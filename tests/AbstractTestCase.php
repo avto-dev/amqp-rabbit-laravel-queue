@@ -4,24 +4,13 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
-use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class AbstractTestCase extends BaseTestCase
 {
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->app->register(ServiceProvider::class);
-    }
-
     /**
      * Creates the application.
      *
@@ -37,9 +26,24 @@ abstract class AbstractTestCase extends BaseTestCase
 
         $app->make(Kernel::class)->bootstrap();
 
-        $app->register(ServiceProvider::class);
+        $app->register(\AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider::class);
+        $app->register(\AvtoDev\AmqpRabbitManager\ServiceProvider::class);
 
         return $app;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUpTraits(): array
+    {
+        $uses = parent::setUpTraits();
+
+        if (isset($uses[WithTemporaryRabbitConnectionTrait::class])) {
+            $this->setUpRabbitConnections();
+        }
+
+        return $uses;
     }
 
     /**
@@ -74,5 +78,25 @@ abstract class AbstractTestCase extends BaseTestCase
     protected function config(): ConfigRepository
     {
         return $this->app->make(ConfigRepository::class);
+    }
+
+    /**
+     * Mock some property for a object.
+     *
+     * @param object $object
+     * @param string $property_name
+     * @param mixed  $value
+     *
+     * @return void
+     */
+    protected function mockProperty($object, string $property_name, $value): void
+    {
+        $reflection = new \ReflectionClass($object);
+
+        $property = $reflection->getProperty($property_name);
+
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+        $property->setAccessible(false);
     }
 }
