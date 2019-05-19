@@ -1,4 +1,4 @@
-FROM rabbitmq:3.7-management-alpine
+FROM rabbitmq:3.7.4-management-alpine
 
 ENV PLUGIN_NAME="rabbitmq_delayed_message_exchange" \
     PLUGIN_DATE="20171201" \
