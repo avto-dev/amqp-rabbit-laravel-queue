@@ -54,7 +54,7 @@ before_install:
     && echo 'extension=amqp.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   # Install RabbitMQ "delayed-messages" plugin
   - if [ ! -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER} ]; then
-    mkdir $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
+    mkdir -p $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
     && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-${DELAYED_MESSAGES_VER}-3.7.x.zip
     -o $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip
     && unzip $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER};
