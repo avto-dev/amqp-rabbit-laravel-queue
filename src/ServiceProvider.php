@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 
 class ServiceProvider extends IlluminateServiceProvider
