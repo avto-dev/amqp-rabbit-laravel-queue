@@ -16,6 +16,6 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testWIP(): void
     {
-        self::markTestIncomplete();
+        self::markTestIncomplete('WIP');
     }
 }
