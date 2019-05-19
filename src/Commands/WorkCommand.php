@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\Job;
 /**
  * You should NOT register this command in console kernel.
  *
- * @see \App\Providers\RabbitQueueServiceProvider::overrideQueueWorkerCommand
+ * @see \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider::overrideQueueWorkerCommand()
  */
 class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
 {
