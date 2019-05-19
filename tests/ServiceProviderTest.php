@@ -9,5 +9,13 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
  */
 class ServiceProviderTest extends AbstractTestCase
 {
-    //
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testWIP(): void
+    {
+        self::markTestIncomplete();
+    }
 }
