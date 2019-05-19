@@ -47,7 +47,7 @@ before_install:
   - cd $HOME/php-amqp/${PHP_AMQP_VER} && phpize --clean && phpize && ./configure && make && sudo make install
     && echo 'extension=amqp.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   # Install RabbitMQ "delayed-messages" plugin
-  - sudo apt-get install rabbitmq-server=3.7.14-1
+  - sudo apt-get install rabbitmq-server=3.7.4-1
   - if [ ! -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER} ]; then
     mkdir $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
     && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-${DELAYED_MESSAGES_VER}-3.6.x.zip
@@ -55,7 +55,7 @@ before_install:
     && unzip $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER};
     fi
   - find / -type d -iname '*plugins*' 2>/dev/null | grep rabbitmq
-  - sudo mv $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.7.14-1/plugins
+  - sudo mv $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.7.4-1/plugins
     && sudo rabbitmq-plugins enable rabbitmq_delayed_message_exchange
     && sudo service rabbitmq-server start
     && sudo rabbitmq-plugins list
