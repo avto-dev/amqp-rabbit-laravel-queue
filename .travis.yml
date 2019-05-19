@@ -10,17 +10,19 @@ cache:
 
 addons:
   apt:
+    sources:
+      - sourceline: deb https://packages.erlang-solutions.com/ubuntu trusty contrib
+        key_url: https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+      - sourceline: deb https://dl.bintray.com/rabbitmq/debian trusty main
+        key_url: https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc
     packages:
       - cmake
-
-services:
-  - rabbitmq
 
 env:
   global:
     - RABBIT_C_VER=0.9.0
     - PHP_AMQP_VER=1.9.4
-    - DELAYED_MESSAGES_VER=20171215
+    - DELAYED_MESSAGES_VER=20171201
     - RABBIT_HOST=127.0.0.1
     - setup=basic
     - coverage=false
@@ -44,18 +46,19 @@ before_install:
     fi
   - cd $HOME/php-amqp/${PHP_AMQP_VER} && phpize --clean && phpize && ./configure && make && sudo make install
     && echo 'extension=amqp.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  # Install RabbitMQ delayed plugin
+  # Install RabbitMQ "delayed-messages" plugin
+  - sudo apt-get install rabbitmq-server=3.7.14
   - if [ ! -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER} ]; then
     mkdir $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
-    && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.6.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-${DELAYED_MESSAGES_VER}-3.6.x.zip
+    && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-${DELAYED_MESSAGES_VER}-3.6.x.zip
     -o $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip
     && unzip $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER};
     fi
-  - find / -type d -iname '*plugins*' | grep rabbitmq
-  - sudo mv $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.6.14/plugins
+  # find / -type d -iname '*plugins*' 2>/dev/null | grep rabbitmq
+  - sudo mv $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.7.14/plugins
     && sudo rabbitmq-plugins enable rabbitmq_delayed_message_exchange
-    && sudo service rabbitmq-server restart
-  - sudo rabbitmq-plugins list
+    && sudo service rabbitmq-server start
+    && sudo rabbitmq-plugins list
   - cd $TRAVIS_BUILD_DIR
   - composer global require hirak/prestissimo --update-no-dev
   - if [[ $coverage = 'false' ]]; then phpenv config-rm xdebug.ini || true; fi
