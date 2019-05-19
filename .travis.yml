@@ -42,6 +42,7 @@ before_install:
     fi
   - cd $HOME/php-amqp/${PHP_AMQP_VER} && phpize --clean && phpize && ./configure && make && sudo make install
     && echo 'extension=amqp.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - rabbitmq-plugins list
   - cd $TRAVIS_BUILD_DIR
   - composer global require hirak/prestissimo --update-no-dev
   - if [[ $coverage = 'false' ]]; then phpenv config-rm xdebug.ini || true; fi
