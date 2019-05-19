@@ -1,0 +1,38 @@
+version: '3.2'
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  rabbit-data:
+  composer-data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - .:/src:cached
+      - composer-data:/tmp/composer:cached
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3.7-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: '/'
+    volumes:
+      - rabbit-data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit:cached
+    ports:
+      - 5672
+      - '8081:15672' # web face
+    networks:
+      - app-network
