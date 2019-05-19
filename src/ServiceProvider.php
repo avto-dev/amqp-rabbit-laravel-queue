@@ -6,8 +6,8 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use Illuminate\Queue\QueueManager;
 use Illuminate\Container\Container;
-use Illuminate\Queue\Worker as IlluminateWorker;
 use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Queue\Worker as IlluminateWorker;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Queue\Failed\FailedJobProviderInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
@@ -38,6 +38,39 @@ class ServiceProvider extends IlluminateServiceProvider
             $this->overrideQueueWorkerCommand();
             $this->overrideMakeJobCommand();
         }
+    }
+
+    /**
+     * Bootstrap queue services.
+     *
+     * @param QueueManager $queue
+     *
+     * @return void
+     */
+    public function boot(QueueManager $queue): void
+    {
+        // Register new driver (connector)
+        $queue->addConnector(self::RABBITMQ_DRIVER_NAME, function (): IlluminateQueueConnector {
+            /** @var Container $container */
+            $container = $this->app;
+
+            return new Connector(
+                $container,
+                $this->app->make(ConnectionsFactoryInterface::class),
+                $this->app->make(QueuesFactoryInterface::class)
+            );
+        });
+
+        $this->app->extend(
+            'queue.worker',
+            function (IlluminateWorker $worker, Container $container): IlluminateWorker {
+                return new Worker(
+                    $container->make(QueueManager::class),
+                    $container->make(EventsDispatcher::class),
+                    $container->make(ExceptionHandler::class)
+                );
+            }
+        );
     }
 
     /**
@@ -91,39 +124,6 @@ class ServiceProvider extends IlluminateServiceProvider
             'command.job.make',
             function (IlluminateJobMakeCommand $original_command, Container $app): IlluminateJobMakeCommand {
                 return new JobMakeCommand($app->make('files'));
-            }
-        );
-    }
-
-    /**
-     * Bootstrap queue services.
-     *
-     * @param QueueManager $queue
-     *
-     * @return void
-     */
-    public function boot(QueueManager $queue): void
-    {
-        // Register new driver (connector)
-        $queue->addConnector(self::RABBITMQ_DRIVER_NAME, function (): IlluminateQueueConnector {
-            /** @var Container $container */
-            $container = $this->app;
-
-            return new Connector(
-                $container,
-                $this->app->make(ConnectionsFactoryInterface::class),
-                $this->app->make(QueuesFactoryInterface::class)
-            );
-        });
-
-        $this->app->extend(
-            'queue.worker',
-            function (IlluminateWorker $worker, Container $container): IlluminateWorker {
-                return new Worker(
-                    $container->make(QueueManager::class),
-                    $container->make(EventsDispatcher::class),
-                    $container->make(ExceptionHandler::class)
-                );
             }
         );
     }

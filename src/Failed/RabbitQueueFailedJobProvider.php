@@ -23,10 +23,10 @@ use Illuminate\Queue\Failed\FailedJobProviderInterface;
 class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
 {
     protected const
-        PROPERTY_FAILED_AT = 'job-failed-at',
-        PROPERTY_CONNECTION_NAME = 'job-connection-name',
-        PROPERTY_QUEUE_NAME = 'job-queue-name',
-        PROPERTY_EXCEPTION = 'job-exception';
+        PROPERTY_FAILED_AT                   = 'job-failed-at';
+    protected const PROPERTY_CONNECTION_NAME = 'job-connection-name';
+    protected const PROPERTY_QUEUE_NAME      = 'job-queue-name';
+    protected const PROPERTY_EXCEPTION       = 'job-exception';
 
     /**
      * @var Queue
@@ -111,9 +111,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     /**
      * {@inheritdoc}
      *
-     * @return array|stdClass[]
      * @throws Throwable
      *
+     * @return array|stdClass[]
      */
     public function all()
     {
@@ -133,6 +133,36 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
         });
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Throwable
+     */
+    public function forget($id): bool
+    {
+        $deleted_count = 0;
+
+        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
+            if ($message->getMessageId() === $id) {
+                $deleted_count++;
+
+                return false;
+            }
+
+            return true;
+        });
+
+        return $deleted_count > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flush(): void
+    {
+        $this->connection->purgeQueue($this->queue);
     }
 
     /**
@@ -185,35 +215,5 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
         }
 
         $this->connection->deleteQueue($temp_queue); // keep clean
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @throws Throwable
-     */
-    public function forget($id): bool
-    {
-        $deleted_count = 0;
-
-        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
-            if ($message->getMessageId() === $id) {
-                ++$deleted_count;
-
-                return false;
-            }
-
-            return true;
-        });
-
-        return $deleted_count > 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function flush(): void
-    {
-        $this->connection->purgeQueue($this->queue);
     }
 }

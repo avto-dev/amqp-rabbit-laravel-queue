@@ -114,24 +114,6 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
-     * Normalize priority value (to 0..255).
-     *
-     * @param int $value
-     *
-     * @return int
-     */
-    protected function normalizePriorityValue(int $value): int
-    {
-        // negative values to zero
-        $value = \max(0, $value);
-
-        // limit max value to 255
-        return $value >= 255
-            ? 255
-            : $value;
-    }
-
-    /**
      * Generate message ID.
      *
      * @param mixed ...$arguments
@@ -141,20 +123,6 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public static function generateMessageId(...$arguments): string
     {
         return 'job-' . Str::substr(\sha1(\serialize($arguments)), 0, 8);
-    }
-
-    /**
-     * Send message using AMQP producer.
-     *
-     * @param Producer  $producer
-     * @param AmqpQueue $queue
-     * @param Message   $message
-     *
-     * @return void
-     */
-    protected function sendMessage(Producer $producer, AmqpQueue $queue, Message $message): void
-    {
-        $producer->send($queue, $message);
     }
 
     /**
@@ -241,5 +209,37 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public function getRabbitQueue(): AmqpQueue
     {
         return $this->queue;
+    }
+
+    /**
+     * Normalize priority value (to 0..255).
+     *
+     * @param int $value
+     *
+     * @return int
+     */
+    protected function normalizePriorityValue(int $value): int
+    {
+        // negative values to zero
+        $value = \max(0, $value);
+
+        // limit max value to 255
+        return $value >= 255
+            ? 255
+            : $value;
+    }
+
+    /**
+     * Send message using AMQP producer.
+     *
+     * @param Producer  $producer
+     * @param AmqpQueue $queue
+     * @param Message   $message
+     *
+     * @return void
+     */
+    protected function sendMessage(Producer $producer, AmqpQueue $queue, Message $message): void
+    {
+        $producer->send($queue, $message);
     }
 }

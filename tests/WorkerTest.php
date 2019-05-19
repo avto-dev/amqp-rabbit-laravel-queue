@@ -49,6 +49,44 @@ class WorkerTest extends AbstractTestCase
     protected $queue_connector_name;
 
     /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->worker                = $this->app->make(Worker::class);
+        $this->queue_manager         = $this->app->make(QueueManager::class);
+        $this->queue_connection_name = 'temp-queue-connection-' . Str::random();
+        $this->queue_connector_name  = 'temp-rabbit-connector-' . Str::random();
+
+        $this->config()->set("queue.connections.{$this->queue_connection_name}", [
+            'driver'      => $this->queue_connector_name,
+            'connection'  => $this->temp_rabbit_connection_name,
+            'queue_id'    => $this->temp_rabbit_queue_id,
+            'time_to_run' => 500, // The timeout is in milliseconds
+        ]);
+
+        $this->queue_manager->addConnector($this->queue_connector_name, function (): IlluminateQueueConnector {
+            return new Connector(
+                $this->app,
+                $this->app->make(ConnectionsFactoryInterface::class),
+                $this->app->make(QueuesFactoryInterface::class)
+            );
+        });
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function tearDown(): void
+    {
+        $this->config()->offsetUnset("queue.connections.{$this->queue_connection_name}");
+
+        parent::tearDown();
+    }
+
+    /**
      * @medium
      *
      * @return void
@@ -134,43 +172,5 @@ class WorkerTest extends AbstractTestCase
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, 60, 3, 3));
         \usleep(1500);
         $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted'
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->worker                = $this->app->make(Worker::class);
-        $this->queue_manager         = $this->app->make(QueueManager::class);
-        $this->queue_connection_name = 'temp-queue-connection-' . Str::random();
-        $this->queue_connector_name  = 'temp-rabbit-connector-' . Str::random();
-
-        $this->config()->set("queue.connections.{$this->queue_connection_name}", [
-            'driver'      => $this->queue_connector_name,
-            'connection'  => $this->temp_rabbit_connection_name,
-            'queue_id'    => $this->temp_rabbit_queue_id,
-            'time_to_run' => 500, // The timeout is in milliseconds
-        ]);
-
-        $this->queue_manager->addConnector($this->queue_connector_name, function (): IlluminateQueueConnector {
-            return new Connector(
-                $this->app,
-                $this->app->make(ConnectionsFactoryInterface::class),
-                $this->app->make(QueuesFactoryInterface::class)
-            );
-        });
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function tearDown(): void
-    {
-        $this->config()->offsetUnset("queue.connections.{$this->queue_connection_name}");
-
-        parent::tearDown();
     }
 }

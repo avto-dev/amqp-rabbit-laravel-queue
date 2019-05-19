@@ -32,6 +32,23 @@ class QueueTest extends AbstractTestCase
     protected $time_to_run = 100;
 
     /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->queue = new Queue(
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            $this->time_to_run
+        );
+
+        $this->assertInstanceOf(QueueContract::class, $this->queue);
+    }
+
+    /**
      * @small
      *
      * @return void
@@ -57,21 +74,6 @@ class QueueTest extends AbstractTestCase
         $this->pushMessage();
 
         $this->assertSame(1, $this->queue->size());
-    }
-
-    /**
-     * Push one message into the queue.
-     *
-     * @param string $content
-     *
-     * @return void
-     */
-    protected function pushMessage(string $content = '{"foo"}'): void
-    {
-        $this->temp_rabbit_connection->createProducer()->send(
-            $this->temp_rabbit_queue,
-            $this->temp_rabbit_connection->createMessage($content)
-        );
     }
 
     /**
@@ -131,43 +133,6 @@ class QueueTest extends AbstractTestCase
         $this->assertSame($job_string, $body['job']);
         $this->assertCommonMessageProperties($message);
         $this->assertSame(0, $message->getPriority());
-    }
-
-    /**
-     * @return Message|null
-     */
-    protected function getQueueMessage(): ?Message
-    {
-        $consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
-
-        $message = $consumer->receive(200);
-
-        if ($message instanceof Message) {
-            $consumer->reject($message);
-
-            return $message;
-        }
-
-        return null;
-    }
-
-    /**
-     * Assert message for a common properties and headers.
-     *
-     * @param Message $message
-     * @param int     $allowed_timestamp_delta
-     */
-    protected function assertCommonMessageProperties(Message $message, int $allowed_timestamp_delta = 500): void
-    {
-        $this->assertRegExp('~job\-[a-zA-Z0-9]{6,}~', $message->getHeader('message_id'));
-
-        $timestamp         = $message->getHeader('timestamp');
-        $current_timestamp = (new DateTime)->getTimestamp();
-
-        $this->assertTrue($timestamp > ($current_timestamp - $allowed_timestamp_delta));
-        $this->assertTrue($timestamp < ($current_timestamp + $allowed_timestamp_delta));
-
-        $this->assertSame('application/json', $message->getHeader('content_type'));
     }
 
     /**
@@ -382,19 +347,54 @@ class QueueTest extends AbstractTestCase
     }
 
     /**
-     * {@inheritdoc}
+     * Push one message into the queue.
+     *
+     * @param string $content
+     *
+     * @return void
      */
-    protected function setUp(): void
+    protected function pushMessage(string $content = '{"foo"}'): void
     {
-        parent::setUp();
-
-        $this->queue = new Queue(
-            $this->app,
-            $this->temp_rabbit_connection,
+        $this->temp_rabbit_connection->createProducer()->send(
             $this->temp_rabbit_queue,
-            $this->time_to_run
+            $this->temp_rabbit_connection->createMessage($content)
         );
+    }
 
-        $this->assertInstanceOf(QueueContract::class, $this->queue);
+    /**
+     * @return Message|null
+     */
+    protected function getQueueMessage(): ?Message
+    {
+        $consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
+
+        $message = $consumer->receive(200);
+
+        if ($message instanceof Message) {
+            $consumer->reject($message);
+
+            return $message;
+        }
+
+        return null;
+    }
+
+    /**
+     * Assert message for a common properties and headers.
+     *
+     * @param Message $message
+     * @param int     $allowed_timestamp_delta
+     */
+    protected function assertCommonMessageProperties(Message $message, int $allowed_timestamp_delta = 500): void
+    {
+        $this->assertRegExp('~job\-[a-zA-Z0-9]{6,}~', $message->getHeader('message_id'));
+
+        $timestamp         = $message->getHeader('timestamp');
+        $current_timestamp = (new DateTime)->getTimestamp();
+
+        $this->assertTrue($timestamp > ($current_timestamp - $allowed_timestamp_delta));
+        $this->assertTrue($timestamp < ($current_timestamp + $allowed_timestamp_delta));
+
+        $this->assertSame('application/json', $message->getHeader('content_type'));
     }
 }

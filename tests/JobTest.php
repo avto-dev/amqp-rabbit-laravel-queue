@@ -37,6 +37,40 @@ class JobTest extends AbstractTestCase
     protected $consumer;
 
     /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Send message to the queue
+        $this
+            ->temp_rabbit_connection
+            ->createProducer()
+            ->send(
+                $this->temp_rabbit_queue,
+                $this->temp_rabbit_connection->createMessage('{"foo":"bar"}')
+            );
+
+        // Create consumer
+        $this->consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
+
+        // And get the message back
+        $this->message = $this->consumer->receive(200);
+
+        $this->job = new Job(
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->consumer,
+            $this->message,
+            Str::random()
+        );
+
+        // testInstanceOf
+        $this->assertInstanceOf(JobContract::class, $this->job);
+    }
+
+    /**
      * @small
      *
      * @return void
@@ -199,39 +233,5 @@ class JobTest extends AbstractTestCase
         // Get Message
 
         $this->assertSame($this->message, $this->job->getMessage());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Send message to the queue
-        $this
-            ->temp_rabbit_connection
-            ->createProducer()
-            ->send(
-                $this->temp_rabbit_queue,
-                $this->temp_rabbit_connection->createMessage('{"foo":"bar"}')
-            );
-
-        // Create consumer
-        $this->consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
-
-        // And get the message back
-        $this->message = $this->consumer->receive(200);
-
-        $this->job = new Job(
-            $this->app,
-            $this->temp_rabbit_connection,
-            $this->consumer,
-            $this->message,
-            Str::random()
-        );
-
-        // testInstanceOf
-        $this->assertInstanceOf(JobContract::class, $this->job);
     }
 }
