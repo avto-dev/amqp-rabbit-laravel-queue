@@ -59,10 +59,10 @@ before_install:
     mkdir -p $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
     && export PN=rabbitmq_delayed_message_exchange
     && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/$PN/$PN-${DELAYED_MESSAGES_VER}-3.7.x.zip
-    -o $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip
-    && unzip $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER};
+    -o $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip;
     fi
-  - sudo mv $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-${RABBITMQ_VER}/plugins
+  - unzip $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
+    && sudo mv $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/*.ez /usr/lib/rabbitmq/lib/rabbitmq_server-${RABBITMQ_VER}/plugins
     && sudo rabbitmq-plugins enable rabbitmq_delayed_message_exchange
     && sudo service rabbitmq-server restart
     && sudo rabbitmq-plugins list
