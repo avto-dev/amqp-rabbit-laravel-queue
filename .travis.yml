@@ -16,6 +16,7 @@ addons:
       - sourceline: deb https://dl.bintray.com/rabbitmq/debian trusty main
         key_url: https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc
     packages:
+      - esl-erlang=1:20.1
       - cmake
 
 env:
@@ -35,6 +36,8 @@ branches:
     - /analysis-.*/
 
 before_install:
+  # Install RabbitMQ server
+  - sudo apt-get install rabbitmq-server=3.7.4-1
   # Install rabbit-c
   - if [ ! -d "$HOME/rabbitmq-c/${RABBIT_C_VER}" ]; then
     travis_retry git clone --branch v${RABBIT_C_VER} https://github.com/alanxz/rabbitmq-c.git $HOME/rabbitmq-c/${RABBIT_C_VER};
@@ -47,7 +50,6 @@ before_install:
   - cd $HOME/php-amqp/${PHP_AMQP_VER} && phpize --clean && phpize && ./configure && make && sudo make install
     && echo 'extension=amqp.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   # Install RabbitMQ "delayed-messages" plugin
-  - sudo apt-get install rabbitmq-server=3.7.4-1
   - if [ ! -d $HOME/delayed-messages/${DELAYED_MESSAGES_VER} ]; then
     mkdir $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
     && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-${DELAYED_MESSAGES_VER}-3.6.x.zip
