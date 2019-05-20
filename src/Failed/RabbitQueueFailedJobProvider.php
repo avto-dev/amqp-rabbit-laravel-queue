@@ -129,9 +129,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     /**
      * {@inheritdoc}
      *
-     * @return array|object[]
      * @throws Throwable
      *
+     * @return array|object[]
      */
     public function all()
     {
@@ -151,6 +151,54 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
         });
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Throwable
+     */
+    public function forget($id): bool
+    {
+        $deleted_count = 0;
+
+        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
+            $message_id = $message->getMessageId();
+
+            if (! empty($message_id) && ((int) $message_id) === $id) {
+                $deleted_count++;
+
+                return false;
+            }
+
+            return true;
+        });
+
+        return $deleted_count > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flush(): void
+    {
+        $this->connection->purgeQueue($this->queue);
+    }
+
+    /**
+     * Get count of failed jobs.
+     *
+     * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
+     *
+     * @return int
+     */
+    public function count(?int $sleep = 2000): int
+    {
+        if (\is_int($sleep)) {
+            \usleep($sleep); // Required for broker (for calling in a loop)
+        }
+
+        return $this->connection->declareQueue($this->queue);
     }
 
     /**
@@ -203,53 +251,5 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
         }
 
         $this->connection->deleteQueue($temp_queue); // keep clean
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @throws Throwable
-     */
-    public function forget($id): bool
-    {
-        $deleted_count = 0;
-
-        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
-            $message_id = $message->getMessageId();
-
-            if (! empty($message_id) && ((int) $message_id) === $id) {
-                $deleted_count++;
-
-                return false;
-            }
-
-            return true;
-        });
-
-        return $deleted_count > 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function flush(): void
-    {
-        $this->connection->purgeQueue($this->queue);
-    }
-
-    /**
-     * Get count of failed jobs.
-     *
-     * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
-     *
-     * @return int
-     */
-    public function count(?int $sleep = 2000): int
-    {
-        if (\is_int($sleep)) {
-            \usleep($sleep); // Required for broker (for calling in a loop)
-        }
-
-        return $this->connection->declareQueue($this->queue);
     }
 }

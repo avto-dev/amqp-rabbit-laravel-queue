@@ -20,16 +20,6 @@ class Sharer
     /**
      * @param string $key
      *
-     * @return string
-     */
-    protected static function keyToPath(string $key): string
-    {
-        return __DIR__ . '/' . \sha1($key) . '.txt';
-    }
-
-    /**
-     * @param string $key
-     *
      * @return bool
      */
     public static function has(string $key): bool
@@ -59,5 +49,15 @@ class Sharer
                 $fs->delete($file->getRealPath());
             }
         }
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return string
+     */
+    protected static function keyToPath(string $key): string
+    {
+        return __DIR__ . '/' . \sha1($key) . '.txt';
     }
 }
