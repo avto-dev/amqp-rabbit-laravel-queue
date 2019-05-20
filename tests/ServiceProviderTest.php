@@ -4,15 +4,15 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
-use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
-use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
-use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
-use AvtoDev\AmqpRabbitLaravelQueue\Worker;
-use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
 use Illuminate\Queue\QueueManager;
+use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use AvtoDev\AmqpRabbitLaravelQueue\Connector;
+use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
+use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
+use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider<extended>

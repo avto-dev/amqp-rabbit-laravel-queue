@@ -26,7 +26,7 @@ class JobMakeCommandTest extends AbstractTestCase
     protected $command;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function setUp(): void
     {
