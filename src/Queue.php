@@ -247,13 +247,17 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
             // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
             // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
             // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
-            $this->{$method_name}($job, $data);
-        } elseif ($parameters_number === 3) {
-            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
-            $this->{$method_name}($job, $queue, $data);
+            return $this->{$method_name}($job, $data);
         }
 
-        throw new RuntimeException('Parent method looks like not compatible with current class');
+        if ($parameters_number === 3) {
+            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
+            return $this->{$method_name}($job, $queue, $data);
+        }
+
+        throw new RuntimeException(
+            "Parent method looks like not compatible with current class (uses {$parameters_number} parameters)"
+        );
     }
 
     /**
