@@ -21,6 +21,14 @@ class SimpleQueueJob implements ShouldQueue
     public $tries = 2;
 
     /**
+     * @return int
+     */
+    public function getTries(): int
+    {
+        return $this->tries;
+    }
+
+    /**
      * Handle the job.
      *
      * @param Dispatcher $events
@@ -29,7 +37,13 @@ class SimpleQueueJob implements ShouldQueue
      */
     public function handle(Dispatcher $events): void
     {
-        Sharer::put(static::class . '-handled', true);
+        $key = static::class . '-handled';
+
+        if (Sharer::has($key)) {
+            Sharer::put($key, Sharer::get($key) + 1);
+        } else {
+            Sharer::put($key, 1);
+        }
 
         $events->dispatch(static::class . '-handled');
     }
@@ -43,7 +57,13 @@ class SimpleQueueJob implements ShouldQueue
      */
     public function failed($exception = null): void
     {
-        Sharer::put(static::class . '-failed', true);
+        $key = static::class . '-failed';
+
+        if (Sharer::has($key)) {
+            Sharer::put($key, Sharer::get($key) + 1);
+        } else {
+            Sharer::put($key, 1);
+        }
 
         event(static::class . '-failed');
     }

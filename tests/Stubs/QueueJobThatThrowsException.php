@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
-use Illuminate\Contracts\Events\Dispatcher;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
+use Illuminate\Contracts\Events\Dispatcher;
 
 class QueueJobThatThrowsException extends SimpleQueueJob
 {
@@ -16,7 +16,13 @@ class QueueJobThatThrowsException extends SimpleQueueJob
      */
     public function handle(Dispatcher $events): void
     {
-        Sharer::put(static::class . '-handled', true);
+        $key = static::class . '-throws';
+
+        if (Sharer::has($key)) {
+            Sharer::put($key, Sharer::get($key) + 1);
+        } else {
+            Sharer::put($key, 1);
+        }
 
         throw new \Exception('Test job failed');
     }

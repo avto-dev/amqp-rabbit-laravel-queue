@@ -3,9 +3,8 @@
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Contracts\Console\Kernel;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -40,18 +39,7 @@ abstract class AbstractTestCase extends BaseTestCase
      */
     public function createApplication(): Application
     {
-        /** @var Application $app */
-        $app = require __DIR__ . '/../vendor/laravel/laravel/bootstrap/app.php';
-
-        // $app->useStoragePath(...);
-        // $app->loadEnvironmentFrom(...);
-
-        $app->make(Kernel::class)->bootstrap();
-
-        $app->register(\AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider::class);
-        $app->register(\AvtoDev\AmqpRabbitManager\ServiceProvider::class);
-
-        return $app;
+        return require __DIR__ . '/bootstrap/app.php';
     }
 
     /**
@@ -100,16 +88,6 @@ abstract class AbstractTestCase extends BaseTestCase
     protected function config(): ConfigRepository
     {
         return $this->app->make(ConfigRepository::class);
-    }
-
-    /**
-     * Get console kernel container.
-     *
-     * @return Kernel
-     */
-    protected function console(): Kernel
-    {
-        return $this->app->make(Kernel::class);
     }
 
     /**

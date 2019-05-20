@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-use DateTime;
 use Throwable;
 use Illuminate\Queue\WorkerOptions;
 use Interop\Amqp\AmqpMessage as Message;
@@ -27,7 +26,7 @@ class Worker extends \Illuminate\Queue\Worker
                 $this->listenForSignals();
             }
 
-            $last_restart      = $this->getTimestampOfLastQueueRestart() ?? (new DateTime)->getTimestamp();
+            $last_restart      = (int) $this->getTimestampOfLastQueueRestart();
             $rabbit_connection = $current_queue->getRabbitConnection();
             $rabbit_queue      = $current_queue->getRabbitQueue();
 
@@ -130,7 +129,7 @@ class Worker extends \Illuminate\Queue\Worker
             case $this->shouldQuit:
             case $this->memoryExceeded($options->memory):
             case $this->queueShouldRestart($lastRestart):
-            case \property_exists($options, $property = 'stopWhenEmpty') && $options->{$property} && $job === null:
+            //case \property_exists($options, $property = 'stopWhenEmpty') && $options->{$property} && $job === null:
                 return true;
         }
 

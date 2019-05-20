@@ -45,7 +45,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
      */
     public function testLog(): void
     {
-        $this->assertSame(0, $this->getCurrentSize());
+        $this->assertSame(0, $this->provider->count());
 
         $id = $this->provider->log(
             $connection_name = Str::random(),
@@ -54,7 +54,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             $exception = new \Exception(Str::random())
         );
 
-        $this->assertSame(1, $this->getCurrentSize());
+        $this->assertSame(1, $this->provider->count());
 
         $message = $this->getLastMessage();
 
@@ -110,7 +110,9 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(3, $this->getCurrentSize());
+        \usleep(2000);
+
+        $this->assertSame(3, $this->provider->count());
 
         $found = $this->provider->find($id2);
 
@@ -154,7 +156,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(3, $this->getCurrentSize());
+        $this->assertSame(3, $this->provider->count());
 
         $all = $this->provider->all();
 
@@ -195,11 +197,11 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(3, $this->getCurrentSize());
+        $this->assertSame(3, $this->provider->count());
 
         $this->provider->forget($id2);
 
-        $this->assertSame(2, $this->getCurrentSize());
+        $this->assertSame(2, $this->provider->count());
 
         $all = $this->provider->all();
 
@@ -230,25 +232,11 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(2, $this->getCurrentSize());
+        $this->assertSame(2, $this->provider->count());
 
         $this->provider->flush();
 
-        $this->assertSame(0, $this->getCurrentSize());
-    }
-
-    /**
-     * Get current queue size.
-     *
-     * @param int $sleep
-     *
-     * @return int
-     */
-    protected function getCurrentSize(int $sleep = 6000): int
-    {
-        \usleep($sleep);
-
-        return $this->temp_rabbit_connection->declareQueue($this->temp_rabbit_queue);
+        $this->assertSame(0, $this->provider->count());
     }
 
     /**

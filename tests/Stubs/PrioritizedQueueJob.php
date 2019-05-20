@@ -4,9 +4,7 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
-use Illuminate\Contracts\Events\Dispatcher;
 use AvtoDev\AmqpRabbitLaravelQueue\HasPriorityTrait;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\PrioritizedJobInterface;
 
 class PrioritizedQueueJob extends SimpleQueueJob implements PrioritizedJobInterface
@@ -26,17 +24,5 @@ class PrioritizedQueueJob extends SimpleQueueJob implements PrioritizedJobInterf
     public function __construct(int $priority = 10)
     {
         $this->priority = $priority;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @throws \Exception
-     */
-    public function handle(Dispatcher $events): void
-    {
-        Sharer::put(static::class . '-handled', true);
-
-        $events->dispatch(static::class . '-handled');
     }
 }

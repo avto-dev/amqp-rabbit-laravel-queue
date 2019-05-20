@@ -20,7 +20,7 @@ use Illuminate\Queue\Failed\FailedJobProviderInterface;
  * @see \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider::overrideFailedJobService()
  * @see \Illuminate\Queue\Failed\DatabaseFailedJobProvider
  */
-class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
+class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Countable
 {
     /**
      * Property name for "failed-at".
@@ -183,6 +183,22 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     public function flush(): void
     {
         $this->connection->purgeQueue($this->queue);
+    }
+
+    /**
+     * Get count of failed jobs.
+     *
+     * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
+     *
+     * @return int
+     */
+    public function count(?int $sleep = 2000): int
+    {
+        if (\is_int($sleep)) {
+            \usleep($sleep); // Required for broker (for calling in a loop)
+        }
+
+        return $this->connection->declareQueue($this->queue);
     }
 
     /**
