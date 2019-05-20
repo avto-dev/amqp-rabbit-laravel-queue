@@ -63,7 +63,7 @@ abstract class AbstractFeatureTest extends AbstractTestCase
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function tearDown(): void
     {

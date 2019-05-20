@@ -10,7 +10,7 @@ return [
             'vhost'    => env('RABBIT_VHOST', '/'),
             'login'    => env('RABBIT_LOGIN', 'guest'),
             'password' => env('RABBIT_PASSWORD', 'guest'),
-        ]
+        ],
     ],
 
     'default_connection' => 'testing',
@@ -37,5 +37,5 @@ return [
 
     'setup' => [
         'testing' => ['jobs', 'failed'],
-    ]
+    ],
 ];

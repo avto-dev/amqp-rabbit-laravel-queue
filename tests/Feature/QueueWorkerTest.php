@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 use Illuminate\Support\Collection;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 
 class QueueWorkerTest extends AbstractFeatureTest
 {

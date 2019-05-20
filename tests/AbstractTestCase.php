@@ -3,8 +3,8 @@
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
