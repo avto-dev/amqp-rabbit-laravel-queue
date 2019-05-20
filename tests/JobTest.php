@@ -11,6 +11,7 @@ use Interop\Amqp\AmqpMessage as Message;
 use Interop\Amqp\Impl\AmqpQueue as Queue;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Job<extended>

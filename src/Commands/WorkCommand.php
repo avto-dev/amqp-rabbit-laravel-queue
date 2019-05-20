@@ -15,6 +15,8 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
 {
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function line($string, $style = null, $verbosity = null): void
     {
@@ -29,20 +31,22 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     protected function writeStatus(Job $job, $status, $type): void
     {
         $this->line(sprintf(
             "<{$type}>[%s] %s</{$type}> %s",
-            \method_exists($job, $method_name = 'getJobId')
-                ? $job->{$method_name}()
-                : null,
-            str_pad("{$status}:", 11), $job->resolveName()
+            $job->getJobId(),
+            \str_pad("{$status}:", 11), $job->resolveName()
         ));
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     protected function runWorker($connection, $queue)
     {

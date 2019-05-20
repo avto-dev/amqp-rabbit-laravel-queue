@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
+namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
 use Illuminate\Contracts\Events\Dispatcher;
 

@@ -11,6 +11,9 @@ use Interop\Amqp\AmqpMessage as Message;
 use AvtoDev\AmqpRabbitLaravelQueue\Queue;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Queue<extended>

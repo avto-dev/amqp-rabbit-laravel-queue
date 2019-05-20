@@ -16,8 +16,11 @@ use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 use Illuminate\Queue\Connectors\ConnectorInterface as IlluminateQueueConnector;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Worker<extended>

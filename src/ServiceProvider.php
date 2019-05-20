@@ -23,7 +23,10 @@ use Illuminate\Queue\Connectors\ConnectorInterface as IlluminateQueueConnector;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
-    public const RABBITMQ_DRIVER_NAME = 'rabbitmq';
+    /**
+     * Driver name.
+     */
+    public const DRIVER_NAME = 'rabbitmq';
 
     /**
      * Register queue services.
@@ -50,7 +53,7 @@ class ServiceProvider extends IlluminateServiceProvider
     public function boot(QueueManager $queue): void
     {
         // Register new driver (connector)
-        $queue->addConnector(self::RABBITMQ_DRIVER_NAME, function (): IlluminateQueueConnector {
+        $queue->addConnector(self::DRIVER_NAME, function (): IlluminateQueueConnector {
             /** @var Container $container */
             $container = $this->app;
 
