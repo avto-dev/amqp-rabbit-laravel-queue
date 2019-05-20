@@ -235,7 +235,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
      *
      * @see \Illuminate\Queue\Queue::createPayload()
      */
-    protected function createPayloadCompatible($job, $queue, $data): string
+    public function createPayloadCompatible($job, $queue, $data): string
     {
         static $parameters_number, $method_name = 'createPayload';
 
