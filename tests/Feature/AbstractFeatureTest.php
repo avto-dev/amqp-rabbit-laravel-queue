@@ -78,16 +78,18 @@ abstract class AbstractFeatureTest extends AbstractTestCase
     }
 
     /**
-     * @param string $command
-     * @param array  $arguments
-     * @param float  $process_timeout
+     * @param string     $command
+     * @param array      $arguments
+     * @param float|null $process_timeout
      *
      * @return array
      */
     protected function startArtisan(string $command,
                                     array $arguments = [],
-                                    float $process_timeout = 1.5): array
+                                    ?float $process_timeout = null): array
     {
+        $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', 0.65);
+
         $standard_output = new Collection;
         $errors_output   = new Collection;
         $timed_out       = false;
