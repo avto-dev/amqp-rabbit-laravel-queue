@@ -107,7 +107,7 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
      */
     public static function generateMessageId(...$arguments): int
     {
-        return \crc32(\serialize($arguments));
+        return (int) Str::limit((string) \crc32(\serialize($arguments)), 8, '');
     }
 
     /**

@@ -110,7 +110,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(3, $this->getCurrentSize(4000));
+        $this->assertSame(3, $this->getCurrentSize());
 
         $found = $this->provider->find($id2);
 
@@ -154,7 +154,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(3, $this->getCurrentSize(4000));
+        $this->assertSame(3, $this->getCurrentSize());
 
         $all = $this->provider->all();
 
@@ -195,11 +195,11 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(3, $this->getCurrentSize(4000));
+        $this->assertSame(3, $this->getCurrentSize());
 
         $this->provider->forget($id2);
 
-        $this->assertSame(2, $this->getCurrentSize(4000));
+        $this->assertSame(2, $this->getCurrentSize());
 
         $all = $this->provider->all();
 
@@ -208,7 +208,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
     }
 
     /**
-     * @small
+     * @medium
      *
      * @return void
      */
@@ -230,11 +230,11 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        $this->assertSame(2, $this->getCurrentSize(4000));
+        $this->assertSame(2, $this->getCurrentSize());
 
         $this->provider->flush();
 
-        $this->assertSame(0, $this->getCurrentSize(4000));
+        $this->assertSame(0, $this->getCurrentSize());
     }
 
     /**
@@ -244,7 +244,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
      *
      * @return int
      */
-    protected function getCurrentSize(int $sleep = 1500): int
+    protected function getCurrentSize(int $sleep = 6000): int
     {
         \usleep($sleep);
 
