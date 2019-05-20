@@ -18,7 +18,8 @@ class HasPriorityTraitTest extends AbstractTestCase
      */
     public function testOnObjectWithProperty(): void
     {
-        $object = new class {
+        $object = new class
+        {
             use HasPriorityTrait;
 
             protected $priority = 10;
@@ -34,7 +35,8 @@ class HasPriorityTraitTest extends AbstractTestCase
      */
     public function testOnObjectWithoutProperty(): void
     {
-        $object = new class {
+        $object = new class
+        {
             use HasPriorityTrait;
         };
 
@@ -48,7 +50,8 @@ class HasPriorityTraitTest extends AbstractTestCase
      */
     public function testOnObjectWithTooLargePropertyValue(): void
     {
-        $object = new class {
+        $object = new class
+        {
             use HasPriorityTrait;
 
             protected $priority = 999;
@@ -64,7 +67,8 @@ class HasPriorityTraitTest extends AbstractTestCase
      */
     public function testOnObjectWithTooLowPropertyValue(): void
     {
-        $object = new class {
+        $object = new class
+        {
             use HasPriorityTrait;
 
             protected $priority = -999;

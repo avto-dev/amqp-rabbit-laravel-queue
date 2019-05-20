@@ -25,20 +25,6 @@ class ConnectorTest extends AbstractTestCase
     protected $connector;
 
     /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->connector = $this->app->make(Connector::class);
-
-        // testInstanceOf
-
-        $this->assertInstanceOf(ConnectorInterface::class, $this->connector);
-    }
-
-    /**
      * @small
      *
      * @return void
@@ -104,5 +90,19 @@ class ConnectorTest extends AbstractTestCase
             //'queue_id'    => $this->queue_id,
             'time_to_run' => 0,
         ]));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->connector = $this->app->make(Connector::class);
+
+        // testInstanceOf
+
+        $this->assertInstanceOf(ConnectorInterface::class, $this->connector);
     }
 }

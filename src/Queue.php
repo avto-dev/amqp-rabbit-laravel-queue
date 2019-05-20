@@ -13,8 +13,10 @@ use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Enqueue\AmqpTools\RabbitMqDelayPluginDelayStrategy;
+use Interop\Queue\Exception\DeliveryDelayNotSupportedException;
 
 class Queue extends \Illuminate\Queue\Queue implements QueueContract
 {
@@ -106,16 +108,40 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
         }
 
         if (isset($options['delay']) && \is_numeric($delay = $options['delay'])) {
-            $producer->setDelayStrategy(new RabbitMqDelayPluginDelayStrategy);
-            $producer->setDeliveryDelay((int) (\is_float($delay)
-                ? $delay * 1000
-                : $this->secondsUntil($delay) * 1000));
+            try {
+                $producer->setDelayStrategy(new RabbitMqDelayPluginDelayStrategy);
+                $producer->setDeliveryDelay((int) (\is_float($delay)
+                    ? $delay * 1000
+                    : $this->secondsUntil($delay) * 1000));
+                // @codeCoverageIgnoreStart
+            } catch (DeliveryDelayNotSupportedException $e) {
+                $this->container->make(ExceptionHandler::class)->report($e);
+            }
+            // @codeCoverageIgnoreEnd
         }
 
         $message->setDeliveryMode(Message::DELIVERY_MODE_PERSISTENT);
         $message->setMessageId(self::generateMessageId($payload, \microtime(true), Str::random()));
 
         $this->sendMessage($producer, $this->queue, $message);
+    }
+
+    /**
+     * Normalize priority value (to 0..255).
+     *
+     * @param int $value
+     *
+     * @return int
+     */
+    protected function normalizePriorityValue(int $value): int
+    {
+        // negative values to zero
+        $value = \max(0, $value);
+
+        // limit max value to 255
+        return $value >= 255
+            ? 255
+            : $value;
     }
 
     /**
@@ -128,6 +154,59 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public static function generateMessageId(...$arguments): string
     {
         return 'job-' . Str::substr(\sha1(\serialize($arguments)), 0, 8);
+    }
+
+    /**
+     * Send message using AMQP producer.
+     *
+     * @param Producer  $producer
+     * @param AmqpQueue $queue
+     * @param Message   $message
+     *
+     * @return void
+     */
+    protected function sendMessage(Producer $producer, AmqpQueue $queue, Message $message): void
+    {
+        $producer->send($queue, $message);
+    }
+
+    /**
+     * Create a payload string from the given job and data.
+     *
+     * @param string|mixed $job
+     * @param string|mixed $queue
+     * @param mixed        $data
+     *
+     * @return string
+     *
+     * @throws RuntimeException
+     *
+     * @throws \Illuminate\Queue\InvalidPayloadException
+     * @see \Illuminate\Queue\Queue::createPayload()
+     */
+    public function createPayloadCompatible($job, $queue, $data): string
+    {
+        static $parameters_number, $method_name = 'createPayload';
+
+        if (! \is_int($parameters_number)) {
+            $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
+        }
+
+        if ($parameters_number === 2) {
+            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
+            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
+            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
+            return $this->{$method_name}($job, $data);
+        }
+
+        if ($parameters_number === 3) {
+            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
+            return $this->{$method_name}($job, $queue, $data);
+        }
+
+        throw new RuntimeException(
+            "Parent method looks like not compatible with current class (uses {$parameters_number} parameters)"
+        );
     }
 
     /**
@@ -219,76 +298,5 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public function getRabbitQueue(): AmqpQueue
     {
         return $this->queue;
-    }
-
-    /**
-     * Create a payload string from the given job and data.
-     *
-     * @param string|mixed $job
-     * @param string|mixed $queue
-     * @param mixed        $data
-     *
-     * @throws \Illuminate\Queue\InvalidPayloadException
-     * @throws RuntimeException
-     *
-     * @return string
-     *
-     * @see \Illuminate\Queue\Queue::createPayload()
-     */
-    public function createPayloadCompatible($job, $queue, $data): string
-    {
-        static $parameters_number, $method_name = 'createPayload';
-
-        if (! \is_int($parameters_number)) {
-            $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
-        }
-
-        if ($parameters_number === 2) {
-            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
-            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
-            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
-            return $this->{$method_name}($job, $data);
-        }
-
-        if ($parameters_number === 3) {
-            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
-            return $this->{$method_name}($job, $queue, $data);
-        }
-
-        throw new RuntimeException(
-            "Parent method looks like not compatible with current class (uses {$parameters_number} parameters)"
-        );
-    }
-
-    /**
-     * Normalize priority value (to 0..255).
-     *
-     * @param int $value
-     *
-     * @return int
-     */
-    protected function normalizePriorityValue(int $value): int
-    {
-        // negative values to zero
-        $value = \max(0, $value);
-
-        // limit max value to 255
-        return $value >= 255
-            ? 255
-            : $value;
-    }
-
-    /**
-     * Send message using AMQP producer.
-     *
-     * @param Producer  $producer
-     * @param AmqpQueue $queue
-     * @param Message   $message
-     *
-     * @return void
-     */
-    protected function sendMessage(Producer $producer, AmqpQueue $queue, Message $message): void
-    {
-        $producer->send($queue, $message);
     }
 }

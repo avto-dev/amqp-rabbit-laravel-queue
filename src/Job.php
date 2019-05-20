@@ -8,8 +8,10 @@ use Illuminate\Container\Container;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use Enqueue\AmqpTools\RabbitMqDelayPluginDelayStrategy;
+use Interop\Queue\Exception\DeliveryDelayNotSupportedException;
 
 class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
 {
@@ -84,8 +86,14 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         $producer = $this->connection->createProducer();
 
         if ($delay > 0) {
-            $producer->setDelayStrategy(new RabbitMqDelayPluginDelayStrategy);
-            $producer->setDeliveryDelay($this->secondsUntil($delay) * 1000);
+            try {
+                $producer->setDelayStrategy(new RabbitMqDelayPluginDelayStrategy);
+                $producer->setDeliveryDelay($this->secondsUntil($delay) * 1000);
+                // @codeCoverageIgnoreStart
+            } catch (DeliveryDelayNotSupportedException $e) {
+                $this->container->make(ExceptionHandler::class)->report($e);
+            }
+            // @codeCoverageIgnoreEnd
         }
 
         $this->consumer->acknowledge($this->message);

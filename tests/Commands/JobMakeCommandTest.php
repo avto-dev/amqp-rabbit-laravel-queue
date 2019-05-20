@@ -26,14 +26,9 @@ class JobMakeCommandTest extends AbstractTestCase
     protected $command;
 
     /**
-     * {@inheritdoc}
+     * @var Filesystem
      */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->command = $this->app->make(JobMakeCommand::class);
-    }
+    protected $fs;
 
     /**
      * @small
@@ -54,7 +49,7 @@ class JobMakeCommandTest extends AbstractTestCase
             $this->assertContains($value, $content);
         }
 
-        (new Filesystem)->delete($file_path);
+        $this->fs->delete($file_path);
     }
 
     /**
@@ -77,6 +72,17 @@ class JobMakeCommandTest extends AbstractTestCase
             $this->assertContains($value, $content);
         }
 
-        (new Filesystem)->delete($file_path);
+        $this->fs->delete($file_path);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->command = $this->app->make(JobMakeCommand::class);
+        $this->fs      = new Filesystem;
     }
 }

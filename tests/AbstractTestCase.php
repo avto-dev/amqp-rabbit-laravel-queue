@@ -4,8 +4,9 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
@@ -48,6 +49,26 @@ abstract class AbstractTestCase extends BaseTestCase
     }
 
     /**
+     * {@inheritDoc}
+     */
+    protected function setUp(): void
+    {
+        Sharer::clear();
+
+        parent::setUp();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        Sharer::clear();
+    }
+
+    /**
      * Delete all queues for all connections.
      *
      * @return void
@@ -79,6 +100,16 @@ abstract class AbstractTestCase extends BaseTestCase
     protected function config(): ConfigRepository
     {
         return $this->app->make(ConfigRepository::class);
+    }
+
+    /**
+     * Get console kernel container.
+     *
+     * @return Kernel
+     */
+    protected function console(): Kernel
+    {
+        return $this->app->make(Kernel::class);
     }
 
     /**

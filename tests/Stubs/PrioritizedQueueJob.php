@@ -6,6 +6,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use AvtoDev\AmqpRabbitLaravelQueue\HasPriorityTrait;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\PrioritizedJobInterface;
 
 class PrioritizedQueueJob extends SimpleQueueJob implements PrioritizedJobInterface
@@ -34,6 +35,8 @@ class PrioritizedQueueJob extends SimpleQueueJob implements PrioritizedJobInterf
      */
     public function handle(Dispatcher $events): void
     {
-        throw new \Exception('Test job failed');
+        Sharer::put(static::class . '-handled', true);
+
+        $events->dispatch(static::class . '-handled');
     }
 }
