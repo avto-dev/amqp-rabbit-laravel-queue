@@ -92,6 +92,8 @@ matrix:
     - php: 7.1.3
       env: laravel=5.7
     - php: 7.1.3
+      env: laravel=5.7.*
+    - php: 7.1.3
       env: setup=stable coverage=true
 
     - php: 7.2
@@ -100,6 +102,8 @@ matrix:
     - php: 7.2
       env: laravel=5.7
     - php: 7.2
+      env: laravel=5.7.*
+    - php: 7.2
       env: setup=stable coverage=true
 
     - php: 7.3
@@ -107,6 +111,8 @@ matrix:
       env: setup=lowest
     - php: 7.3
       env: laravel=5.7
+    - php: 7.3
+      env: laravel=5.7.*
     - php: 7.3
       env: setup=stable coverage=true
 
