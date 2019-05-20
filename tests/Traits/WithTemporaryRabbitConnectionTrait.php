@@ -12,7 +12,7 @@ use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 
 /**
  * @property \Illuminate\Foundation\Application app
- * @property callable[]                         beforeApplicationDestroyedCallbacks
+ * @property void                               beforeApplicationDestroyed(callable $callback)
  * @property bool                               disable_rabbitmq_temporary
  * @property bool                               disable_rabbitmq_queue_creation
  */
@@ -95,7 +95,7 @@ trait WithTemporaryRabbitConnectionTrait
         }
 
         // Register destroy callback
-        $this->beforeApplicationDestroyedCallbacks[] = function () use ($connections, $queues): void {
+        $this->beforeApplicationDestroyed(function () use ($connections, $queues): void {
             if ($this->temp_rabbit_connection instanceof AmqpContext) {
                 if ($this->temp_rabbit_queue instanceof AmqpQueue) {
                     $this->temp_rabbit_connection->deleteQueue($this->temp_rabbit_queue);
@@ -114,6 +114,6 @@ trait WithTemporaryRabbitConnectionTrait
                 $this->temp_rabbit_queue,
                 $this->temp_rabbit_connection
             );
-        };
+        });
     }
 }

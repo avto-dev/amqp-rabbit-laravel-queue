@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use Illuminate\Support\Facades\Event;
 use Mockery as m;
 use Illuminate\Support\Str;
 use Illuminate\Queue\QueueManager;
@@ -77,6 +78,7 @@ class WorkerTest extends AbstractTestCase
                 $this->app->make(QueuesFactoryInterface::class)
             );
         });
+        $this->config()->offsetUnset('queue.failed');
     }
 
     /**
@@ -141,7 +143,7 @@ class WorkerTest extends AbstractTestCase
     public function testDaemonJobFails(): void
     {
         $this->expectsEvents([
-            JobProcessing::class, //, QueueJobThatThrowsException::class . '-failed', // @todo: FIX THIS EVENT HANDLING
+            JobProcessing::class,
         ]);
 
         $this->doesntExpectEvents([
@@ -172,8 +174,8 @@ class WorkerTest extends AbstractTestCase
         \usleep(1500);
         $this->assertSame(1, $queue->size());
 
-        $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, 60, 3, 3));
+        $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, 60, 3, 2));
         \usleep(1500);
-        $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted'
+        $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted
     }
 }

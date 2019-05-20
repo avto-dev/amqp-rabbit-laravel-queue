@@ -22,11 +22,25 @@ use Illuminate\Queue\Failed\FailedJobProviderInterface;
  */
 class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
 {
-    protected const
-        PROPERTY_FAILED_AT                   = 'job-failed-at';
+    /**
+     * Property name for "failed-at".
+     */
+    protected const PROPERTY_FAILED_AT = 'job-failed-at';
+
+    /**
+     * Property name for "connection-name".
+     */
     protected const PROPERTY_CONNECTION_NAME = 'job-connection-name';
-    protected const PROPERTY_QUEUE_NAME      = 'job-queue-name';
-    protected const PROPERTY_EXCEPTION       = 'job-exception';
+
+    /**
+     * Property name for "queue-name".
+     */
+    protected const PROPERTY_QUEUE_NAME = 'job-queue-name';
+
+    /**
+     * Property name for "exception".
+     */
+    protected const PROPERTY_EXCEPTION = 'job-exception';
 
     /**
      * @var Queue
@@ -59,8 +73,10 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return string Pushed message ID
      */
-    public function log($connection_name, $queue_name, $message_body, $exception): ?int
+    public function log($connection_name, $queue_name, $message_body, $exception): string
     {
         $timestamp = (new DateTime)->getTimestamp();
 
@@ -75,11 +91,11 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
             'content_type' => 'application/json',
         ]);
 
-        $message->setMessageId(self::generateMessageId($message_body, \microtime(true)));
+        $message->setMessageId($id = self::generateMessageId($message_body, \microtime(true)));
 
         $this->connection->createProducer()->send($this->queue, $message);
 
-        return null;
+        return $id;
     }
 
     /**
@@ -108,14 +124,16 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
                 return $job;
             }
         }
+
+        return null;
     }
 
     /**
      * {@inheritdoc}
      *
+     * @return array|object[]
      * @throws Throwable
      *
-     * @return array|object[]
      */
     public function all()
     {
