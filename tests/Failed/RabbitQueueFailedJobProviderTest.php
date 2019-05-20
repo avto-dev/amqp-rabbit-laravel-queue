@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Failed;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 use Carbon\Carbon;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpMessage as Message;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider<extended>
@@ -25,7 +25,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
     protected $provider;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function setUp(): void
     {

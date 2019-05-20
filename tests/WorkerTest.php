@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use Illuminate\Support\Facades\Event;
 use Mockery as m;
 use Illuminate\Support\Str;
 use Illuminate\Queue\QueueManager;

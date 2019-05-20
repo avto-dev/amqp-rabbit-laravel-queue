@@ -124,16 +124,14 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
                 return $job;
             }
         }
-
-        return null;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return array|object[]
      * @throws Throwable
      *
+     * @return array|object[]
      */
     public function all()
     {
