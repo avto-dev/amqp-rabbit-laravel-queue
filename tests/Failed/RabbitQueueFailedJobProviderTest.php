@@ -66,7 +66,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 
         $this->assertSame('data-sources-failed-jobs', $message->getHeader('app_id'));
         $this->assertSame('application/json', $message->getHeader('content_type'));
-        $this->assertSame($id, $message->getMessageId());
+        $this->assertSame($id, (int) $message->getMessageId());
     }
 
     /**
@@ -76,7 +76,10 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
      */
     public function testGenerateMessageId(): void
     {
-        $this->assertRegExp('~failed\-job\-[a-zA-Z0-9]+~', $this->provider::generateMessageId('foo'));
+        $this->assertInternalType('numeric', $this->provider::generateMessageId('foo'));
+        $this->assertInternalType('numeric', $this->provider::generateMessageId(['foo']));
+        $this->assertInternalType('numeric', $this->provider::generateMessageId(['foo', false]));
+        $this->assertInternalType('numeric', $this->provider::generateMessageId(['foo', false], 123));
     }
 
     /**

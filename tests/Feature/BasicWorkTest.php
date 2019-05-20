@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use Interop\Amqp\AmqpQueue;
 use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
@@ -20,6 +21,11 @@ class BasicWorkTest extends AbstractTestCase
      * @var bool
      */
     public $mockConsoleOutput = false;
+
+    /**
+     * @var RabbitQueueFailedJobProvider
+     */
+    protected $failer;
 
     /**
      * {@inheritdoc}
@@ -84,6 +90,8 @@ class BasicWorkTest extends AbstractTestCase
             '--recreate' => true,
             '--force'    => true,
         ]);
+
+        $this->failer = $this->app->make('queue.failer');
     }
 
     /**
@@ -146,4 +154,40 @@ class BasicWorkTest extends AbstractTestCase
         $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
         $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-failed'));
     }
+
+//    /**
+//     * @medium
+//     *
+//     * @return void
+//     */
+//    public function testDispatchJobWithException(): void
+//    {
+//        $this->assertFalse(Sharer::has(QueueJobThatThrowsException::class . '-handled'));
+//        $this->assertFalse(Sharer::has(QueueJobThatThrowsException::class . '-failed'));
+//
+//        dispatch(new QueueJobThatThrowsException);
+//
+//        $this->artisan('queue:work', ['--once' => true]);
+//
+//        $output         = $this->console()->output();
+//dump($output);
+//        $job_class_safe = \preg_quote(QueueJobThatThrowsException::class, '/');
+//        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output);
+//
+//        $this->assertTrue(Sharer::has(QueueJobThatThrowsException::class . '-handled'));
+//        $this->assertFalse(Sharer::has(QueueJobThatThrowsException::class . '-failed'));
+//
+//        $this->artisan('queue:work', ['--once' => true]);
+//
+//        $output         = $this->console()->output();
+//dump($output);
+//        $job_class_safe = \preg_quote(QueueJobThatThrowsException::class, '/');
+//        $this->assertRegExp("~^.+failed.+{$job_class_safe}.?$~im", $output);
+//
+//        $this->assertTrue(Sharer::has(QueueJobThatThrowsException::class . '-handled'));
+//        $this->assertTrue(Sharer::has(QueueJobThatThrowsException::class . '-failed'));
+//dump($this->failer->all());
+//        $this->assertCount(1, $this->failer->all());
+//
+//    }
 }

@@ -72,11 +72,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return string Pushed message ID
+     * {@inheritDoc}
      */
-    public function log($connection_name, $queue_name, $message_body, $exception): string
+    public function log($connection_name, $queue_name, $message_body, $exception)
     {
         $timestamp = (new DateTime)->getTimestamp();
 
@@ -91,7 +89,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
             'content_type' => 'application/json',
         ]);
 
-        $message->setMessageId($id = self::generateMessageId($message_body, \microtime(true)));
+        $id = self::generateMessageId($message_body, \microtime(true));
+
+        $message->setMessageId((string) $id);
 
         $this->connection->createProducer()->send($this->queue, $message);
 
@@ -103,11 +103,11 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
      *
      * @param mixed ...$arguments
      *
-     * @return string
+     * @return int
      */
-    public static function generateMessageId(...$arguments): string
+    public static function generateMessageId(...$arguments): int
     {
-        return 'failed-job-' . Str::substr(\sha1(\serialize($arguments)), 0, 8);
+        return \crc32(\serialize($arguments));
     }
 
     /**
@@ -129,9 +129,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     /**
      * {@inheritdoc}
      *
+     * @return array|object[]
      * @throws Throwable
      *
-     * @return array|object[]
      */
     public function all()
     {
@@ -140,7 +140,7 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
         $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$result): void {
             $job = new stdClass;
 
-            $job->id         = $message->getMessageId();
+            $job->id         = (int) $message->getMessageId();
             $job->connection = $message->getProperty(self::PROPERTY_CONNECTION_NAME);
             $job->queue      = $message->getProperty(self::PROPERTY_QUEUE_NAME);
             $job->payload    = $message->getBody();
@@ -163,7 +163,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
         $deleted_count = 0;
 
         $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
-            if ($message->getMessageId() === $id) {
+            $message_id = $message->getMessageId();
+
+            if (! empty($message_id) && ((int) $message_id) === $id) {
                 $deleted_count++;
 
                 return false;
