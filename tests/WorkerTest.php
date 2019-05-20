@@ -138,7 +138,7 @@ class WorkerTest extends AbstractTestCase
     public function testDaemonJobFails(): void
     {
         $this->expectsEvents([
-            JobProcessing::class //, QueueJobThatThrowsException::class . '-failed', // @todo: FIX THIS EVENT HANDLING
+            JobProcessing::class, //, QueueJobThatThrowsException::class . '-failed', // @todo: FIX THIS EVENT HANDLING
         ]);
 
         $this->doesntExpectEvents([
