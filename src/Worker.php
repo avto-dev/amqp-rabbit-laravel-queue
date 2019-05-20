@@ -92,12 +92,33 @@ class Worker extends \Illuminate\Queue\Worker
             $this->closeRabbitConnection($rabbit_connection);
 
             $this->stop();
-            // @codeCoverageIgnoreStart
+        // @codeCoverageIgnoreStart
         } else {
             // Backward compatibility is our everything =)
             parent::daemon($connectionName, $queue_names, $options);
         }
         // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Sleep the script for a given number of seconds.
+     *
+     * @param int|float $seconds
+     *
+     * @return void
+     */
+    public function sleep($seconds)
+    {
+        // @link https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Worker.php#L596
+        // @link https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Worker.php#L583
+        // @link https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Worker.php#L585
+        // @link https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Worker.php#L587
+
+        if ($seconds < 1) {
+            \usleep((int) $seconds * 1000000);
+        } else {
+            \sleep((int) $seconds);
+        }
     }
 
     /**
@@ -125,27 +146,6 @@ class Worker extends \Illuminate\Queue\Worker
     }
 
     /**
-     * Sleep the script for a given number of seconds.
-     *
-     * @param int|float $seconds
-     *
-     * @return void
-     */
-    public function sleep($seconds)
-    {
-        // @link https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Worker.php#L596
-        // @link https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Worker.php#L583
-        // @link https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Worker.php#L585
-        // @link https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Worker.php#L587
-
-        if ($seconds < 1) {
-            \usleep((int) $seconds * 1000000);
-        } else {
-            \sleep((int) $seconds);
-        }
-    }
-
-    /**
      * Close rabbit connection.
      *
      * @param Context $connection
@@ -156,7 +156,7 @@ class Worker extends \Illuminate\Queue\Worker
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function stopWorkerIfLostConnection($e)
     {

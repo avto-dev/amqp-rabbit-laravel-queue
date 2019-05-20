@@ -50,41 +50,6 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
-     * Create a payload string from the given job and data.
-     *
-     * @param string|mixed $job
-     * @param string|mixed $queue
-     * @param mixed        $data
-     *
-     * @return string
-     *
-     * @throws \Illuminate\Queue\InvalidPayloadException
-     * @throws RuntimeException
-     *
-     * @see \Illuminate\Queue\Queue::createPayload()
-     */
-    protected function createPayloadCompatible($job, $queue, $data): string
-    {
-        static $parameters_number, $method_name = 'createPayload';
-
-        if (! \is_int($parameters_number)) {
-            $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
-        }
-
-        if ($parameters_number === 2) {
-            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
-            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
-            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
-            $this->{$method_name}($job, $data);
-        } elseif ($parameters_number === 3) {
-            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
-            $this->{$method_name}($job, $queue, $data);
-        }
-
-        throw new RuntimeException('Parent method looks like not compatible with current class');
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
@@ -254,6 +219,41 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public function getRabbitQueue(): AmqpQueue
     {
         return $this->queue;
+    }
+
+    /**
+     * Create a payload string from the given job and data.
+     *
+     * @param string|mixed $job
+     * @param string|mixed $queue
+     * @param mixed        $data
+     *
+     * @throws \Illuminate\Queue\InvalidPayloadException
+     * @throws RuntimeException
+     *
+     * @return string
+     *
+     * @see \Illuminate\Queue\Queue::createPayload()
+     */
+    protected function createPayloadCompatible($job, $queue, $data): string
+    {
+        static $parameters_number, $method_name = 'createPayload';
+
+        if (! \is_int($parameters_number)) {
+            $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
+        }
+
+        if ($parameters_number === 2) {
+            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
+            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
+            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
+            $this->{$method_name}($job, $data);
+        } elseif ($parameters_number === 3) {
+            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
+            $this->{$method_name}($job, $queue, $data);
+        }
+
+        throw new RuntimeException('Parent method looks like not compatible with current class');
     }
 
     /**
