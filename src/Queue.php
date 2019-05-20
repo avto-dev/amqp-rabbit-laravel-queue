@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use DateTime;
+use RuntimeException;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpQueue;
 use Illuminate\Container\Container;
@@ -49,6 +50,41 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
+     * Create a payload string from the given job and data.
+     *
+     * @param string|mixed $job
+     * @param string|mixed $queue
+     * @param mixed        $data
+     *
+     * @return string
+     *
+     * @throws \Illuminate\Queue\InvalidPayloadException
+     * @throws RuntimeException
+     *
+     * @see \Illuminate\Queue\Queue::createPayload()
+     */
+    protected function createPayloadCompatible($job, $queue, $data): string
+    {
+        static $parameters_number, $method_name = 'createPayload';
+
+        if (! \is_int($parameters_number)) {
+            $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
+        }
+
+        if ($parameters_number === 2) {
+            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
+            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
+            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
+            $this->{$method_name}($job, $data);
+        } elseif ($parameters_number === 3) {
+            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
+            $this->{$method_name}($job, $queue, $data);
+        }
+
+        throw new RuntimeException('Parent method looks like not compatible with current class');
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
@@ -63,10 +99,14 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
-     * {@inheritdoc}
+     * Push a new job onto the queue.
      *
      * @param object|string $job
+     * @param mixed         $data
+     * @param string        $queue
      * @param int|null      $priority Message priority
+     *
+     * @return void
      */
     public function push($job, $data = '', $queue = null, ?int $priority = null): void
     {
@@ -78,7 +118,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
             $options['priority'] = $priority;
         }
 
-        $this->pushRaw($this->createPayload($job, $queue, $data), $queue, $options);
+        $this->pushRaw($this->createPayloadCompatible($job, $queue, $data), $queue, $options);
     }
 
     /**
@@ -126,12 +166,17 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
-     * {@inheritdoc}
+     * Push a new job onto the queue after a delay.
      *
-     * @param float|int $delay    Delay in seconds
-     * @param int|null  $priority Message priority
+     * @param \DateTimeInterface|\DateInterval|int|float $delay    Delay in seconds
+     * @param string|object                              $job
+     * @param mixed                                      $data
+     * @param string                                     $queue
+     * @param int|null                                   $priority Message priority
+     *
+     * @return mixed|void
      */
-    public function later($delay, $job, $data = '', $queue = null, ?int $priority = null): void
+    public function later($delay, $job, $data = '', $queue = null, ?int $priority = null)
     {
         $options = [
             'delay' => $delay,
@@ -143,7 +188,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
             $options['priority'] = $priority;
         }
 
-        $this->pushRaw($this->createPayload($job, $queue, $data), $queue, $options);
+        $this->pushRaw($this->createPayloadCompatible($job, $queue, $data), $queue, $options);
     }
 
     /**

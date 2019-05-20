@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
+use DateTime;
 use Throwable;
 use Illuminate\Queue\WorkerOptions;
 use Interop\Amqp\AmqpMessage as Message;
@@ -26,7 +27,7 @@ class Worker extends \Illuminate\Queue\Worker
                 $this->listenForSignals();
             }
 
-            $lastRestart       = $this->getTimestampOfLastQueueRestart();
+            $last_restart      = $this->getTimestampOfLastQueueRestart() ?? (new DateTime)->getTimestamp();
             $rabbit_connection = $current_queue->getRabbitConnection();
             $rabbit_queue      = $current_queue->getRabbitQueue();
 
@@ -40,7 +41,7 @@ class Worker extends \Illuminate\Queue\Worker
                     $connectionName,
                     $queue_names,
                     $options,
-                    $lastRestart
+                    $last_restart
                 ): bool {
                     // Before reserving any jobs, we will make sure this queue is not paused and
                     // if it is we will just pause this worker for a given amount of time and
@@ -48,7 +49,7 @@ class Worker extends \Illuminate\Queue\Worker
                     if (! $this->daemonShouldRun($options, $connectionName, $queue_names)) {
                         $consumer->reject($message);
 
-                        $this->pauseWorker($options, $lastRestart);
+                        $this->pauseWorker($options, $last_restart);
 
                         return true;
                     }
@@ -61,7 +62,7 @@ class Worker extends \Illuminate\Queue\Worker
 
                         $this->exceptions->report($e = new FatalThrowableError($e));
                         $this->stopWorkerIfLostConnection($e);
-                        $this->sleep(0.2);
+                        $this->sleep(0.3);
 
                         return true;
                     }
@@ -77,7 +78,7 @@ class Worker extends \Illuminate\Queue\Worker
                     // Finally, we will check to see if we have exceeded our memory limits or if
                     // the queue should restart based on other indications. If so, we'll stop
                     // this worker and let whatever is "monitoring" it restart the process.
-                    if ($this->needToStop($options, $lastRestart, $job)) {
+                    if ($this->needToStop($options, $last_restart, $job)) {
                         return false;
                     }
 
@@ -91,7 +92,7 @@ class Worker extends \Illuminate\Queue\Worker
             $this->closeRabbitConnection($rabbit_connection);
 
             $this->stop();
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         } else {
             // Backward compatibility is our everything =)
             parent::daemon($connectionName, $queue_names, $options);
@@ -116,11 +117,32 @@ class Worker extends \Illuminate\Queue\Worker
             case $this->shouldQuit:
             case $this->memoryExceeded($options->memory):
             case $this->queueShouldRestart($lastRestart):
-            case $options->stopWhenEmpty && $job === null:
+            case \property_exists($options, $property = 'stopWhenEmpty') && $options->{$property} && $job === null:
                 return true;
         }
 
         return false;
+    }
+
+    /**
+     * Sleep the script for a given number of seconds.
+     *
+     * @param int|float $seconds
+     *
+     * @return void
+     */
+    public function sleep($seconds)
+    {
+        // @link https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Worker.php#L596
+        // @link https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Worker.php#L583
+        // @link https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Worker.php#L585
+        // @link https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Worker.php#L587
+
+        if ($seconds < 1) {
+            \usleep((int) $seconds * 1000000);
+        } else {
+            \sleep((int) $seconds);
+        }
     }
 
     /**
@@ -134,16 +156,15 @@ class Worker extends \Illuminate\Queue\Worker
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    protected function causedByLostConnection(Throwable $e): bool
+    protected function stopWorkerIfLostConnection($e)
     {
         switch (true) {
             case $e instanceof \AMQPExchangeException:
             case $e instanceof \AMQPConnectionException:
-                return true;
+            case $this->causedByLostConnection($e):
+                $this->shouldQuit = true;
         }
-
-        return parent::causedByLostConnection($e);
     }
 }

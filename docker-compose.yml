@@ -35,6 +35,6 @@ services:
       - rabbit-data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit:cached
     ports:
       - 5672
-      - '8081:15672' # web face
+      #- '8081:15672' # web face
     networks:
       - app-network

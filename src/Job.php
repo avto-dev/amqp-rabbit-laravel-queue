@@ -57,7 +57,7 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
      */
     public function getJobId(): string
     {
-        return $this->message->getMessageId();
+        return (string) $this->message->getMessageId();
     }
 
     /**

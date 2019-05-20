@@ -23,10 +23,10 @@ use Illuminate\Queue\Failed\FailedJobProviderInterface;
 class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
 {
     protected const
-        PROPERTY_FAILED_AT                   = 'job-failed-at';
-    protected const PROPERTY_CONNECTION_NAME = 'job-connection-name';
-    protected const PROPERTY_QUEUE_NAME      = 'job-queue-name';
-    protected const PROPERTY_EXCEPTION       = 'job-exception';
+        PROPERTY_FAILED_AT = 'job-failed-at',
+        PROPERTY_CONNECTION_NAME = 'job-connection-name',
+        PROPERTY_QUEUE_NAME = 'job-queue-name',
+        PROPERTY_EXCEPTION = 'job-exception';
 
     /**
      * @var Queue
@@ -95,9 +95,13 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get a single failed job.
+     *
+     * @param  mixed  $id
+     *
+     * @return object|null|mixed
      */
-    public function find($id): ?stdclass
+    public function find($id)
     {
         foreach ($this->all() as $job) {
             if (\property_exists($job, 'id') && $job->id === $id) {
@@ -111,9 +115,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     /**
      * {@inheritdoc}
      *
+     * @return array|object[]
      * @throws Throwable
      *
-     * @return array|stdClass[]
      */
     public function all()
     {
