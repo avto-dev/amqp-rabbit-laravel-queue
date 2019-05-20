@@ -86,7 +86,7 @@ abstract class AbstractFeatureTest extends AbstractTestCase
      */
     protected function startArtisan(string $command,
                                     array $arguments = [],
-                                    float $process_timeout = 0.65): array
+                                    float $process_timeout = 1.5): array
     {
         $standard_output = new Collection;
         $errors_output   = new Collection;

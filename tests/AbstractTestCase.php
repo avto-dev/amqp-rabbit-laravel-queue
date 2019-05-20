@@ -3,8 +3,8 @@
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Foundation\Application;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -12,6 +12,16 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
 
 abstract class AbstractTestCase extends BaseTestCase
 {
+    /**
+     * Creates the application.
+     *
+     * @return Application
+     */
+    public function createApplication(): Application
+    {
+        return require __DIR__ . '/bootstrap/app.php';
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -30,16 +40,6 @@ abstract class AbstractTestCase extends BaseTestCase
         parent::tearDown();
 
         Sharer::clear();
-    }
-
-    /**
-     * Creates the application.
-     *
-     * @return Application
-     */
-    public function createApplication(): Application
-    {
-        return require __DIR__ . '/bootstrap/app.php';
     }
 
     /**

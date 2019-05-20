@@ -25,20 +25,6 @@ class ConnectorTest extends AbstractTestCase
     protected $connector;
 
     /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->connector = $this->app->make(Connector::class);
-
-        // testInstanceOf
-
-        $this->assertInstanceOf(ConnectorInterface::class, $this->connector);
-    }
-
-    /**
      * @small
      *
      * @return void
@@ -46,32 +32,32 @@ class ConnectorTest extends AbstractTestCase
     public function testConnectWithParametersPassing(): void
     {
         $this->assertInstanceOf(Queue::class, $this->connector->connect([
-            'connection'  => $this->temp_rabbit_connection_name,
-            'queue_id'    => $this->temp_rabbit_queue_id,
-            'time_to_run' => 0,
+            'connection' => $this->temp_rabbit_connection_name,
+            'queue_id'   => $this->temp_rabbit_queue_id,
+            'timeout'    => 0,
         ]));
 
-        // Connect Set Default TimeToRun Value
+        // Connect Set Default Timeout Value
 
         /* @var Queue $queue */
         $this->assertInstanceOf(Queue::class, $queue = $this->connector->connect([
             'connection' => $this->temp_rabbit_connection_name,
             'queue_id'   => $this->temp_rabbit_queue_id,
-            //'time_to_run' => 0,
+            //'timeout' => 0,
         ]));
 
-        $this->assertSame(0, $queue->getTimeToRun());
+        $this->assertSame(0, $queue->getTimeout());
 
-        // Connect With Passing TimeToRun Value
+        // Connect With Passing Timeout Value
 
         /* @var Queue $queue */
         $this->assertInstanceOf(Queue::class, $queue = $this->connector->connect([
-            'connection'  => $this->temp_rabbit_connection_name,
-            'queue_id'    => $this->temp_rabbit_queue_id,
-            'time_to_run' => $time_to_run = \random_int(1, 99),
+            'connection' => $this->temp_rabbit_connection_name,
+            'queue_id'   => $this->temp_rabbit_queue_id,
+            'timeout'    => $timeout = \random_int(1, 99),
         ]));
 
-        $this->assertSame($time_to_run, $queue->getTimeToRun());
+        $this->assertSame($timeout, $queue->getTimeout());
     }
 
     /**
@@ -85,8 +71,8 @@ class ConnectorTest extends AbstractTestCase
 
         $this->assertInstanceOf(Queue::class, $this->connector->connect([
             //'connection'  => $this->connection_name,
-            'queue_id'    => $this->temp_rabbit_queue_id,
-            'time_to_run' => 0,
+            'queue_id' => $this->temp_rabbit_queue_id,
+            'timeout'  => 0,
         ]));
     }
 
@@ -100,9 +86,23 @@ class ConnectorTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
 
         $this->assertInstanceOf(Queue::class, $this->connector->connect([
-            'connection'  => $this->temp_rabbit_connection_name,
+            'connection' => $this->temp_rabbit_connection_name,
             //'queue_id'    => $this->queue_id,
-            'time_to_run' => 0,
+            'timeout'    => 0,
         ]));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->connector = $this->app->make(Connector::class);
+
+        // testInstanceOf
+
+        $this->assertInstanceOf(ConnectorInterface::class, $this->connector);
     }
 }

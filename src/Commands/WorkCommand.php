@@ -18,6 +18,20 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
      *
      * @codeCoverageIgnore
      */
+    protected function writeStatus(Job $job, $status, $type): void
+    {
+        $this->line(sprintf(
+            "<{$type}>[%s] %s</{$type}> %s",
+            $job->getJobId(),
+            \str_pad("{$status}:", 11), $job->resolveName()
+        ));
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
+     */
     public function line($string, $style = null, $verbosity = null): void
     {
         $time = (new \DateTime)->format('H:i:s.v');
@@ -27,20 +41,6 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
             : $string;
 
         $this->output->writeln("<fg=white>{$time}</> {$styled}", $this->parseVerbosity($verbosity));
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    protected function writeStatus(Job $job, $status, $type): void
-    {
-        $this->line(sprintf(
-            "<{$type}>[%s] %s</{$type}> %s",
-            $job->getJobId(),
-            \str_pad("{$status}:", 11), $job->resolveName()
-        ));
     }
 
     /**

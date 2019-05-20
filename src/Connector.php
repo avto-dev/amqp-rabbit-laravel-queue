@@ -58,10 +58,10 @@ class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
             throw new InvalidArgumentException('RabbitMQ queue ID was not passed');
         }
 
-        $connection  = $this->rabbit_mq_manager->make($config['connection']);
-        $queue       = $this->queues_factory->make($config['queue_id']);
-        $time_to_run = (int) ($config['time_to_run'] ?? 0);
+        $connection = $this->rabbit_mq_manager->make($config['connection']);
+        $queue      = $this->queues_factory->make($config['queue_id']);
+        $timeout    = (int) ($config['timeout'] ?? 0);
 
-        return new Queue($this->container, $connection, $queue, $time_to_run);
+        return new Queue($this->container, $connection, $queue, $timeout);
     }
 }

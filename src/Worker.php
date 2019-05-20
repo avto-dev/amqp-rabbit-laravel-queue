@@ -61,7 +61,7 @@ class Worker extends \Illuminate\Queue\Worker
 
                         $this->exceptions->report($e = new FatalThrowableError($e));
                         $this->stopWorkerIfLostConnection($e);
-                        $this->sleep(0.3);
+                        $this->sleep(3);
 
                         return true;
                     }
@@ -85,13 +85,13 @@ class Worker extends \Illuminate\Queue\Worker
                 }
             );
 
-            $subscriber->consume($current_queue->getTimeToRun()); // Start `subscribe` method loop
+            $subscriber->consume($current_queue->getTimeout()); // Start `subscribe` method loop
 
             $subscriber->unsubscribe($consumer);
             $this->closeRabbitConnection($rabbit_connection);
 
             $this->stop();
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         } else {
             // Backward compatibility is our everything =)
             parent::daemon($connectionName, $queue_names, $options);
@@ -129,7 +129,7 @@ class Worker extends \Illuminate\Queue\Worker
             case $this->shouldQuit:
             case $this->memoryExceeded($options->memory):
             case $this->queueShouldRestart($lastRestart):
-            //case \property_exists($options, $property = 'stopWhenEmpty') && $options->{$property} && $job === null:
+            case \property_exists($options, $property = 'stopWhenEmpty') && $options->{$property} && $job === null:
                 return true;
         }
 

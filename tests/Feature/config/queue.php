@@ -7,10 +7,10 @@ return [
 
     'connections' => [
         'rabbitmq' => [
-            'driver'      => ServiceProvider::DRIVER_NAME,
-            'connection'  => 'testing',
-            'queue_id'    => 'jobs',
-            'time_to_run' => 0, // The timeout is in milliseconds
+            'driver'     => ServiceProvider::DRIVER_NAME,
+            'connection' => 'testing',
+            'queue_id'   => 'jobs',
+            'timeout'    => 0, // The timeout is in milliseconds
         ],
     ],
 
