@@ -22,68 +22,7 @@ class BasicWorkTest extends AbstractTestCase
     public $mockConsoleOutput = false;
 
     /**
-     * @medium
-     *
-     * @return void
-     */
-    public function testPushing(): void
-    {
-        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
-
-        dispatch(new SimpleQueueJob);
-
-        $this->artisan('queue:work', ['--once' => true]);
-
-        $output         = $this->console()->output();
-        $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
-
-        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output);
-        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output);
-        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output);
-
-        $this->assertTrue(Sharer::has(SimpleQueueJob::class . '-handled'));
-        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
-        $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-failed'));
-        $this->assertFalse(Sharer::has(QueueJobThatThrowsException::class . '-failed'));
-    }
-
-    /**
-     * @medium
-     *
-     * @return void
-     */
-    public function testTwoJobs(): void
-    {
-        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
-        $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-handled'));
-
-        dispatch(new PrioritizedQueueJob);
-        \usleep(3000);
-        dispatch(new SimpleQueueJob);
-
-        $this->artisan('queue:work', ['--once' => true]);
-        $output1 = $this->console()->output();
-        $this->artisan('queue:work', ['--once' => true]);
-        $output2 = $this->console()->output();
-
-        $job_class_safe = \preg_quote(PrioritizedQueueJob::class, '/');
-        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output1);
-        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output1);
-        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output1);
-
-        $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
-        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output2);
-        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output2);
-        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output2);
-
-        $this->assertTrue(Sharer::has(SimpleQueueJob::class . '-handled'));
-        $this->assertTrue(Sharer::has(PrioritizedQueueJob::class . '-handled'));
-        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
-        $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-failed'));
-    }
-
-    /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function setUp(): void
     {
@@ -145,5 +84,66 @@ class BasicWorkTest extends AbstractTestCase
             '--recreate' => true,
             '--force'    => true,
         ]);
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testPushing(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        dispatch(new SimpleQueueJob);
+
+        $this->artisan('queue:work', ['--once' => true]);
+
+        $output         = $this->console()->output();
+        $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
+
+        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output);
+        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output);
+        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output);
+
+        $this->assertTrue(Sharer::has(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+        $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-failed'));
+        $this->assertFalse(Sharer::has(QueueJobThatThrowsException::class . '-failed'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testTwoJobs(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-handled'));
+
+        dispatch(new PrioritizedQueueJob);
+        \usleep(3000);
+        dispatch(new SimpleQueueJob);
+
+        $this->artisan('queue:work', ['--once' => true]);
+        $output1 = $this->console()->output();
+        $this->artisan('queue:work', ['--once' => true]);
+        $output2 = $this->console()->output();
+
+        $job_class_safe = \preg_quote(PrioritizedQueueJob::class, '/');
+        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output1);
+        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output1);
+        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output1);
+
+        $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
+        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output2);
+        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output2);
+        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output2);
+
+        $this->assertTrue(Sharer::has(SimpleQueueJob::class . '-handled'));
+        $this->assertTrue(Sharer::has(PrioritizedQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+        $this->assertFalse(Sharer::has(PrioritizedQueueJob::class . '-failed'));
     }
 }

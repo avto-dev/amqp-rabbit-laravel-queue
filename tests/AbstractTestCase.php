@@ -4,8 +4,8 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -13,6 +13,26 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
 
 abstract class AbstractTestCase extends BaseTestCase
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        Sharer::clear();
+
+        parent::setUp();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        Sharer::clear();
+    }
+
     /**
      * Creates the application.
      *
@@ -46,26 +66,6 @@ abstract class AbstractTestCase extends BaseTestCase
         }
 
         return $uses;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function setUp(): void
-    {
-        Sharer::clear();
-
-        parent::setUp();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        Sharer::clear();
     }
 
     /**

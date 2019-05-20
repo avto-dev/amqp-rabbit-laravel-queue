@@ -129,9 +129,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     /**
      * {@inheritdoc}
      *
-     * @return array|object[]
      * @throws Throwable
      *
+     * @return array|object[]
      */
     public function all()
     {
@@ -151,6 +151,36 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
         });
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws Throwable
+     */
+    public function forget($id): bool
+    {
+        $deleted_count = 0;
+
+        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
+            if ($message->getMessageId() === $id) {
+                $deleted_count++;
+
+                return false;
+            }
+
+            return true;
+        });
+
+        return $deleted_count > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flush(): void
+    {
+        $this->connection->purgeQueue($this->queue);
     }
 
     /**
@@ -203,35 +233,5 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
         }
 
         $this->connection->deleteQueue($temp_queue); // keep clean
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @throws Throwable
-     */
-    public function forget($id): bool
-    {
-        $deleted_count = 0;
-
-        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
-            if ($message->getMessageId() === $id) {
-                $deleted_count++;
-
-                return false;
-            }
-
-            return true;
-        });
-
-        return $deleted_count > 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function flush(): void
-    {
-        $this->connection->purgeQueue($this->queue);
     }
 }

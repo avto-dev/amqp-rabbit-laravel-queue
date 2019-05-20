@@ -92,25 +92,12 @@ class Worker extends \Illuminate\Queue\Worker
             $this->closeRabbitConnection($rabbit_connection);
 
             $this->stop();
-            // @codeCoverageIgnoreStart
+        // @codeCoverageIgnoreStart
         } else {
             // Backward compatibility is our everything =)
             parent::daemon($connectionName, $queue_names, $options);
         }
         // @codeCoverageIgnoreEnd
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function stopWorkerIfLostConnection($e)
-    {
-        switch (true) {
-            case $e instanceof \AMQPExchangeException:
-            case $e instanceof \AMQPConnectionException:
-            case $this->causedByLostConnection($e):
-                $this->shouldQuit = true;
-        }
     }
 
     /**
@@ -131,6 +118,19 @@ class Worker extends \Illuminate\Queue\Worker
             \usleep((int) $seconds * 1000000);
         } else {
             \sleep((int) $seconds);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function stopWorkerIfLostConnection($e)
+    {
+        switch (true) {
+            case $e instanceof \AMQPExchangeException:
+            case $e instanceof \AMQPConnectionException:
+            case $this->causedByLostConnection($e):
+                $this->shouldQuit = true;
         }
     }
 

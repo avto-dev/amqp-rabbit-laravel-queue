@@ -25,6 +25,20 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
     protected $provider;
 
     /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->provider = new RabbitQueueFailedJobProvider(
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            $this->app->make(ExceptionHandler::class)
+        );
+    }
+
+    /**
      * @small
      *
      * @return void
@@ -53,30 +67,6 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertSame('data-sources-failed-jobs', $message->getHeader('app_id'));
         $this->assertSame('application/json', $message->getHeader('content_type'));
         $this->assertSame($id, $message->getMessageId());
-    }
-
-    /**
-     * Get current queue size.
-     *
-     * @param int $sleep
-     *
-     * @return int
-     */
-    protected function getCurrentSize(int $sleep = 1500): int
-    {
-        \usleep($sleep);
-
-        return $this->temp_rabbit_connection->declareQueue($this->temp_rabbit_queue);
-    }
-
-    /**
-     * @param int $timeout
-     *
-     * @return Message
-     */
-    protected function getLastMessage(int $timeout = 1500): Message
-    {
-        return $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue)->receive($timeout);
     }
 
     /**
@@ -245,16 +235,26 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
     }
 
     /**
-     * {@inheritdoc}
+     * Get current queue size.
+     *
+     * @param int $sleep
+     *
+     * @return int
      */
-    protected function setUp(): void
+    protected function getCurrentSize(int $sleep = 1500): int
     {
-        parent::setUp();
+        \usleep($sleep);
 
-        $this->provider = new RabbitQueueFailedJobProvider(
-            $this->temp_rabbit_connection,
-            $this->temp_rabbit_queue,
-            $this->app->make(ExceptionHandler::class)
-        );
+        return $this->temp_rabbit_connection->declareQueue($this->temp_rabbit_queue);
+    }
+
+    /**
+     * @param int $timeout
+     *
+     * @return Message
+     */
+    protected function getLastMessage(int $timeout = 1500): Message
+    {
+        return $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue)->receive($timeout);
     }
 }
