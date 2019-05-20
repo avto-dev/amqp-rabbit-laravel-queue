@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use Interop\Amqp\AmqpQueue;
 use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 
 class BasicWorkTest extends AbstractTestCase

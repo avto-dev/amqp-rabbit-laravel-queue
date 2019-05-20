@@ -72,7 +72,7 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function log($connection_name, $queue_name, $message_body, $exception)
     {
@@ -129,9 +129,9 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface
     /**
      * {@inheritdoc}
      *
-     * @return array|object[]
      * @throws Throwable
      *
+     * @return array|object[]
      */
     public function all()
     {
