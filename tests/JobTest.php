@@ -67,7 +67,6 @@ class JobTest extends AbstractTestCase
             Str::random()
         );
 
-        // testInstanceOf
         $this->assertInstanceOf(JobContract::class, $this->job);
     }
 

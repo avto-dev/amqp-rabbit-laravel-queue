@@ -33,8 +33,6 @@ class ConnectorTest extends AbstractTestCase
 
         $this->connector = $this->app->make(Connector::class);
 
-        // testInstanceOf
-
         $this->assertInstanceOf(ConnectorInterface::class, $this->connector);
     }
 

@@ -64,7 +64,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertSame((string) $exception, $message->getProperty('job-exception'));
         $this->assertSame($message_body, $message->getBody());
 
-        $this->assertSame('data-sources-failed-jobs', $message->getHeader('app_id'));
+        $this->assertSame('jobs-failer', $message->getHeader('app_id'));
         $this->assertSame('application/json', $message->getHeader('content_type'));
         $this->assertSame($id, (int) $message->getMessageId());
     }

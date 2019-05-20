@@ -44,7 +44,7 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Bootstrap queue services.
+     * Bootstrap package services.
      *
      * @param QueueManager $queue
      *

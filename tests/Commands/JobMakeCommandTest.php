@@ -49,10 +49,14 @@ class JobMakeCommandTest extends AbstractTestCase
     public function testGetStub(): void
     {
         $this->artisan('make:job', [
-            'name' => $name = 'foo',
+            'name' => $name = 'Foo',
         ]);
 
         $this->assertFileExists($file_path = __DIR__ . '/../../vendor/laravel/laravel/app/Jobs/' . $name . '.php');
+
+        require $file_path;
+
+        $this->assertInternalType('object', new \App\Jobs\Foo);
 
         $content = \file_get_contents($file_path);
 
@@ -71,11 +75,15 @@ class JobMakeCommandTest extends AbstractTestCase
     public function testGetStubSync(): void
     {
         $this->artisan('make:job', [
-            'name'   => $name = 'foo',
+            'name'   => $name = 'Bar',
             '--sync' => true,
         ]);
 
         $this->assertFileExists($file_path = __DIR__ . '/../../vendor/laravel/laravel/app/Jobs/' . $name . '.php');
+
+        require $file_path;
+
+        $this->assertInternalType('object', new \App\Jobs\Bar);
 
         $content = \file_get_contents($file_path);
 

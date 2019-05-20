@@ -84,7 +84,7 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
             self::PROPERTY_QUEUE_NAME      => $queue_name,
             self::PROPERTY_EXCEPTION       => Str::limit((string) $exception, 10240),
         ], [
-            'app_id'       => 'data-sources-failed-jobs',
+            'app_id'       => 'jobs-failer',
             'timestamp'    => $timestamp,
             'content_type' => 'application/json',
         ]);
