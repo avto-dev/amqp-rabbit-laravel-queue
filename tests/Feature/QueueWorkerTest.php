@@ -31,7 +31,7 @@ class QueueWorkerTest extends AbstractFeatureTest
         $this->dispatcher->dispatch(new SimpleQueueJob);
 
         $process_info = $this->startArtisan('queue:work');
-        dump($process_info);
+
         $this->assertTrue($process_info['timed_out']);
         /** @var Collection $output */
         $output         = $process_info['stdout'];
@@ -58,7 +58,6 @@ class QueueWorkerTest extends AbstractFeatureTest
         dispatch(new SimpleQueueJob);
 
         $process_info = $this->startArtisan('queue:work');
-        dump($process_info);
 
         $this->assertTrue($process_info['timed_out']);
         /** @var Collection $output */
@@ -87,7 +86,6 @@ class QueueWorkerTest extends AbstractFeatureTest
         \usleep(1000);
 
         $process_info = $this->startArtisan('queue:work');
-        dump($process_info);
 
         $this->assertTrue($process_info['timed_out']);
         /** @var Collection $output */
@@ -118,7 +116,6 @@ class QueueWorkerTest extends AbstractFeatureTest
         $this->dispatcher->dispatch($will_throws = new QueueJobThatThrowsException);
 
         $process_info = $this->startArtisan('queue:work');
-        dump($process_info);
 
         $this->assertTrue($process_info['timed_out']);
         /** @var Collection $output */
@@ -143,7 +140,6 @@ class QueueWorkerTest extends AbstractFeatureTest
         $this->dispatcher->dispatch($will_throws = new QueueJobThatThrowsException);
 
         $process_info = $this->startArtisan('queue:work');
-        dump($process_info);
 
         $this->assertTrue($process_info['timed_out']);
 

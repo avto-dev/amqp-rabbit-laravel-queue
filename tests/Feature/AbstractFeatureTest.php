@@ -115,9 +115,29 @@ abstract class AbstractFeatureTest extends AbstractTestCase
 
         return [
             'process'   => $process,
-            'stdout'    => $standard_output,
-            'stderr'    => $errors_output,
+            'stdout'    => $this->normalizeOutputCollection($standard_output),
+            'stderr'    => $this->normalizeOutputCollection($errors_output),
             'timed_out' => $timed_out,
         ];
+    }
+
+    /**
+     * @param Collection $collection
+     *
+     * @return Collection
+     */
+    protected function normalizeOutputCollection(Collection $collection): Collection
+    {
+        $as_text = '';
+
+        foreach ($collection->all() as $item) {
+            $as_text .= (string) $item;
+        }
+
+        $result = array_filter(\preg_split("~(\r|\n)~", $as_text), function ($item) {
+            return ! empty($item) ? $item : null;
+        });
+
+        return new Collection($result);
     }
 }
