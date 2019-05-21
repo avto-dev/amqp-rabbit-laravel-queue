@@ -67,7 +67,7 @@ before_install:
     && sudo rabbitmq-plugins enable rabbitmq_delayed_message_exchange
     && sudo service rabbitmq-server restart
     && sudo rabbitmq-plugins list
-  # Installing completed
+  # Installing  completed
   - cd $TRAVIS_BUILD_DIR
   - composer global require hirak/prestissimo --update-no-dev
   - if [[ $coverage = 'false' ]]; then phpenv config-rm xdebug.ini || true; fi
