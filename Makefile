@@ -18,6 +18,9 @@ help: ## Show this help
 build: ## Build docker images, required for current package environment
 	$(dc_bin) build
 
+install: clean ## Install stable php dependencies
+	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --prefer-dist --no-interaction --no-suggest
+
 latest: clean ## Install latest php dependencies
 	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --ansi --no-suggest --prefer-dist --prefer-stable
 
