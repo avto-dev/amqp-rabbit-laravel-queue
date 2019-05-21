@@ -16,9 +16,11 @@ This package allows to use RabbitMQ queues for queued Laravel jobs.
 
 > Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./docker/app/Dockerfile).
 
-> **Important:** Before using this package you should install [`amqp-rabbit-manager`][link_amqp_rabbit_manager] into your application. Installation steps can be found [here][link_amqp_rabbit_manager_install].
+> **Important:** Make sure `opcache` is disabled for CLI in your `php.ini` file (`opcache.enable_cli = "Off"`).
 
 ## Install
+
+> **Important:** Before using this package you should install [`amqp-rabbit-manager`][link_amqp_rabbit_manager] into your application. Installation steps can be found [here][link_amqp_rabbit_manager_install].
 
 Require this package with composer using the following command:
 
@@ -55,11 +57,98 @@ Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to man
 
 After that you should modify your configuration files:
 
-@todo: Write more info here
+### `./config/rabbitmq.php`
+
+```php
+<?php
+
+use Interop\Amqp\AmqpQueue;
+
+return [
+
+    // ...
+
+    'queues' => [
+    
+        // ...
+    
+        'jobs' => [
+            'name'         => 'jobs',
+            'flags'        => AmqpQueue::FLAG_DURABLE, // Durable queues remain active when a server restarts
+            'arguments'    => [
+                'x-max-priority' => 255, // @link <https://www.rabbitmq.com/priority.html>
+            ],
+            'consumer_tag' => null,
+        ],
+        
+        'failed' => [
+            'name'         => 'failed',
+            'flags'        => AmqpQueue::FLAG_DURABLE, // Durable queues remain active when a server restarts
+            'arguments'    => [
+                'x-message-ttl' => 604800000, // 7 days (60×60×24×7×1000), @link <https://www.rabbitmq.com/ttl.html>
+                'x-queue-mode'  => 'lazy', // @link <https://www.rabbitmq.com/lazy-queues.html>
+            ],
+            'consumer_tag' => null,
+        ],
+    ],
+
+    // ...
+
+    'setup' => [
+        'rabbit-default' => [
+            'jobs',
+            'failed',
+        ],
+    ],
+];
+```
+
+### `./config/queue.php`
+
+```php
+<?php
+
+use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
+
+return [
+    
+    // ...
+    
+    'default' => env('QUEUE_DRIVER', 'rabbitmq'),
+
+    // ...
+
+    'connections' => [
+        
+        // ...
+        
+        'rabbitmq' => [
+            'driver'     => ServiceProvider::DRIVER_NAME,
+            'connection' => 'testing',
+            'queue_id'   => 'jobs',
+            'timeout'    => 0, // The timeout is in milliseconds
+        ],
+    ],
+
+    // ...
+
+    'failed' => [
+        'connection' => 'testing',
+        'queue_id'   => 'failed',
+    ],
+];
+```
 
 ## Usage
 
-@todo: Write more info here
+You can dispatch your jobs as usual, commands like `queue:work`, `queue:failed`, `queue:retry` and others works fine.
+
+#### Additional features:
+
+- Jobs delaying (plugin `rabbitmq_delayed_message_exchange` for RabbitMQ server is required);
+- Jobs priority (job should implements `PrioritizedJobInterface` interface).
+
+**Be careful with commands `queue:failed` and `queue:retry`**. If during command execution something happens (lost connection, etc) you may loose all failed jobs!
 
 ### Testing
 

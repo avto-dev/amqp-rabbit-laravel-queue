@@ -159,4 +159,26 @@ class QueueWorkerTest extends AbstractFeatureTest
         $this->assertSame($will_throws->getTries() * 2, Sharer::get(QueueJobThatThrowsException::class . '-throws'));
         $this->assertSame(2, Sharer::get(QueueJobThatThrowsException::class . '-failed'));
     }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testOnceParameter(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        $this->dispatcher->dispatch(new SimpleQueueJob);
+        $this->dispatcher->dispatch(new SimpleQueueJob);
+
+        $process_info = $this->startArtisan('queue:work', ['--once']);
+
+        $this->assertFalse($process_info['timed_out']);
+        /** @var CommandOutput $output */
+        $output = $process_info['stdout'];
+
+        $this->assertGreaterThanOrEqual(3, $output->count(), $output->getAsPlaintText());
+        $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
+    }
 }

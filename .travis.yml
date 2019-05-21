@@ -26,7 +26,7 @@ env:
     - DELAYED_MESSAGES_VER=20171201
     - RABBITMQ_VER=3.7.4
     - RABBIT_HOST=127.0.0.1
-    - ARTISAN_PROCESS_TIMEOUT=7
+    - ARTISAN_PROCESS_TIMEOUT=3
     - setup=basic
     - coverage=false
     - laravel=default
