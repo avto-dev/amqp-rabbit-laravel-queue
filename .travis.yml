@@ -70,8 +70,8 @@ before_install:
   # Installing completed
   - cd $TRAVIS_BUILD_DIR
   - composer global require hirak/prestissimo --update-no-dev
+  - echo 'track_errors = "Off"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - if [[ $coverage = 'false' ]]; then phpenv config-rm xdebug.ini || true; fi
-  - php -i
 
 install:
   - if [[ $setup = 'basic'  ]]; then travis_retry composer update --prefer-dist --no-interaction --no-suggest; fi
