@@ -192,7 +192,7 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
      *
      * @return int
      */
-    public function count(?int $sleep = 2000): int
+    public function count(?int $sleep = 3000): int
     {
         if (\is_int($sleep)) {
             \usleep($sleep); // Required for broker (for calling in a loop)
