@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
-use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Illuminate\Contracts\Bus\Dispatcher;
@@ -90,8 +89,8 @@ abstract class AbstractFeatureTest extends AbstractTestCase
     {
         $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', 0.65);
 
-        $standard_output = new Collection;
-        $errors_output   = new Collection;
+        $standard_output = new CommandOutput;
+        $errors_output   = new CommandOutput;
         $timed_out       = false;
 
         $process = new Process(\array_merge([
@@ -101,12 +100,26 @@ abstract class AbstractFeatureTest extends AbstractTestCase
             '--no-ansi',
         ], $arguments), base_path(), null, null, $process_timeout);
 
+        $lineToArray = function (string $line): array {
+            $lines = \preg_split("~(\r|\n)~", $line);
+
+            return \array_filter($lines, function ($line) {
+                $line = \trim($line);
+
+                return ! empty($line) ? $line : null;
+            });
+        };
+
         try {
-            $process->run(function ($type, $line) use ($standard_output, $errors_output): void {
+            $process->run(function ($type, $line) use ($standard_output, $errors_output, $lineToArray): void {
                 if ($type === Process::ERR) {
-                    $errors_output->push($line);
+                    foreach ($lineToArray($line) as $single_line) {
+                        $errors_output->push($single_line);
+                    }
                 } else {
-                    $standard_output->push($line);
+                    foreach ($lineToArray($line) as $single_line) {
+                        $standard_output->push($single_line);
+                    }
                 }
             });
         } catch (ProcessTimedOutException $e) {
@@ -115,29 +128,9 @@ abstract class AbstractFeatureTest extends AbstractTestCase
 
         return [
             'process'   => $process,
-            'stdout'    => $this->normalizeOutputCollection($standard_output),
-            'stderr'    => $this->normalizeOutputCollection($errors_output),
+            'stdout'    => $standard_output,
+            'stderr'    => $errors_output,
             'timed_out' => $timed_out,
         ];
-    }
-
-    /**
-     * @param Collection $collection
-     *
-     * @return Collection
-     */
-    protected function normalizeOutputCollection(Collection $collection): Collection
-    {
-        $as_text = '';
-
-        foreach ($collection->all() as $item) {
-            $as_text .= (string) $item;
-        }
-
-        $result = array_filter(\preg_split("~(\r|\n)~", $as_text), function ($item) {
-            return ! empty($item) ? $item : null;
-        });
-
-        return new Collection($result);
     }
 }

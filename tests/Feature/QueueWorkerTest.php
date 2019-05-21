@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
-use Illuminate\Support\Collection;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
@@ -12,13 +11,6 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 
 class QueueWorkerTest extends AbstractFeatureTest
 {
-    /**
-     * Indicates if the console output should be mocked.
-     *
-     * @var bool
-     */
-    public $mockConsoleOutput = false;
-
     /**
      * @medium
      *
@@ -33,15 +25,14 @@ class QueueWorkerTest extends AbstractFeatureTest
         $process_info = $this->startArtisan('queue:work');
 
         $this->assertTrue($process_info['timed_out']);
-        /** @var Collection $output */
+        /** @var CommandOutput $output */
         $output         = $process_info['stdout'];
-        $output_single  = \implode("\n", $output->all());
         $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
 
         $this->assertEmpty($process_info['stderr']);
-        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output_single);
-        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output[1] ?? '', $output_single);
-        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output[2] ?? '', $output_single);
+        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
+        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
+        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
         $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
     }
 
@@ -60,11 +51,10 @@ class QueueWorkerTest extends AbstractFeatureTest
         $process_info = $this->startArtisan('queue:work');
 
         $this->assertTrue($process_info['timed_out']);
-        /** @var Collection $output */
-        $output        = $process_info['stdout'];
-        $output_single = \implode("\n", $output->all());
+        /** @var CommandOutput $output */
+        $output = $process_info['stdout'];
 
-        $this->assertGreaterThanOrEqual(5, $output->count(), $output_single);
+        $this->assertGreaterThanOrEqual(5, $output->count(), $output->getAsPlaintText());
         $this->assertSame(2, Sharer::get(SimpleQueueJob::class . '-handled'));
     }
 
@@ -88,15 +78,17 @@ class QueueWorkerTest extends AbstractFeatureTest
         $process_info = $this->startArtisan('queue:work');
 
         $this->assertTrue($process_info['timed_out']);
-        /** @var Collection $output */
-        $output        = $process_info['stdout'];
-        $output_single = \implode("\n", $output->all());
+        /** @var CommandOutput $output */
+        $output = $process_info['stdout'];
 
         // Should be processed FIRST
-        $this->assertRegExp('~' . \preg_quote(PrioritizedQueueJob::class, '/') . '$~i', $output[1] ?? '',
-            $output_single);
+        $this->assertRegExp(
+            '~' . \preg_quote(PrioritizedQueueJob::class, '/') . '$~i',
+            $output[1] ?? '',
+            $output->getAsPlaintText()
+        );
 
-        $this->assertGreaterThanOrEqual(9, $output->count(), $output_single);
+        $this->assertGreaterThanOrEqual(9, $output->count(), $output->getAsPlaintText());
         $this->assertSame(3, Sharer::get(SimpleQueueJob::class . '-handled'));
         $this->assertSame(1, Sharer::get(PrioritizedQueueJob::class . '-handled'));
     }
@@ -118,11 +110,10 @@ class QueueWorkerTest extends AbstractFeatureTest
         $process_info = $this->startArtisan('queue:work');
 
         $this->assertTrue($process_info['timed_out']);
-        /** @var Collection $output */
-        $output        = $process_info['stdout'];
-        $output_single = \implode("\n", $output->all());
+        /** @var CommandOutput $output */
+        $output = $process_info['stdout'];
 
-        $this->assertGreaterThanOrEqual(6, $output->count(), $output_single);
+        $this->assertGreaterThanOrEqual(6, $output->count(), $output->getAsPlaintText());
         $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
         $this->assertSame($will_throws->getTries(), Sharer::get(QueueJobThatThrowsException::class . '-throws'));
         $this->assertSame(1, Sharer::get(QueueJobThatThrowsException::class . '-failed'));
@@ -152,15 +143,18 @@ class QueueWorkerTest extends AbstractFeatureTest
         $process_info = $this->startArtisan('queue:retry', ['all']);
 
         $this->assertFalse($process_info['timed_out']);
-        /** @var Collection $output */
-        $output        = $process_info['stdout'];
-        $output_single = \implode("\n", $output->all());
+        /** @var CommandOutput $output */
+        $output = $process_info['stdout'];
 
-        $this->assertRegExp("~^.+failed.+{$failed_job_id}.+pushed\sback.+$~im", $output[0] ?? '', $output_single);
+        $this->assertRegExp(
+            "~^.+failed.+{$failed_job_id}.+pushed\sback.+$~im",
+            $output[0] ?? '',
+            $output->getAsPlaintText()
+        );
 
         $process_info = $this->startArtisan('queue:work');
 
-        $this->assertTrue($process_info['timed_out'], $output_single);
+        $this->assertTrue($process_info['timed_out'], $output->getAsPlaintText());
 
         $this->assertSame($will_throws->getTries() * 2, Sharer::get(QueueJobThatThrowsException::class . '-throws'));
         $this->assertSame(2, Sharer::get(QueueJobThatThrowsException::class . '-failed'));
