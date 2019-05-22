@@ -12,13 +12,17 @@
 [![Downloads count][badge_downloads_count]][link_packagist]
 [![License][badge_license]][link_license]
 
-This package allows to use RabbitMQ queues for queued Laravel jobs.
+This package allows to use RabbitMQ queues for queued Laravel (prioritized) jobs. Fully configurable.
 
-> Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./docker/app/Dockerfile).
+Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./docker/app/Dockerfile).
 
-> **Important:** Before using this package you should install [`amqp-rabbit-manager`][link_amqp_rabbit_manager] into your application. Installation steps can be found [here][link_amqp_rabbit_manager_install].
+For jobs delaying you also should install [`rabbitmq-delayed-message-exchange`][link_rabbitmq_delayed_message_exchange] plugin for RabbitMQ. Delaying is optional feature.
+
+> **Important:** Make sure `opcache` is disabled for CLI in your `php.ini` file (`opcache.enable_cli = "Off"`).
 
 ## Install
+
+> **Important:** Before using this package you should install [`avto-dev/amqp-rabbit-manager`][link_amqp_rabbit_manager] into your application. Installation steps can be found [here][link_amqp_rabbit_manager_install].
 
 Require this package with composer using the following command:
 
@@ -26,18 +30,9 @@ Require this package with composer using the following command:
 $ composer require avto-dev/amqp-rabbit-laravel-queue "^1.0"
 ```
 
-> Installed `composer` is required ([how to install composer][getcomposer]).
+> Installed `composer` is required ([how to install composer][getcomposer]). Also you need to fix the major version of package.
 
-> You need to fix the major version of package.
-
-Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to manually register the service-provider. Otherwise you must add the service provider to the `providers` array in `./config/app.php`:
-
-```php
-'providers' => [
-    // ...
-    AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider::class,
-]
-```
+Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to manually register the service-provider.
 
 > If you wants to disable package service-provider auto discover, just add into your `composer.json` next lines:
 >
@@ -55,11 +50,125 @@ Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to man
 
 After that you should modify your configuration files:
 
-@todo: Write more info here
+### `./config/rabbitmq.php`
+
+```php
+<?php
+
+use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpTopic;
+
+return [
+
+    // ...
+
+    'queues' => [
+    
+        'jobs' => [
+            'name'         => env('JOBS_QUEUE_NAME', 'jobs'),
+            'flags'        => AmqpQueue::FLAG_DURABLE, // Remain queue active when a server restarts
+            'arguments'    => [
+                'x-max-priority' => 255, // @link <https://www.rabbitmq.com/priority.html>
+            ],
+            'consumer_tag' => null,
+        ],
+        
+        'failed' => [
+            'name'         => env('FAILED_JOBS_QUEUE_NAME', 'failed-jobs'),
+            'flags'        => AmqpQueue::FLAG_DURABLE,
+            'arguments'    => [
+                'x-message-ttl' => 604800000, // 7 days, @link <https://www.rabbitmq.com/ttl.html>
+                'x-queue-mode'  => 'lazy', // @link <https://www.rabbitmq.com/lazy-queues.html>
+            ],
+            'consumer_tag' => null,
+        ],
+        
+    ],
+
+    // ...
+
+    'exchanges' => [
+        
+        // RabbitMQ Delayed Message Plugin is required (@link: <https://git.io/fj4SE>)
+        'delayed-jobs' => [
+            'name'      => env('DELAYED_JOBS_EXCHANGE_NAME', 'jobs.delayed'),
+            'type'      => 'x-delayed-message',
+            'flags'     => AmqpTopic::FLAG_DURABLE, // Remain active when a server restarts
+            'arguments' => [
+                'x-delayed-type' => AmqpTopic::TYPE_DIRECT,
+            ],
+        ],
+        
+    ],
+
+    // ...
+
+    'setup' => [
+        'rabbit-default' => [
+            'queues' => [
+                'jobs', 
+                'failed',
+            ],
+            'exchanges' => [
+                'delayed-jobs'
+            ],
+        ],
+    ],
+];
+```
+
+### `./config/queue.php`
+
+```php
+<?php
+
+use AvtoDev\AmqpRabbitLaravelQueue\Connector;
+
+return [
+    
+    // ...
+    
+    'default' => env('QUEUE_DRIVER', 'rabbitmq'),
+
+    // ...
+
+    'connections' => [
+        
+        // ...
+        
+        'rabbitmq' => [
+            'driver'              => Connector::NAME,
+            'connection'          => 'rabbit-default',
+            'queue_id'            => 'jobs',
+            'delayed_exchange_id' => 'delayed-jobs',
+            'timeout'             => 0, // The timeout is in milliseconds
+        ],
+    ],
+
+    // ...
+
+    'failed' => [
+        'connection' => 'rabbit-default',
+        'queue_id'   => 'failed',
+    ],
+];
+```
+
+You can remove `delayed_exchange_id` for disabling delayed jobs feature.
+
+At the end, don't forget to execute command `php ./artisan rabbit:setup`.
 
 ## Usage
 
-@todo: Write more info here
+You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->delay(10)`), commands like `queue:work`, `queue:failed`, `queue:retry` and others works fine.
+
+#### Additional features:
+
+- Jobs delaying (plugin `rabbitmq_delayed_message_exchange` for RabbitMQ server is required);
+- Jobs priority (job should implements `PrioritizedJobInterface` interface);
+- Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation).
+
+**Be careful with commands `queue:failed` and `queue:retry`**. If during command execution something happens (lost connection, etc) you may loose all failed jobs!
 
 ### Testing
 
@@ -114,3 +223,4 @@ This is open-sourced software licensed under the [MIT License][link_license].
 [getcomposer]:https://getcomposer.org/download/
 [link_amqp_rabbit_manager]:https://github.com/avto-dev/amqp-rabbit-manager
 [link_amqp_rabbit_manager_install]:https://github.com/avto-dev/amqp-rabbit-manager/blob/master/README.md#install
+[link_rabbitmq_delayed_message_exchange]:https://github.com/rabbitmq/rabbitmq-delayed-message-exchange

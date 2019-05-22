@@ -2,26 +2,17 @@
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use ReflectionFunction;
+use ReflectionException;
 use Illuminate\Foundation\Application;
-use Illuminate\Contracts\Console\Kernel;
-use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 abstract class AbstractTestCase extends BaseTestCase
 {
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->app->register(ServiceProvider::class);
-    }
-
     /**
      * Creates the application.
      *
@@ -29,17 +20,21 @@ abstract class AbstractTestCase extends BaseTestCase
      */
     public function createApplication(): Application
     {
-        /** @var Application $app */
-        $app = require __DIR__ . '/../vendor/laravel/laravel/bootstrap/app.php';
+        return require __DIR__ . '/bootstrap/app.php';
+    }
 
-        // $app->useStoragePath(...);
-        // $app->loadEnvironmentFrom(...);
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUpTraits(): array
+    {
+        $uses = parent::setUpTraits();
 
-        $app->make(Kernel::class)->bootstrap();
+        if (isset($uses[WithTemporaryRabbitConnectionTrait::class])) {
+            $this->setUpRabbitConnections();
+        }
 
-        $app->register(ServiceProvider::class);
-
-        return $app;
+        return $uses;
     }
 
     /**
@@ -74,5 +69,53 @@ abstract class AbstractTestCase extends BaseTestCase
     protected function config(): ConfigRepository
     {
         return $this->app->make(ConfigRepository::class);
+    }
+
+    /**
+     * Get listeners for abstract event.
+     *
+     * @see https://laravel.com/docs/5.6/events
+     * @see https://laravel.com/docs/5.5/events
+     *
+     * @param mixed|string $event_abstract
+     *
+     * @throws ReflectionException
+     *
+     * @return array
+     */
+    protected function getEventListenersClasses($event_abstract): array
+    {
+        $result = [];
+
+        foreach (\Illuminate\Support\Facades\Event::getListeners($event_abstract) as $listener_closure) {
+            $reflection = new ReflectionFunction($listener_closure);
+            $uses       = $reflection->getStaticVariables();
+
+            if (isset($uses['listener'])) {
+                $result[] = $uses['listener'];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Mock some property for a object.
+     *
+     * @param object $object
+     * @param string $property_name
+     * @param mixed  $value
+     *
+     * @return void
+     */
+    protected function mockProperty($object, string $property_name, $value): void
+    {
+        $reflection = new \ReflectionClass($object);
+
+        $property = $reflection->getProperty($property_name);
+
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+        $property->setAccessible(false);
     }
 }

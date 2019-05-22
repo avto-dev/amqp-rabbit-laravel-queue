@@ -7,7 +7,7 @@ dc_bin := $(shell command -v docker-compose 2> /dev/null)
 SHELL = /bin/sh
 RUN_APP_ARGS = --rm --user "$(shell id -u):$(shell id -g)" app
 
-.PHONY : help latest lowest test test-cover shell
+.PHONY : help install latest lowest test test-cover shell
 .DEFAULT_GOAL : help
 
 # This will output the help for each task. thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -17,6 +17,9 @@ help: ## Show this help
 
 build: ## Build docker images, required for current package environment
 	$(dc_bin) build
+
+install: clean ## Install stable php dependencies
+	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --prefer-dist --no-interaction --no-suggest
 
 latest: clean ## Install latest php dependencies
 	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --ansi --no-suggest --prefer-dist --prefer-stable

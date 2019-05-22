@@ -6,22 +6,30 @@ cache:
     - $HOME/.composer/cache
     - $HOME/rabbitmq-c
     - $HOME/php-amqp
+    - $HOME/delayed-messages
 
 addons:
   apt:
+    sources:
+      - sourceline: deb https://packages.erlang-solutions.com/ubuntu trusty contrib
+        key_url: https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+      - sourceline: deb https://dl.bintray.com/rabbitmq/debian trusty main
+        key_url: https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc
     packages:
+      - esl-erlang=1:20.1
       - cmake
-
-services:
-  - rabbitmq
 
 env:
   global:
     - RABBIT_C_VER=0.9.0
     - PHP_AMQP_VER=1.9.4
+    - DELAYED_MESSAGES_VER=20171201
+    - RABBITMQ_VER=3.7.4
     - RABBIT_HOST=127.0.0.1
+    - ARTISAN_PROCESS_TIMEOUT=3
     - setup=basic
     - coverage=false
+    - laravel=default
 
 sudo: false
 
@@ -31,6 +39,10 @@ branches:
     - /analysis-.*/
 
 before_install:
+  # Install RabbitMQ server
+  - sudo mv /opt/jdk_switcher/jdk_switcher.sh /tmp
+    && sudo apt-get install rabbitmq-server=${RABBITMQ_VER}-1
+    && sudo mv /tmp/jdk_switcher.sh /opt/jdk_switcher/
   # Install rabbit-c
   - if [ ! -d "$HOME/rabbitmq-c/${RABBIT_C_VER}" ]; then
     travis_retry git clone --branch v${RABBIT_C_VER} https://github.com/alanxz/rabbitmq-c.git $HOME/rabbitmq-c/${RABBIT_C_VER};
@@ -42,14 +54,30 @@ before_install:
     fi
   - cd $HOME/php-amqp/${PHP_AMQP_VER} && phpize --clean && phpize && ./configure && make && sudo make install
     && echo 'extension=amqp.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  # Install RabbitMQ "delayed-messages" plugin
+  - ls -la $HOME/delayed-messages || true
+  - ls -la $HOME/delayed-messages/${DELAYED_MESSAGES_VER} || true
+  - if [ ! -d "$HOME/delayed-messages/${DELAYED_MESSAGES_VER}" ]; then
+    mkdir -p $HOME/delayed-messages/${DELAYED_MESSAGES_VER}
+    && export PN=rabbitmq_delayed_message_exchange
+    && travis_retry curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/$PN/$PN-${DELAYED_MESSAGES_VER}-3.7.x.zip
+    -o $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip;
+    fi
+  - sudo unzip $HOME/delayed-messages/${DELAYED_MESSAGES_VER}/plugin.zip -d /usr/lib/rabbitmq/lib/rabbitmq_server-${RABBITMQ_VER}/plugins
+    && sudo rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+    && sudo service rabbitmq-server restart
+    && sudo rabbitmq-plugins list
+  # Installing completed
   - cd $TRAVIS_BUILD_DIR
   - composer global require hirak/prestissimo --update-no-dev
+  - echo 'opcache.enable_cli = "Off"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - if [[ $coverage = 'false' ]]; then phpenv config-rm xdebug.ini || true; fi
 
 install:
   - if [[ $setup = 'basic'  ]]; then travis_retry composer update --prefer-dist --no-interaction --no-suggest; fi
   - if [[ $setup = 'stable' ]]; then travis_retry composer update --prefer-dist --no-interaction --no-suggest --prefer-stable; fi
   - if [[ $setup = 'lowest' ]]; then travis_retry composer update --prefer-dist --no-interaction --no-suggest --prefer-lowest; fi
+  - if [[ $laravel != 'default' ]]; then travis_retry composer require --dev --update-with-dependencies --prefer-dist --no-interaction --no-suggest laravel/laravel "$laravel"; fi
   - composer info | grep -e laravel/laravel -e phpunit/phpunit -e phpstan/phpstan
 
 script:
@@ -61,24 +89,26 @@ after_success:
 matrix:
   include:
     - php: 7.1.3
-#    - php: 7.1.3
-#      env: setup=lowest
-#
-#    - php: 7.2
-#      env: coverage=true
-#    - php: 7.2
-#      env: setup=lowest
-#    - php: 7.2
-#      env: setup=stable
-#
-#    - php: 7.3
-#      env: coverage=true
-#    - php: 7.3
-#      env: setup=lowest
-#    - php: 7.3
-#      env: setup=stable
-#
-#    - php: nightly
-#
-#  allow_failures:
-#    - php: nightly
+    - php: 7.1.3
+      env: setup=lowest
+    - php: 7.1.3
+      env: setup=stable coverage=true
+
+    - php: 7.2
+    - php: 7.2
+      env: setup=lowest
+    - php: 7.2
+      env: laravel=5.7
+    - php: 7.2
+      env: setup=stable coverage=true
+
+    - php: 7.3
+    - php: 7.3
+      env: setup=lowest
+    - php: 7.3
+      env: setup=stable coverage=true
+
+    - php: nightly
+
+  allow_failures:
+    - php: nightly
