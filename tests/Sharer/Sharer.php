@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer;
 
+use Exception;
+use Throwable;
 use Illuminate\Filesystem\Filesystem;
 
 class Sharer
@@ -20,6 +22,16 @@ class Sharer
     /**
      * @param string $key
      *
+     * @return string
+     */
+    protected static function keyToPath(string $key): string
+    {
+        return __DIR__ . '/' . \sha1($key) . '.txt';
+    }
+
+    /**
+     * @param string $key
+     *
      * @return bool
      */
     public static function has(string $key): bool
@@ -31,10 +43,16 @@ class Sharer
      * @param string $key
      *
      * @return mixed
+     *
+     * @throws Exception
      */
     public static function get(string $key)
     {
-        return \unserialize((new Filesystem)->get(static::keyToPath($key), true));
+        try {
+            return \unserialize((new Filesystem)->get(static::keyToPath($key), true));
+        } catch (Throwable $e) {
+            throw new Exception("Key [{$key}] does not exists", $e->getCode(), $e);
+        }
     }
 
     /**
@@ -49,15 +67,5 @@ class Sharer
                 $fs->delete($file->getRealPath());
             }
         }
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return string
-     */
-    protected static function keyToPath(string $key): string
-    {
-        return __DIR__ . '/' . \sha1($key) . '.txt';
     }
 }

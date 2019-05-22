@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use Enqueue\AmqpExt\AmqpProducer as Producer;
+use Interop\Amqp\AmqpTopic;
 use Mockery as m;
 use Illuminate\Support\Str;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
@@ -38,39 +40,6 @@ class JobTest extends AbstractTestCase
     protected $consumer;
 
     /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Send message to the queue
-        $this
-            ->temp_rabbit_connection
-            ->createProducer()
-            ->send(
-                $this->temp_rabbit_queue,
-                $this->temp_rabbit_connection->createMessage('{"foo":"bar"}')
-            );
-
-        // Create consumer
-        $this->consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
-
-        // And get the message back
-        $this->message = $this->consumer->receive(200);
-
-        $this->job = new Job(
-            $this->app,
-            $this->temp_rabbit_connection,
-            $this->consumer,
-            $this->message,
-            Str::random()
-        );
-
-        $this->assertInstanceOf(JobContract::class, $this->job);
-    }
-
-    /**
      * @small
      *
      * @return void
@@ -102,10 +71,6 @@ class JobTest extends AbstractTestCase
     public function testReleaseWithoutDelay(): void
     {
         $producer = m::mock($this->temp_rabbit_connection->createProducer())
-            ->expects('setDeliveryDelay')
-            ->never()// !!!
-            ->andReturnSelf()
-            ->getMock()
             ->expects('send')
             ->once()
             ->withArgs(function (Queue $queue, Message $message): bool {
@@ -153,11 +118,6 @@ class JobTest extends AbstractTestCase
         $delay = \random_int(1, 10);
 
         $producer = m::mock($this->temp_rabbit_connection->createProducer())
-            ->expects('setDeliveryDelay')
-            ->once()// !!!
-            ->with($delay * 1000)
-            ->andReturnSelf()
-            ->getMock()
             ->expects('send')
             ->once()
             ->withArgs(function (Queue $queue, Message $message): bool {
@@ -200,6 +160,38 @@ class JobTest extends AbstractTestCase
      *
      * @return void
      */
+    public function testReleaseWithDelayAndExchange(): void
+    {
+        $delay = \random_int(1, 10);
+
+        $this->job = m::mock(Job::class, [
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->consumer,
+            $this->message,
+            Str::random(),
+            $this->temp_rabbit_exchange
+        ])
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial()
+            ->expects('sendMessage')
+            ->once()
+            ->withArgs(function (Producer $producer, AmqpTopic $exchange, Message $message) use (&$delay): bool {
+                $this->assertEquals($delay * 1000, $message->getProperty('x-delay'));
+
+                return true;
+            })
+            ->andReturnNull()
+            ->getMock();
+
+        $this->job->release($delay);
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
     public function testGetters(): void
     {
         // Get Queue
@@ -233,5 +225,38 @@ class JobTest extends AbstractTestCase
         // Get Message
 
         $this->assertSame($this->message, $this->job->getMessage());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Send message to the queue
+        $this
+            ->temp_rabbit_connection
+            ->createProducer()
+            ->send(
+                $this->temp_rabbit_queue,
+                $this->temp_rabbit_connection->createMessage('{"foo":"bar"}')
+            );
+
+        // Create consumer
+        $this->consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
+
+        // And get the message back
+        $this->message = $this->consumer->receive(200);
+
+        $this->job = new Job(
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->consumer,
+            $this->message,
+            Str::random()
+        );
+
+        $this->assertInstanceOf(JobContract::class, $this->job);
     }
 }

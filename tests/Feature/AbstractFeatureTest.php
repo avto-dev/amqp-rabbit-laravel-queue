@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Illuminate\Contracts\Bus\Dispatcher;
@@ -29,11 +30,18 @@ abstract class AbstractFeatureTest extends AbstractTestCase
     protected $dispatcher;
 
     /**
+     * @var int Test starting timestamp
+     */
+    protected $now;
+
+    /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
         parent::setUp();
+
+        Sharer::clear();
 
         $this->fs = new Filesystem;
 
@@ -45,7 +53,7 @@ abstract class AbstractFeatureTest extends AbstractTestCase
         }
 
         $this->fs->copyDirectory(
-            __DIR__ . '/config',
+            __DIR__ . '/../config',
             __DIR__ . '/../../vendor/laravel/laravel/config'
         );
 
@@ -59,6 +67,8 @@ abstract class AbstractFeatureTest extends AbstractTestCase
         ]);
 
         $this->failer = $this->app->make('queue.failer');
+
+        $this->now = (new \DateTime)->getTimestamp();
     }
 
     /**
@@ -72,6 +82,8 @@ abstract class AbstractFeatureTest extends AbstractTestCase
             __DIR__ . '/../../vendor/laravel/laravel/config.orig',
             __DIR__ . '/../../vendor/laravel/laravel/config'
         );
+
+        Sharer::clear();
 
         parent::tearDown();
     }
@@ -87,7 +99,7 @@ abstract class AbstractFeatureTest extends AbstractTestCase
                                     array $arguments = [],
                                     ?float $process_timeout = null): array
     {
-        $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', 0.65);
+        $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', $process_timeout ?? 0.65);
 
         $standard_output = new CommandOutput;
         $errors_output   = new CommandOutput;
@@ -106,7 +118,9 @@ abstract class AbstractFeatureTest extends AbstractTestCase
             return \array_filter($lines, function ($line) {
                 $line = \trim($line);
 
-                return ! empty($line) ? $line : null;
+                return ! empty($line)
+                    ? $line
+                    : null;
             });
         };
 

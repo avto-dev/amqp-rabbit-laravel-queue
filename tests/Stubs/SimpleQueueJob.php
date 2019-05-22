@@ -45,6 +45,8 @@ class SimpleQueueJob implements ShouldQueue
             Sharer::put($key, 1);
         }
 
+        Sharer::put(static::class . '-when', (new \DateTime)->getTimestamp());
+
         $events->dispatch(static::class . '-handled');
     }
 

@@ -25,20 +25,6 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
     protected $provider;
 
     /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->provider = new RabbitQueueFailedJobProvider(
-            $this->temp_rabbit_connection,
-            $this->temp_rabbit_queue,
-            $this->app->make(ExceptionHandler::class)
-        );
-    }
-
-    /**
      * @small
      *
      * @return void
@@ -67,6 +53,16 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertSame('jobs-failer', $message->getHeader('app_id'));
         $this->assertSame('application/json', $message->getHeader('content_type'));
         $this->assertSame($id, (int) $message->getMessageId());
+    }
+
+    /**
+     * @param int $timeout
+     *
+     * @return Message
+     */
+    protected function getLastMessage(int $timeout = 1500): Message
+    {
+        return $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue)->receive($timeout);
     }
 
     /**
@@ -240,12 +236,16 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
     }
 
     /**
-     * @param int $timeout
-     *
-     * @return Message
+     * {@inheritdoc}
      */
-    protected function getLastMessage(int $timeout = 1500): Message
+    protected function setUp(): void
     {
-        return $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue)->receive($timeout);
+        parent::setUp();
+
+        $this->provider = new RabbitQueueFailedJobProvider(
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            $this->app->make(ExceptionHandler::class)
+        );
     }
 }

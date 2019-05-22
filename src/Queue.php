@@ -7,19 +7,19 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 use DateTime;
 use RuntimeException;
 use Illuminate\Support\Str;
+use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\AmqpQueue;
 use Illuminate\Container\Container;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
-use Enqueue\AmqpTools\RabbitMqDelayPluginDelayStrategy;
-use Interop\Queue\Exception\DeliveryDelayNotSupportedException;
 
 class Queue extends \Illuminate\Queue\Queue implements QueueContract
 {
+    use InteractsWithJobsTrait;
+
     /**
      * @var AmqpQueue
      */
@@ -36,23 +36,36 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     protected $connection;
 
     /**
-     * Queue constructor.
-     *
-     * @param Container $container
-     * @param Context   $connection
-     * @param AmqpQueue $queue
-     * @param int       $timeout    Timeout in milliseconds
+     * @var AmqpTopic|null
      */
-    public function __construct(Container $container, Context $connection, AmqpQueue $queue, int $timeout = 0)
+    protected $delayed_exchange;
+
+    /**
+     * Create a new Queue instance.
+     *
+     * @param Container      $container
+     * @param Context        $connection
+     * @param AmqpQueue      $queue
+     * @param int            $timeout
+     * @param AmqpTopic|null $delayed_exchange
+     */
+    public function __construct(Container $container,
+                                Context $connection,
+                                AmqpQueue $queue,
+                                int $timeout = 0,
+                                ?AmqpTopic $delayed_exchange = null)
     {
-        $this->container  = $container;
-        $this->connection = $connection;
-        $this->queue      = $queue;
-        $this->timeout    = \max(0, $timeout);
+        $this->container        = $container;
+        $this->connection       = $connection;
+        $this->queue            = $queue;
+        $this->timeout          = \max(0, $timeout);
+        $this->delayed_exchange = $delayed_exchange;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * Delayed messages count will be NOT included!
      *
      * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
      */
@@ -77,12 +90,12 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
      */
     public function push($job, $data = '', $queue = null, ?int $priority = null): void
     {
-        $options = [];
+        $options = [
+            'priority' => $priority,
+        ];
 
         if (\is_object($job) && $job instanceof PrioritizedJobInterface) {
             $options['priority'] = $job->priority();
-        } elseif (\is_int($priority)) {
-            $options['priority'] = $priority;
         }
 
         $this->pushRaw($this->createPayloadCompatible($job, $queue, $data), $queue, $options);
@@ -90,9 +103,6 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
 
     /**
      * {@inheritdoc}
-     *
-     * `$options['delay']` can be passed as integer or float value. In this case, values will be interpreted as a
-     * SECONDS (1 = 1 sec, 0.5 = 500 milliseconds, 10 = 10 seconds, 0.1 = 100 milliseconds)
      */
     public function pushRaw($payload, $queue = null, array $options = []): void
     {
@@ -101,41 +111,41 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
             'content_type' => 'application/json',
         ]);
 
-        $producer = $this->connection->createProducer();
+        $producer  = $this->connection->createProducer();
+        $priority  = ($options['priority'] ?? null);
+        $delay     = ($options['delay'] ?? null);
+        $recipient = $this->queue; // Default way
 
-        if (isset($options['priority']) && \is_int($priority = $options['priority'])) {
+        $message->setDeliveryMode(Message::DELIVERY_MODE_PERSISTENT);
+        $message->setMessageId($this->generateMessageId('job-', $payload, \microtime(true), Str::random()));
+
+        if (\is_int($priority)) {
             $message->setPriority($this->normalizePriorityValue($priority));
         }
 
-        if (isset($options['delay']) && \is_numeric($delay = $options['delay'])) {
-            try {
-                $producer->setDelayStrategy(new RabbitMqDelayPluginDelayStrategy);
-                $producer->setDeliveryDelay((int) (\is_float($delay)
-                    ? $delay * 1000
-                    : $this->secondsUntil($delay) * 1000));
-                // @codeCoverageIgnoreStart
-            } catch (DeliveryDelayNotSupportedException $e) {
-                $this->container->make(ExceptionHandler::class)->report($e);
-            }
-            // @codeCoverageIgnoreEnd
+        // If delayed exchange are defined and message should be sent with delay - change the recipient
+        if ($delay !== null && $this->delayed_exchange instanceof AmqpTopic) {
+            $message->setProperty('x-delay', $this->delayToMilliseconds($delay));
+            $message->setRoutingKey($this->queue->getQueueName());
+
+            $recipient = $this->delayed_exchange;
         }
 
-        $message->setDeliveryMode(Message::DELIVERY_MODE_PERSISTENT);
-        $message->setMessageId(self::generateMessageId($payload, \microtime(true), Str::random()));
-
-        $this->sendMessage($producer, $this->queue, $message);
+        $this->sendMessage($producer, $recipient, $message);
     }
 
     /**
-     * Generate message ID.
+     * Send message using AMQP producer.
      *
-     * @param mixed ...$arguments
+     * @param Producer            $producer
+     * @param AmqpTopic|AmqpQueue $destination
+     * @param Message             $message
      *
-     * @return string
+     * @return void
      */
-    public static function generateMessageId(...$arguments): string
+    protected function sendMessage(Producer $producer, $destination, Message $message): void
     {
-        return 'job-' . Str::substr(\sha1(\serialize($arguments)), 0, 8);
+        $producer->send($destination, $message);
     }
 
     /**
@@ -145,10 +155,10 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
      * @param string|mixed $queue
      * @param mixed        $data
      *
-     * @throws \Illuminate\Queue\InvalidPayloadException
-     * @throws RuntimeException
-     *
      * @return string
+     *
+     * @throws RuntimeException
+     * @throws \Illuminate\Queue\InvalidPayloadException
      *
      * @see \Illuminate\Queue\Queue::createPayload()
      */
@@ -191,13 +201,12 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public function later($delay, $job, $data = '', $queue = null, ?int $priority = null)
     {
         $options = [
-            'delay' => $delay,
+            'delay'    => $delay,
+            'priority' => $priority,
         ];
 
         if (\is_object($job) && $job instanceof PrioritizedJobInterface) {
             $options['priority'] = $job->priority();
-        } elseif (\is_int($priority)) {
-            $options['priority'] = $priority;
         }
 
         $this->pushRaw($this->createPayloadCompatible($job, $queue, $data), $queue, $options);
@@ -244,7 +253,8 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
             $this->connection,
             $consumer,
             $message,
-            $this->connectionName
+            $this->connectionName,
+            $this->delayed_exchange
         );
     }
 
@@ -266,37 +276,5 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public function getRabbitQueue(): AmqpQueue
     {
         return $this->queue;
-    }
-
-    /**
-     * Normalize priority value (to 0..255).
-     *
-     * @param int $value
-     *
-     * @return int
-     */
-    protected function normalizePriorityValue(int $value): int
-    {
-        // negative values to zero
-        $value = \max(0, $value);
-
-        // limit max value to 255
-        return $value >= 255
-            ? 255
-            : $value;
-    }
-
-    /**
-     * Send message using AMQP producer.
-     *
-     * @param Producer  $producer
-     * @param AmqpQueue $queue
-     * @param Message   $message
-     *
-     * @return void
-     */
-    protected function sendMessage(Producer $producer, AmqpQueue $queue, Message $message): void
-    {
-        $producer->send($queue, $message);
     }
 }

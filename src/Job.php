@@ -4,18 +4,28 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
+use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpTopic;
 use Illuminate\Container\Container;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
+use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Queue\Job as JobContract;
-use Enqueue\AmqpTools\RabbitMqDelayPluginDelayStrategy;
-use Interop\Queue\Exception\DeliveryDelayNotSupportedException;
 
 class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
 {
-    protected const ATTEMPTS_PROPERTY = 'job-attempts';
+    use InteractsWithJobsTrait;
+
+    /**
+     * Attempts property name.
+     */
+    public const ATTEMPTS_PROPERTY = 'job-attempts';
+
+    /**
+     * @var AmqpTopic|null
+     */
+    protected $delayed_exchange;
 
     /**
      * @var Context
@@ -35,23 +45,26 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     /**
      * Job constructor.
      *
-     * @param Container $container
-     * @param Context   $connection
-     * @param Consumer  $consumer
-     * @param Message   $message
-     * @param string    $connection_name
+     * @param Container      $container
+     * @param Context        $connection
+     * @param Consumer       $consumer
+     * @param Message        $message
+     * @param string         $connection_name
+     * @param AmqpTopic|null $delayed_exchange
      */
     public function __construct(Container $container,
                                 Context $connection,
                                 Consumer $consumer,
                                 Message $message,
-                                $connection_name)
+                                $connection_name,
+                                ?AmqpTopic $delayed_exchange = null)
     {
-        $this->container      = $container;
-        $this->connection     = $connection;
-        $this->consumer       = $consumer;
-        $this->message        = $message;
-        $this->connectionName = $connection_name;
+        $this->container        = $container;
+        $this->connection       = $connection;
+        $this->consumer         = $consumer;
+        $this->message          = $message;
+        $this->connectionName   = $connection_name;
+        $this->delayed_exchange = $delayed_exchange;
     }
 
     /**
@@ -74,31 +87,30 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
 
     /**
      * {@inheritdoc}
+     *
+     * @param int|float $delay
      */
     public function release($delay = 0): void
     {
         parent::release($delay);
 
+        $this->consumer->acknowledge($this->message);
+
         $requeue_message = clone $this->message;
+        $producer        = $this->connection->createProducer();
+        $recipient       = $this->consumer->getQueue(); // Default way
 
         $requeue_message->setProperty(self::ATTEMPTS_PROPERTY, $this->attempts() + 1);
 
-        $producer = $this->connection->createProducer();
+        // If delayed exchange are defined and message should be sent with delay - change the recipient
+        if ($delay > 0 && $this->delayed_exchange instanceof AmqpTopic) {
+            $requeue_message->setProperty('x-delay', $this->delayToMilliseconds($delay));
+            $requeue_message->setRoutingKey($this->consumer->getQueue()->getQueueName());
 
-        if ($delay > 0) {
-            try {
-                $producer->setDelayStrategy(new RabbitMqDelayPluginDelayStrategy);
-                $producer->setDeliveryDelay($this->secondsUntil($delay) * 1000);
-                // @codeCoverageIgnoreStart
-            } catch (DeliveryDelayNotSupportedException $e) {
-                $this->container->make(ExceptionHandler::class)->report($e);
-            }
-            // @codeCoverageIgnoreEnd
+            $recipient = $this->delayed_exchange;
         }
 
-        $this->consumer->acknowledge($this->message);
-
-        $producer->send($this->consumer->getQueue(), $requeue_message);
+        $this->sendMessage($producer, $recipient, $requeue_message);
     }
 
     /**
@@ -107,6 +119,20 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     public function attempts(): int
     {
         return (int) $this->message->getProperty(self::ATTEMPTS_PROPERTY, 1);
+    }
+
+    /**
+     * Send message using AMQP producer.
+     *
+     * @param Producer            $producer
+     * @param AmqpTopic|AmqpQueue $destination
+     * @param Message             $message
+     *
+     * @return void
+     */
+    protected function sendMessage(Producer $producer, $destination, Message $message): void
+    {
+        $producer->send($destination, $message);
     }
 
     /**

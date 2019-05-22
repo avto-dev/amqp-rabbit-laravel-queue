@@ -6,9 +6,13 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 
+/**
+ * @group feature
+ */
 class QueueWorkerTest extends AbstractFeatureTest
 {
     /**
@@ -180,5 +184,87 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $this->assertGreaterThanOrEqual(3, $output->count(), $output->getAsPlaintText());
         $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testDelayedJob(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        $this->dispatcher->dispatch((new SimpleQueueJob)->delay(999999)); // Should be grater then timeout
+
+        $process_info = $this->startArtisan('queue:work');
+        $this->assertTrue($process_info['timed_out']);
+
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testDelayedJobWithRegular(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        $this->dispatcher->dispatch(new SimpleQueueJob);
+        $this->dispatcher->dispatch((new SimpleQueueJob)->delay(999999)); // Should be grater then timeout
+        $this->dispatcher->dispatch(new SimpleQueueJob);
+
+        $process_info = $this->startArtisan('queue:work');
+        $this->assertTrue($process_info['timed_out']);
+
+        $this->assertSame(2, Sharer::get(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testDelayedJobProcessing(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        $this->dispatcher->dispatch((new SimpleQueueJob)->delay($delay = 2)); // Should be LESS then timeout
+
+        $process_info = $this->startArtisan('queue:work', [], 3.0);
+        $this->assertTrue($process_info['timed_out']);
+
+        $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+
+        $when = Sharer::get(SimpleQueueJob::class . '-when');
+
+        $this->assertEquals($this->now + $delay, $when, 'Jobs processed with wrong delay', 1);
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testFailingJobWithRetryDelay(): void
+    {
+        $this->assertFalse(Sharer::has(QueueJobWithDelay::class . '-handled'));
+
+        $this->dispatcher->dispatch($job = new QueueJobWithDelay);
+
+        $process_info = $this->startArtisan('queue:work', [], 3.0);
+        $this->assertTrue($process_info['timed_out']);
+
+        $this->assertSame(1, Sharer::get(QueueJobWithDelay::class . '-handled'));
+        $this->assertFalse(Sharer::has(QueueJobWithDelay::class . '-failed'));
+
+        $when = Sharer::get(QueueJobWithDelay::class . '-when');
+
+        $this->assertEquals($this->now + $job->delay, $when, 'Jobs processed with wrong delay', 1);
     }
 }

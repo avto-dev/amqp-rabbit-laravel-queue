@@ -14,8 +14,6 @@ use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use Illuminate\Queue\Events\JobProcessing;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
-use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
@@ -50,45 +48,6 @@ class WorkerTest extends AbstractTestCase
      * @var string
      */
     protected $queue_connector_name;
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->worker                = $this->app->make(Worker::class);
-        $this->queue_manager         = $this->app->make(QueueManager::class);
-        $this->queue_connection_name = 'temp-queue-connection-' . Str::random();
-        $this->queue_connector_name  = 'temp-rabbit-connector-' . Str::random();
-
-        $this->config()->set("queue.connections.{$this->queue_connection_name}", [
-            'driver'     => $this->queue_connector_name,
-            'connection' => $this->temp_rabbit_connection_name,
-            'queue_id'   => $this->temp_rabbit_queue_id,
-            'timeout'    => 500, // The timeout is in milliseconds
-        ]);
-
-        $this->queue_manager->addConnector($this->queue_connector_name, function (): IlluminateQueueConnector {
-            return new Connector(
-                $this->app,
-                $this->app->make(ConnectionsFactoryInterface::class),
-                $this->app->make(QueuesFactoryInterface::class)
-            );
-        });
-        $this->config()->offsetUnset('queue.failed');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function tearDown(): void
-    {
-        $this->config()->offsetUnset("queue.connections.{$this->queue_connection_name}");
-
-        parent::tearDown();
-    }
 
     /**
      * @medium
@@ -176,5 +135,40 @@ class WorkerTest extends AbstractTestCase
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, 60, 3, 2));
         \usleep(1500);
         $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->worker                = $this->app->make(Worker::class);
+        $this->queue_manager         = $this->app->make(QueueManager::class);
+        $this->queue_connection_name = 'temp-queue-connection-' . Str::random();
+        $this->queue_connector_name  = 'temp-rabbit-connector-' . Str::random();
+
+        $this->config()->set("queue.connections.{$this->queue_connection_name}", [
+            'driver'     => $this->queue_connector_name,
+            'connection' => $this->temp_rabbit_connection_name,
+            'queue_id'   => $this->temp_rabbit_queue_id,
+            'timeout'    => 500, // The timeout is in milliseconds
+        ]);
+
+        $this->queue_manager->addConnector($this->queue_connector_name, function (): IlluminateQueueConnector {
+            return $this->app->make(Connector::class);
+        });
+        $this->config()->offsetUnset('queue.failed');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function tearDown(): void
+    {
+        $this->config()->offsetUnset("queue.connections.{$this->queue_connection_name}");
+
+        parent::tearDown();
     }
 }

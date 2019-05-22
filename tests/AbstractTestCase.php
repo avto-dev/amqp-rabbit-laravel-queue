@@ -2,36 +2,17 @@
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use ReflectionFunction;
+use ReflectionException;
 use Illuminate\Foundation\Application;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 abstract class AbstractTestCase extends BaseTestCase
 {
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        Sharer::clear();
-
-        parent::setUp();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        Sharer::clear();
-    }
-
     /**
      * Creates the application.
      *
@@ -88,6 +69,34 @@ abstract class AbstractTestCase extends BaseTestCase
     protected function config(): ConfigRepository
     {
         return $this->app->make(ConfigRepository::class);
+    }
+
+    /**
+     * Get listeners for abstract event.
+     *
+     * @see https://laravel.com/docs/5.6/events
+     * @see https://laravel.com/docs/5.5/events
+     *
+     * @param mixed|string $event_abstract
+     *
+     * @throws ReflectionException
+     *
+     * @return array
+     */
+    protected function getEventListenersClasses($event_abstract): array
+    {
+        $result = [];
+
+        foreach (\Illuminate\Support\Facades\Event::getListeners($event_abstract) as $listener_closure) {
+            $reflection = new ReflectionFunction($listener_closure);
+            $uses       = $reflection->getStaticVariables();
+
+            if (isset($uses['listener'])) {
+                $result[] = $uses['listener'];
+            }
+        }
+
+        return $result;
     }
 
     /**

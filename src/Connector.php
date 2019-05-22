@@ -8,19 +8,25 @@ use InvalidArgumentException;
 use Illuminate\Container\Container;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
+use AvtoDev\AmqpRabbitManager\ExchangesFactoryInterface;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 
 class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
 {
     /**
+     * Connector (driver) name.
+     */
+    public const NAME = 'rabbitmq';
+
+    /**
      * @var ConnectionsFactoryInterface
      */
-    protected $rabbit_mq_manager;
+    protected $connections;
 
     /**
      * @var QueuesFactoryInterface
      */
-    protected $queues_factory;
+    protected $queues;
 
     /**
      * @var Container
@@ -28,19 +34,27 @@ class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
     protected $container;
 
     /**
+     * @var ExchangesFactoryInterface
+     */
+    protected $exchanges;
+
+    /**
      * Connector constructor.
      *
      * @param Container                   $container
-     * @param ConnectionsFactoryInterface $rabbit_mq_manager
-     * @param QueuesFactoryInterface      $queues_factory
+     * @param ConnectionsFactoryInterface $connections
+     * @param QueuesFactoryInterface      $queues
+     * @param ExchangesFactoryInterface   $exchanges
      */
     public function __construct(Container $container,
-                                ConnectionsFactoryInterface $rabbit_mq_manager,
-                                QueuesFactoryInterface $queues_factory)
+                                ConnectionsFactoryInterface $connections,
+                                QueuesFactoryInterface $queues,
+                                ExchangesFactoryInterface $exchanges)
     {
-        $this->container         = $container;
-        $this->rabbit_mq_manager = $rabbit_mq_manager;
-        $this->queues_factory    = $queues_factory;
+        $this->container   = $container;
+        $this->connections = $connections;
+        $this->queues      = $queues;
+        $this->exchanges   = $exchanges;
     }
 
     /**
@@ -58,10 +72,14 @@ class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
             throw new InvalidArgumentException('RabbitMQ queue ID was not passed');
         }
 
-        $connection = $this->rabbit_mq_manager->make($config['connection']);
-        $queue      = $this->queues_factory->make($config['queue_id']);
+        $connection = $this->connections->make($config['connection']);
+        $queue      = $this->queues->make($config['queue_id']);
         $timeout    = (int) ($config['timeout'] ?? 0);
 
-        return new Queue($this->container, $connection, $queue, $timeout);
+        $delayed_exchange = isset($config['delayed_exchange_id'])
+            ? $this->exchanges->make($config['delayed_exchange_id'])
+            : null;
+
+        return new Queue($this->container, $connection, $queue, $timeout, $delayed_exchange);
     }
 }

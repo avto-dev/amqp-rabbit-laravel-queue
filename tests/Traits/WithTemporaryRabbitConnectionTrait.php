@@ -7,7 +7,9 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpQueue;
 use Enqueue\AmqpExt\AmqpContext;
+use Interop\Amqp\Impl\AmqpTopic;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use AvtoDev\AmqpRabbitManager\ExchangesFactoryInterface;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 
 /**
@@ -44,6 +46,21 @@ trait WithTemporaryRabbitConnectionTrait
     protected $temp_rabbit_queue;
 
     /**
+     * @var string
+     */
+    protected $temp_rabbit_exchange_id;
+
+    /**
+     * @var string
+     */
+    protected $temp_rabbit_exchange_name;
+
+    /**
+     * @var AmqpTopic
+     */
+    protected $temp_rabbit_exchange;
+
+    /**
      * @return void
      */
     protected function setUpRabbitConnections(): void
@@ -57,10 +74,15 @@ trait WithTemporaryRabbitConnectionTrait
         /** @var QueuesFactoryInterface $queues */
         $queues = $this->app->make(QueuesFactoryInterface::class);
 
+        /** @var ExchangesFactoryInterface $exchanges */
+        $exchanges = $this->app->make(ExchangesFactoryInterface::class);
+
         // Generate random names & IDs
         $this->temp_rabbit_connection_name = 'temp-rabbit-connection-' . Str::random();
         $this->temp_rabbit_queue_id        = 'temp-queue-id-' . Str::random();
         $this->temp_rabbit_queue_name      = 'temp-queue-name-' . Str::random();
+        $this->temp_rabbit_exchange_id     = 'temp-exchange-id-' . Str::random();
+        $this->temp_rabbit_exchange_name   = 'temp-exchange-name-' . Str::random();
 
         // Register connection factory
         $connections->addFactory($this->temp_rabbit_connection_name, [
@@ -83,6 +105,14 @@ trait WithTemporaryRabbitConnectionTrait
             'consumer_tag' => null,
         ]);
 
+        // Register exchange factory
+        $exchanges->addFactory($this->temp_rabbit_exchange_id, [
+            'name'      => $this->temp_rabbit_exchange_name,
+            'type'      => AmqpTopic::TYPE_DIRECT,
+            'flags'     => AmqpTopic::FLAG_DURABLE,
+            'arguments' => [],
+        ]);
+
         if ($disable_rabbitmq_temporary !== true) {
             // Create connection
             $this->temp_rabbit_connection = $connections->make($this->temp_rabbit_connection_name);
@@ -92,13 +122,22 @@ trait WithTemporaryRabbitConnectionTrait
 
             // Create queue on broker
             $this->temp_rabbit_connection->declareQueue($this->temp_rabbit_queue);
+
+            // Create temp queue
+            $this->temp_rabbit_exchange = $exchanges->make($this->temp_rabbit_exchange_id);
+
+            // Create exchange on broker
+            $this->temp_rabbit_connection->declareTopic($this->temp_rabbit_exchange);
         }
 
         // Register destroy callback
-        $this->beforeApplicationDestroyed(function () use ($connections, $queues): void {
+        $this->beforeApplicationDestroyed(function () use ($connections, $queues, $exchanges): void {
             if ($this->temp_rabbit_connection instanceof AmqpContext) {
                 if ($this->temp_rabbit_queue instanceof AmqpQueue) {
                     $this->temp_rabbit_connection->deleteQueue($this->temp_rabbit_queue);
+                }
+                if ($this->temp_rabbit_queue instanceof AmqpTopic) {
+                    $this->temp_rabbit_connection->deleteTopic($this->temp_rabbit_exchange);
                 }
 
                 $this->temp_rabbit_connection->close();
@@ -106,13 +145,17 @@ trait WithTemporaryRabbitConnectionTrait
 
             $connections->removeFactory($this->temp_rabbit_connection_name);
             $queues->removeFactory($this->temp_rabbit_queue_id);
+            $exchanges->removeFactory($this->temp_rabbit_exchange_id);
 
             unset(
                 $this->temp_rabbit_connection_name,
                 $this->temp_rabbit_queue_id,
                 $this->temp_rabbit_queue_name,
                 $this->temp_rabbit_queue,
-                $this->temp_rabbit_connection
+                $this->temp_rabbit_connection,
+                $this->temp_rabbit_exchange_name,
+                $this->temp_rabbit_exchange_id,
+                $this->temp_rabbit_exchange
             );
         });
     }

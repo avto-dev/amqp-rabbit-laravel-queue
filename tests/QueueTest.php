@@ -6,6 +6,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use DateTime;
 use Mockery as m;
+use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpMessage as Message;
 use AvtoDev\AmqpRabbitLaravelQueue\Queue;
@@ -33,23 +34,6 @@ class QueueTest extends AbstractTestCase
      * @var int
      */
     protected $timeout = 100;
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->queue = new Queue(
-            $this->app,
-            $this->temp_rabbit_connection,
-            $this->temp_rabbit_queue,
-            $this->timeout
-        );
-
-        $this->assertInstanceOf(QueueContract::class, $this->queue);
-    }
 
     /**
      * @small
@@ -80,6 +64,21 @@ class QueueTest extends AbstractTestCase
     }
 
     /**
+     * Push one message into the queue.
+     *
+     * @param string $content
+     *
+     * @return void
+     */
+    protected function pushMessage(string $content = '{"foo"}'): void
+    {
+        $this->temp_rabbit_connection->createProducer()->send(
+            $this->temp_rabbit_queue,
+            $this->temp_rabbit_connection->createMessage($content)
+        );
+    }
+
+    /**
      * @small
      *
      * @return void
@@ -98,9 +97,52 @@ class QueueTest extends AbstractTestCase
         $this->assertCommonMessageProperties($message);
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Prioritized Job Object
+    /**
+     * @return Message|null
+     */
+    protected function getQueueMessage(): ?Message
+    {
+        $consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
 
+        $message = $consumer->receive(200);
+
+        if ($message instanceof Message) {
+            $consumer->reject($message);
+
+            return $message;
+        }
+
+        return null;
+    }
+
+    /**
+     * Assert message for a common properties and headers.
+     *
+     * @param Message $message
+     * @param int     $allowed_timestamp_delta
+     */
+    protected function assertCommonMessageProperties(Message $message, int $allowed_timestamp_delta = 500): void
+    {
+        $this->assertRegExp('~job\-[a-zA-Z0-9]{6,}~', $message->getHeader('message_id'));
+
+        $timestamp         = $message->getHeader('timestamp');
+        $current_timestamp = (new DateTime)->getTimestamp();
+
+        $this->assertTrue($timestamp > ($current_timestamp - $allowed_timestamp_delta));
+        $this->assertTrue($timestamp < ($current_timestamp + $allowed_timestamp_delta));
+
+        $this->assertSame('application/json', $message->getHeader('content_type'));
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushWithPrioritizedJobObject(): void
+    {
         $this->queue->push(new PrioritizedQueueJob($priority = \random_int(1, 255)));
 
         $message = $this->getQueueMessage();
@@ -111,9 +153,15 @@ class QueueTest extends AbstractTestCase
         $this->assertCommonMessageProperties($message);
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Passing Priority Value
-
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushWithPassingPriorityValue(): void
+    {
         $this->queue->push(new SimpleQueueJob, null, null, $priority = \random_int(1, 255));
 
         $message = $this->getQueueMessage();
@@ -124,9 +172,15 @@ class QueueTest extends AbstractTestCase
         $this->assertCommonMessageProperties($message);
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With String Job Object
-
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushWithStringJobObject(): void
+    {
         $this->queue->push($job_string = 'foobar', [1, 2]);
 
         $message = $this->getQueueMessage();
@@ -155,9 +209,15 @@ class QueueTest extends AbstractTestCase
         $this->assertCommonMessageProperties($message);
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Passing Priority
-
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushRawWithPassingPriority(): void
+    {
         $this->queue->pushRaw($payload = 'foobar', null, [
             'priority' => $priority = \random_int(1, 255),
         ]);
@@ -169,9 +229,15 @@ class QueueTest extends AbstractTestCase
         $this->assertSame($priority, $message->getPriority());
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Passing Priority Above Normal
-
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushRawWithPassingPriorityAboveNormal(): void
+    {
         $this->queue->pushRaw($payload = 'foobar', null, [
             'priority' => $priority = \random_int(256, 1024),
         ]);
@@ -183,9 +249,15 @@ class QueueTest extends AbstractTestCase
         $this->assertSame(255, $message->getPriority());
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Passing Priority Below Normal
-
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushRawWithPassingPriorityBelowNormal(): void
+    {
         $this->queue->pushRaw($payload = 'foobar', null, [
             'priority' => $priority = -1,
         ]);
@@ -197,18 +269,30 @@ class QueueTest extends AbstractTestCase
         $this->assertSame(0, $message->getPriority());
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // Passing Delay As Integer
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushRawWithPassingDelayAsIntegerWithExchange(): void
+    {
+        $delay = \random_int(100, 10000);
 
-        $delay = \random_int(1, 100);
-
-        $this->queue = m::mock(Queue::class, [$this->app, $this->temp_rabbit_connection, $this->temp_rabbit_queue])
+        $this->queue = m::mock(Queue::class, [
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            0,
+            $this->temp_rabbit_exchange,
+        ])
             ->shouldAllowMockingProtectedMethods()
             ->makePartial()
             ->expects('sendMessage')
             ->once()
-            ->withArgs(function (Producer $producer, AmqpQueue $queue, Message $message) use (&$delay): bool {
-                $this->assertSame($delay * 1000, $producer->getDeliveryDelay());
+            ->withArgs(function (Producer $producer, AmqpTopic $queue, Message $message) use (&$delay): bool {
+                $this->assertEquals($delay * 1000, $message->getProperty('x-delay'));
 
                 return true;
             })
@@ -220,9 +304,44 @@ class QueueTest extends AbstractTestCase
         ]);
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Passing Delay As Float
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushRawWithPassingDelayAsIntegerWithoutExchange(): void
+    {
+        $delay = \random_int(100, 10000);
 
+        $this->queue = m::mock(Queue::class, [$this->app, $this->temp_rabbit_connection, $this->temp_rabbit_queue])
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial()
+            ->expects('sendMessage')
+            ->once()
+            ->withArgs(function (Producer $producer, AmqpQueue $queue, Message $message) use (&$delay): bool {
+                $this->assertNull($producer->getDeliveryDelay());
+
+                return true;
+            })
+            ->andReturnNull()
+            ->getMock();
+
+        $this->queue->pushRaw($payload = 'foobar', null, [
+            'delay' => $delay,
+        ]);
+
+        $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testPushRawWithPassingDelaysFloatWithoutExchange(): void
+    {
         $delay = \M_PI;
 
         $this->queue = m::mock(Queue::class, [$this->app, $this->temp_rabbit_connection, $this->temp_rabbit_queue])
@@ -231,7 +350,7 @@ class QueueTest extends AbstractTestCase
             ->expects('sendMessage')
             ->once()
             ->withArgs(function (Producer $producer, AmqpQueue $queue, Message $message) use (&$delay): bool {
-                $this->assertSame((int) ($delay * 1000), $producer->getDeliveryDelay());
+                $this->assertNull($producer->getDeliveryDelay());
 
                 return true;
             })
@@ -248,7 +367,40 @@ class QueueTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testLater(): void
+    public function testPushRawWithPassingDelaysFloat(): void
+    {
+        $delay = \M_PI;
+
+        $this->queue = m::mock(Queue::class, [
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            0,
+            $this->temp_rabbit_exchange,
+        ])
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial()
+            ->expects('sendMessage')
+            ->once()
+            ->withArgs(function (Producer $producer, AmqpTopic $queue, Message $message) use (&$delay): bool {
+                $this->assertSame((int) ($delay * 1000), $message->getProperty('x-delay'));
+
+                return true;
+            })
+            ->andReturnNull()
+            ->getMock();
+
+        $this->queue->pushRaw($payload = 'foobar', null, [
+            'delay' => $delay,
+        ]);
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testLaterWithoutExchange(): void
     {
         // Passing Delay As Integer
 
@@ -264,7 +416,7 @@ class QueueTest extends AbstractTestCase
                 &$delay,
                 &$priority
             ): bool {
-                $this->assertSame($delay * 1000, $producer->getDeliveryDelay());
+                $this->assertNull($producer->getDeliveryDelay());
                 $this->assertSame($priority, $message->getPriority());
 
                 return true;
@@ -275,9 +427,55 @@ class QueueTest extends AbstractTestCase
         $this->queue->later($delay, new SimpleQueueJob, null, null, $priority);
 
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
 
-        // With Passing Delay As Float
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testLater(): void
+    {
+        // Passing Delay As Integer
 
+        $delay    = \random_int(1, 100);
+        $priority = \random_int(1, 255);
+
+        $this->queue = m::mock(Queue::class, [
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            0,
+            $this->temp_rabbit_exchange,
+        ])
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial()
+            ->expects('sendMessage')
+            ->once()
+            ->withArgs(function (Producer $producer, AmqpTopic $queue, Message $message) use (
+                &$delay,
+                &$priority
+            ): bool {
+                $this->assertEquals($delay * 1000, $message->getProperty('x-delay'));
+                $this->assertSame($priority, $message->getPriority());
+
+                return true;
+            })
+            ->andReturnNull()
+            ->getMock();
+
+        $this->queue->later($delay, new SimpleQueueJob, null, null, $priority);
+
+        $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testLaterWithPassingDelayAsFloatWithoutExchange(): void
+    {
         $delay    = \M_PI;
         $priority = \random_int(1, 255);
 
@@ -290,13 +488,53 @@ class QueueTest extends AbstractTestCase
                 &$delay,
                 &$priority
             ): bool {
-                $this->assertSame((int) ($delay * 1000), $producer->getDeliveryDelay());
+                $this->assertNull($producer->getDeliveryDelay());
                 $this->assertSame($priority, $message->getPriority());
 
                 return true;
             })
             ->andReturnNull()
             ->getMock();
+
+        // FLOAT values should be SKIPPED
+
+        $this->queue->later($delay, new PrioritizedQueueJob($priority));
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testLaterWithPassingDelayAsFloat(): void
+    {
+        $delay    = \M_PI;
+        $priority = \random_int(1, 255);
+
+        $this->queue = m::mock(Queue::class, [
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->temp_rabbit_queue,
+            0,
+            $this->temp_rabbit_exchange,
+        ])
+            ->shouldAllowMockingProtectedMethods()
+            ->makePartial()
+            ->expects('sendMessage')
+            ->once()
+            ->withArgs(function (Producer $producer, AmqpTopic $queue, Message $message) use (
+                &$delay,
+                &$priority
+            ): bool {
+                $this->assertEquals((int) ($delay * 1000), $message->getProperty('x-delay'));
+                $this->assertSame($priority, $message->getPriority());
+
+                return true;
+            })
+            ->andReturnNull()
+            ->getMock();
+
+        // FLOAT values should be SKIPPED
 
         $this->queue->later($delay, new PrioritizedQueueJob($priority));
     }
@@ -345,59 +583,22 @@ class QueueTest extends AbstractTestCase
         $this->assertSame($this->temp_rabbit_connection, $this->queue->getRabbitConnection());
         $this->assertSame($this->temp_rabbit_queue, $this->queue->getRabbitQueue());
         $this->assertSame($this->timeout, $this->queue->getTimeout());
-
-        $this->assertRegExp('~job\-[a-zA-Z0-9]{6,}~', $this->queue::generateMessageId('foo', 123));
     }
 
     /**
-     * Push one message into the queue.
-     *
-     * @param string $content
-     *
-     * @return void
+     * {@inheritdoc}
      */
-    protected function pushMessage(string $content = '{"foo"}'): void
+    protected function setUp(): void
     {
-        $this->temp_rabbit_connection->createProducer()->send(
+        parent::setUp();
+
+        $this->queue = new Queue(
+            $this->app,
+            $this->temp_rabbit_connection,
             $this->temp_rabbit_queue,
-            $this->temp_rabbit_connection->createMessage($content)
+            $this->timeout
         );
-    }
 
-    /**
-     * @return Message|null
-     */
-    protected function getQueueMessage(): ?Message
-    {
-        $consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
-
-        $message = $consumer->receive(200);
-
-        if ($message instanceof Message) {
-            $consumer->reject($message);
-
-            return $message;
-        }
-
-        return null;
-    }
-
-    /**
-     * Assert message for a common properties and headers.
-     *
-     * @param Message $message
-     * @param int     $allowed_timestamp_delta
-     */
-    protected function assertCommonMessageProperties(Message $message, int $allowed_timestamp_delta = 500): void
-    {
-        $this->assertRegExp('~job\-[a-zA-Z0-9]{6,}~', $message->getHeader('message_id'));
-
-        $timestamp         = $message->getHeader('timestamp');
-        $current_timestamp = (new DateTime)->getTimestamp();
-
-        $this->assertTrue($timestamp > ($current_timestamp - $allowed_timestamp_delta));
-        $this->assertTrue($timestamp < ($current_timestamp + $allowed_timestamp_delta));
-
-        $this->assertSame('application/json', $message->getHeader('content_type'));
+        $this->assertInstanceOf(QueueContract::class, $this->queue);
     }
 }

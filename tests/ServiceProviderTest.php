@@ -7,10 +7,13 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider;
 use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind;
 use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
@@ -26,29 +29,33 @@ class ServiceProviderTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testConstants(): void
-    {
-        $this->assertSame('rabbitmq', ServiceProvider::DRIVER_NAME);
-    }
-
-    /**
-     * @small
-     *
-     * @return void
-     */
-    public function testOverrideMakeJobCommand(): void
-    {
-        $this->assertInstanceOf(JobMakeCommand::class, $this->app->make('command.job.make'));
-    }
-
-    /**
-     * @small
-     *
-     * @return void
-     */
     public function testOverrideQueueWorkerCommand(): void
     {
         $this->assertInstanceOf(WorkCommand::class, $this->app->make('command.queue.work'));
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testQueueDriverRegistration(): void
+    {
+        $this->assertArrayHasKey(
+            Connector::NAME,
+            $this->getObjectAttribute($this->app->make(QueueManager::class), 'connectors')
+        );
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testListenersBooting(): void
+    {
+        $this->assertContains(CreateExchangeBind::class, $this->getEventListenersClasses(ExchangeCreated::class));
+        $this->assertContains(RemoveExchangeBind::class, $this->getEventListenersClasses(ExchangeDeleting::class));
     }
 
     /**
@@ -69,12 +76,27 @@ class ServiceProviderTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testFailbackFailedJobService(): void
+    public function testFallbackFailedJobService(): void
     {
         $this->config()->offsetUnset('queue.failed.connection');
         $this->config()->offsetUnset('queue.failed.queue_id');
 
         $this->assertInstanceOf(DatabaseFailedJobProvider::class, $this->app->make('queue.failer'));
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testQueueConnectorExists(): void
+    {
+        /** @var QueueManager $queue */
+        $queue = $this->app->make(QueueManager::class);
+
+        $connector = $this->getObjectAttribute($queue, 'connectors')[Connector::NAME];
+
+        $this->assertInstanceOf(Connector::class, $connector());
     }
 
     /**
@@ -92,13 +114,8 @@ class ServiceProviderTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testQueueConnectorExists(): void
+    public function testOverrideMakeJobCommand(): void
     {
-        /** @var QueueManager $queue */
-        $queue = $this->app->make(QueueManager::class);
-
-        $connector = $this->getObjectAttribute($queue, 'connectors')[ServiceProvider::DRIVER_NAME];
-
-        $this->assertInstanceOf(Connector::class, $connector());
+        $this->assertInstanceOf(JobMakeCommand::class, $this->app->make('command.job.make'));
     }
 }
