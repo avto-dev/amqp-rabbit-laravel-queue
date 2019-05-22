@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use Enqueue\AmqpExt\AmqpProducer as Producer;
-use Interop\Amqp\AmqpTopic;
 use Mockery as m;
 use Illuminate\Support\Str;
+use Interop\Amqp\AmqpTopic;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
 use Interop\Amqp\AmqpMessage as Message;
 use Interop\Amqp\Impl\AmqpQueue as Queue;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
+use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Job as JobContract;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
@@ -38,6 +38,39 @@ class JobTest extends AbstractTestCase
      * @var Consumer
      */
     protected $consumer;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Send message to the queue
+        $this
+            ->temp_rabbit_connection
+            ->createProducer()
+            ->send(
+                $this->temp_rabbit_queue,
+                $this->temp_rabbit_connection->createMessage('{"foo":"bar"}')
+            );
+
+        // Create consumer
+        $this->consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
+
+        // And get the message back
+        $this->message = $this->consumer->receive(200);
+
+        $this->job = new Job(
+            $this->app,
+            $this->temp_rabbit_connection,
+            $this->consumer,
+            $this->message,
+            Str::random()
+        );
+
+        $this->assertInstanceOf(JobContract::class, $this->job);
+    }
 
     /**
      * @small
@@ -170,7 +203,7 @@ class JobTest extends AbstractTestCase
             $this->consumer,
             $this->message,
             Str::random(),
-            $this->temp_rabbit_exchange
+            $this->temp_rabbit_exchange,
         ])
             ->shouldAllowMockingProtectedMethods()
             ->makePartial()
@@ -225,38 +258,5 @@ class JobTest extends AbstractTestCase
         // Get Message
 
         $this->assertSame($this->message, $this->job->getMessage());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Send message to the queue
-        $this
-            ->temp_rabbit_connection
-            ->createProducer()
-            ->send(
-                $this->temp_rabbit_queue,
-                $this->temp_rabbit_connection->createMessage('{"foo":"bar"}')
-            );
-
-        // Create consumer
-        $this->consumer = $this->temp_rabbit_connection->createConsumer($this->temp_rabbit_queue);
-
-        // And get the message back
-        $this->message = $this->consumer->receive(200);
-
-        $this->job = new Job(
-            $this->app,
-            $this->temp_rabbit_connection,
-            $this->consumer,
-            $this->message,
-            Str::random()
-        );
-
-        $this->assertInstanceOf(JobContract::class, $this->job);
     }
 }

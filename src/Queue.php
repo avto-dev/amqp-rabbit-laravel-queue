@@ -7,8 +7,8 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 use DateTime;
 use RuntimeException;
 use Illuminate\Support\Str;
-use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpTopic;
 use Illuminate\Container\Container;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
@@ -135,30 +135,16 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
-     * Send message using AMQP producer.
-     *
-     * @param Producer            $producer
-     * @param AmqpTopic|AmqpQueue $destination
-     * @param Message             $message
-     *
-     * @return void
-     */
-    protected function sendMessage(Producer $producer, $destination, Message $message): void
-    {
-        $producer->send($destination, $message);
-    }
-
-    /**
      * Create a payload string from the given job and data.
      *
      * @param string|mixed $job
      * @param string|mixed $queue
      * @param mixed        $data
      *
-     * @return string
-     *
      * @throws RuntimeException
      * @throws \Illuminate\Queue\InvalidPayloadException
+     *
+     * @return string
      *
      * @see \Illuminate\Queue\Queue::createPayload()
      */
@@ -276,5 +262,19 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     public function getRabbitQueue(): AmqpQueue
     {
         return $this->queue;
+    }
+
+    /**
+     * Send message using AMQP producer.
+     *
+     * @param Producer            $producer
+     * @param AmqpTopic|AmqpQueue $destination
+     * @param Message             $message
+     *
+     * @return void
+     */
+    protected function sendMessage(Producer $producer, $destination, Message $message): void
+    {
+        $producer->send($destination, $message);
     }
 }

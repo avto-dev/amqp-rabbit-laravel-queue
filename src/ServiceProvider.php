@@ -6,17 +6,17 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use Illuminate\Queue\QueueManager;
 use Illuminate\Container\Container;
-use Illuminate\Queue\Worker as IlluminateWorker;
 use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Queue\Worker as IlluminateWorker;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Queue\Failed\FailedJobProviderInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
-use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 use Illuminate\Queue\Console\WorkCommand as IlluminateWorkCommand;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
@@ -39,6 +39,20 @@ class ServiceProvider extends IlluminateServiceProvider
             $this->overrideQueueWorkerCommand();
             $this->overrideMakeJobCommand();
         }
+    }
+
+    /**
+     * Bootstrap package services.
+     *
+     * @param QueueManager     $queue
+     * @param EventsDispatcher $events
+     *
+     * @return void
+     */
+    public function boot(QueueManager $queue, EventsDispatcher $events): void
+    {
+        $this->bootQueueDriver($queue);
+        $this->bootListeners($events);
     }
 
     /**
@@ -112,21 +126,7 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * Bootstrap package services.
-     *
-     * @param QueueManager     $queue
-     * @param EventsDispatcher $events
-     *
-     * @return void
-     */
-    public function boot(QueueManager $queue, EventsDispatcher $events): void
-    {
-        $this->bootQueueDriver($queue);
-        $this->bootListeners($events);
-    }
-
-    /**
-     * Register new driver (connector)
+     * Register new driver (connector).
      *
      * @param QueueManager $queue
      *

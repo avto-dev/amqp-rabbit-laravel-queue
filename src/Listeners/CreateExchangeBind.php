@@ -10,7 +10,6 @@ use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 
 /**
  * @see \Enqueue\AmqpTools\RabbitMqDelayPluginDelayStrategy
- *
  * @see <https://github.com/rabbitmq/rabbitmq-delayed-message-exchange>
  */
 class CreateExchangeBind extends AbstractExchangeBindListener

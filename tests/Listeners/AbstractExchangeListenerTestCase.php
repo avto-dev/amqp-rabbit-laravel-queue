@@ -20,7 +20,7 @@ abstract class AbstractExchangeListenerTestCase extends AbstractTestCase
     protected $listener_class;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function setUp(): void
     {

@@ -9,8 +9,8 @@ use Interop\Amqp\AmqpTopic;
 use Illuminate\Container\Container;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
-use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
+use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Job as JobContract;
 
 class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
@@ -122,20 +122,6 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     }
 
     /**
-     * Send message using AMQP producer.
-     *
-     * @param Producer            $producer
-     * @param AmqpTopic|AmqpQueue $destination
-     * @param Message             $message
-     *
-     * @return void
-     */
-    protected function sendMessage(Producer $producer, $destination, Message $message): void
-    {
-        $producer->send($destination, $message);
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function getQueue(): string
@@ -157,5 +143,19 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     public function getMessage(): Message
     {
         return $this->message;
+    }
+
+    /**
+     * Send message using AMQP producer.
+     *
+     * @param Producer            $producer
+     * @param AmqpTopic|AmqpQueue $destination
+     * @param Message             $message
+     *
+     * @return void
+     */
+    protected function sendMessage(Producer $producer, $destination, Message $message): void
+    {
+        $producer->send($destination, $message);
     }
 }
