@@ -69,7 +69,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
      *
      * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
      */
-    public function size($queue = null, ?int $sleep = 2000): int
+    public function size($queue = null, ?int $sleep = 2700): int
     {
         if (\is_int($sleep)) {
             \usleep($sleep); // Required for broker (for calling in a loop)
