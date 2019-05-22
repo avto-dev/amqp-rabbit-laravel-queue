@@ -12,11 +12,11 @@
 [![Downloads count][badge_downloads_count]][link_packagist]
 [![License][badge_license]][link_license]
 
-This package allows to use RabbitMQ queues for queued Laravel jobs.
+This package allows to use RabbitMQ queues for queued Laravel (prioritized) jobs. Fully configurable.
 
 Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./docker/app/Dockerfile).
 
-For jobs delaying you also should install [`rabbitmq-delayed-message-exchange`][link_rabbitmq_delayed_message_exchange] plugin for RabbitMQ.
+For jobs delaying you also should install [`rabbitmq-delayed-message-exchange`][link_rabbitmq_delayed_message_exchange] plugin for RabbitMQ. Delaying is optional feature.
 
 > **Important:** Make sure `opcache` is disabled for CLI in your `php.ini` file (`opcache.enable_cli = "Off"`).
 
@@ -160,12 +160,13 @@ At the end, don't forget to execute command `php ./artisan rabbit:setup`.
 
 ## Usage
 
-You can dispatch your jobs as usual, commands like `queue:work`, `queue:failed`, `queue:retry` and others works fine.
+You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->delay(10)`), commands like `queue:work`, `queue:failed`, `queue:retry` and others works fine.
 
 #### Additional features:
 
 - Jobs delaying (plugin `rabbitmq_delayed_message_exchange` for RabbitMQ server is required);
-- Jobs priority (job should implements `PrioritizedJobInterface` interface).
+- Jobs priority (job should implements `PrioritizedJobInterface` interface);
+- Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation).
 
 **Be careful with commands `queue:failed` and `queue:retry`**. If during command execution something happens (lost connection, etc) you may loose all failed jobs!
 

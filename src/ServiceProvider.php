@@ -90,8 +90,8 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->app->extend(
             'command.queue.work',
-            function (IlluminateWorkCommand $original_command, Container $app): IlluminateWorkCommand {
-                return new WorkCommand($app->make('queue.worker'));
+            function (IlluminateWorkCommand $original_command, Container $container): IlluminateWorkCommand {
+                return $container->make(WorkCommand::class);
             }
         );
     }
@@ -105,8 +105,8 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->app->extend(
             'command.job.make',
-            function (IlluminateJobMakeCommand $original_command, Container $app): IlluminateJobMakeCommand {
-                return new JobMakeCommand($app->make('files'));
+            function (IlluminateJobMakeCommand $original_command, Container $container): IlluminateJobMakeCommand {
+                return $container->make(JobMakeCommand::class);
             }
         );
     }
