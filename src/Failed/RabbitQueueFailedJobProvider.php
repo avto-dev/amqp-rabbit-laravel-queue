@@ -229,8 +229,6 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
             $consumer->acknowledge($message); // anyway
         }
 
-        unset($consumer);
-
         $consumer = $this->connection->createConsumer($temp_queue);
 
         // And then move back
