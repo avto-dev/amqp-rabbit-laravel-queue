@@ -563,6 +563,8 @@ class QueueTest extends AbstractTestCase
             $this->temp_rabbit_queue,
             $this->temp_rabbit_connection->createMessage($content)
         );
+
+        \usleep(2000);
     }
 
     /**
