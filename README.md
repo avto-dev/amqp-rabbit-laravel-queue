@@ -158,6 +158,14 @@ You can remove `delayed_exchange_id` for disabling delayed jobs feature.
 
 At the end, don't forget to execute command `php ./artisan rabbit:setup`.
 
+### How jobs delaying works?
+
+Very simple:
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/avto-dev/amqp-rabbit-laravel-queue/master/.github/queue-delay.svg" width="100%" alt="" />
+</div>
+
 ## Usage
 
 You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->delay(10)`), commands like `queue:work`, `queue:failed`, `queue:retry` and others works fine.
@@ -168,7 +176,14 @@ You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->
 - Jobs priority (job should implements `PrioritizedJobInterface` interface);
 - Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation).
 
+### :warning: Warning
+
 **Be careful with commands `queue:failed` and `queue:retry`**. If during command execution something happens (lost connection, etc) you may loose all failed jobs!
+
+You should avoid to use next method _(broker does not guarantee operations order, so calling results may be wrong)_:
+
+- `\AvtoDev\AmqpRabbitLaravelQueue\Queue::size()`
+- `\AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider::count()`
 
 ### Testing
 

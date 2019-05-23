@@ -28,7 +28,7 @@ lowest: clean ## Install lowest php dependencies
 	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --ansi --no-suggest --prefer-dist --prefer-lowest
 
 test: ## Execute php tests and linters
-	$(dc_bin) run $(RUN_APP_ARGS) composer test
+	$(dc_bin) run $(RUN_APP_ARGS) sh -c "sleep 5 && composer test"
 
 test-cover: ## Execute php tests with coverage
 	$(dc_bin) run --rm --user "0:0" app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer phpunit-cover"'

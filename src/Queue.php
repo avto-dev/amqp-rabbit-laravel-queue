@@ -65,11 +65,13 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     /**
      * {@inheritdoc}
      *
+     * !!! You should avoid to use this method (broker does not guarantee operations order) !!!
+     *
      * Delayed messages count will be NOT included!
      *
      * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
      */
-    public function size($queue = null, ?int $sleep = 2000): int
+    public function size($queue = null, ?int $sleep = 2500): int
     {
         if (\is_int($sleep)) {
             \usleep($sleep); // Required for broker (for calling in a loop)
