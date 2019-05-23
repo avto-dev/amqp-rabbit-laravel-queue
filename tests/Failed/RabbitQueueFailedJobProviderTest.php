@@ -96,12 +96,16 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
+        \usleep(100);
+
         $id2 = $this->provider->log(
             $connection_name2 = Str::random(),
             $queue_name2 = Str::random(),
             $message_body2 = Str::random(),
             $exception2 = new \Exception(Str::random())
         );
+
+        \usleep(100);
 
         $this->provider->log(
             Str::random(),
@@ -110,11 +114,13 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        \usleep(7000);
+        \usleep(9000);
 
         $this->assertSame(3, $this->provider->count());
 
         $found = $this->provider->find($id2);
+
+        \usleep(7000);
 
         $this->assertSame($id2, $found->id);
         $this->assertSame($connection_name2, $found->connection);
