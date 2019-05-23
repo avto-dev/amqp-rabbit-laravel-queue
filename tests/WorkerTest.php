@@ -118,14 +118,14 @@ class WorkerTest extends AbstractTestCase
         /** @var Queue $queue */
         $queue = $this->worker->getManager()->connection($this->queue_connection_name);
 
-        $this->assertSame(0, @$queue->size());
+        $this->assertSame(0, $queue->size());
         $queue->push(new SimpleQueueJob);
         \usleep(1500);
-        $this->assertSame(1, @$queue->size());
+        $this->assertSame(1, $queue->size());
 
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions);
 
-        $this->assertSame(0, @$queue->size());
+        $this->assertSame(0, $queue->size());
     }
 
     /**
@@ -162,13 +162,13 @@ class WorkerTest extends AbstractTestCase
         /** @var Queue $queue */
         $queue = $this->worker->getManager()->connection($this->queue_connection_name);
 
-        $this->assertSame(0, @$queue->size());
+        $this->assertSame(0, $queue->size());
         $queue->push(new QueueJobThatThrowsException);
         \usleep(1500);
-        $this->assertSame(1, @$queue->size());
+        $this->assertSame(1, $queue->size());
 
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, 60, 3, 2));
         \usleep(1500);
-        $this->assertSame(0, @$queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted
+        $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted
     }
 }

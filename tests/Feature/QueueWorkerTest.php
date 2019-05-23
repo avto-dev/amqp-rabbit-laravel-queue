@@ -122,7 +122,7 @@ class QueueWorkerTest extends AbstractFeatureTest
         $this->assertSame($will_throws->getTries(), Sharer::get(QueueJobThatThrowsException::class . '-throws'));
         $this->assertSame(1, Sharer::get(QueueJobThatThrowsException::class . '-failed'));
 
-        $this->assertSame(1, @$this->failer->count());
+        $this->assertSame(1, $this->failer->count());
     }
 
     /**
@@ -141,7 +141,7 @@ class QueueWorkerTest extends AbstractFeatureTest
         $this->assertSame($will_throws->getTries(), Sharer::get(QueueJobThatThrowsException::class . '-throws'));
         $this->assertSame(1, Sharer::get(QueueJobThatThrowsException::class . '-failed'));
 
-        $this->assertSame(1, @$this->failer->count());
+        $this->assertSame(1, $this->failer->count());
         $failed_job_id = $this->failer->all()[0]->id;
 
         $process_info = $this->startArtisan('queue:retry', ['all']);

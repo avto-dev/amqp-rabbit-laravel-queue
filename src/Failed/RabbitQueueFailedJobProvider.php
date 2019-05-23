@@ -194,10 +194,6 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
      */
     public function count(?int $sleep = 3000): int
     {
-        \trigger_error(
-            'You should avoid to use this method (broker does not guarantee operations order)', E_USER_NOTICE
-        );
-
         if (\is_int($sleep)) {
             \usleep($sleep); // Required for broker (for calling in a loop)
         }

@@ -45,7 +45,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
      */
     public function testLog(): void
     {
-        $this->assertSame(0, @$this->provider->count());
+        $this->assertSame(0, $this->provider->count());
 
         $id = $this->provider->log(
             $connection_name = Str::random(),
@@ -54,7 +54,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             $exception = new \Exception(Str::random())
         );
 
-        $this->assertSame(1, @$this->provider->count());
+        $this->assertSame(1, $this->provider->count());
 
         $message = $this->getLastMessage();
 
@@ -112,7 +112,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 
         \usleep(7000);
 
-        $this->assertSame(3, @$this->provider->count());
+        $this->assertSame(3, $this->provider->count());
 
         $found = $this->provider->find($id2);
 
@@ -158,7 +158,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 
         \usleep(6000);
 
-        $this->assertSame(3, @$this->provider->count());
+        $this->assertSame(3, $this->provider->count());
 
         $all = $this->provider->all();
 
@@ -201,13 +201,13 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 
         \usleep(10000);
 
-        $this->assertSame(3, @$this->provider->count());
+        $this->assertSame(3, $this->provider->count());
 
         $this->provider->forget($id2);
 
         \usleep(2000);
 
-        $this->assertSame(2, @$this->provider->count());
+        $this->assertSame(2, $this->provider->count());
 
         $all = $this->provider->all();
 
@@ -242,11 +242,11 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 
         \usleep(2000);
 
-        $this->assertSame(2, @$this->provider->count());
+        $this->assertSame(2, $this->provider->count());
 
         $this->provider->flush();
 
-        $this->assertSame(0, @$this->provider->count());
+        $this->assertSame(0, $this->provider->count());
     }
 
     /**
