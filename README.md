@@ -158,6 +158,14 @@ You can remove `delayed_exchange_id` for disabling delayed jobs feature.
 
 At the end, don't forget to execute command `php ./artisan rabbit:setup`.
 
+### How jobs delaying works?
+
+Very simple:
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/avto-dev/amqp-rabbit-laravel-queue/master/.github/queue-delay.svg" width="100%" alt="" />
+</div>
+
 ## Usage
 
 You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->delay(10)`), commands like `queue:work`, `queue:failed`, `queue:retry` and others works fine.

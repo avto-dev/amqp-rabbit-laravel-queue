@@ -132,8 +132,7 @@ class ServiceProvider extends IlluminateServiceProvider
      *
      * @return void
      */
-    protected function bootQueueDriver(
-        $queue): void
+    protected function bootQueueDriver($queue): void
     {
         $queue->addConnector(Connector::NAME, function (): IlluminateQueueConnector {
             return $this->app->make(Connector::class);

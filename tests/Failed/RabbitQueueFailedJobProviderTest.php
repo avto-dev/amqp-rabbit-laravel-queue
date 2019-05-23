@@ -199,15 +199,19 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
             new \Exception(Str::random())
         );
 
-        \usleep(2000);
+        \usleep(10000);
 
         $this->assertSame(3, $this->provider->count());
 
         $this->provider->forget($id2);
 
+        \usleep(2000);
+
         $this->assertSame(2, $this->provider->count());
 
         $all = $this->provider->all();
+
+        \usleep(2000);
 
         $this->assertSame($id1, $all[0]->id);
         $this->assertSame($id3, $all[1]->id);
