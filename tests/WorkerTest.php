@@ -164,11 +164,11 @@ class WorkerTest extends AbstractTestCase
 
         $this->assertSame(0, $queue->size());
         $queue->push(new QueueJobThatThrowsException);
-        \usleep(3500);
+        \usleep(8500);
         $this->assertSame(1, $queue->size());
 
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, 60, 3, 2));
-        \usleep(3500);
+        \usleep(8500);
         $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted
     }
 }
