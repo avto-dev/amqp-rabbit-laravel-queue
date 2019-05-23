@@ -217,10 +217,6 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
      */
     protected function filterMessagesInQueue(Queue $queue, callable $callback): void
     {
-        \trigger_error(
-            'This operation is very dangerous. Avoid to use this method', E_USER_NOTICE
-        );
-
         $temp_queue = $this->connection->createTemporaryQueue();
 
         $consumer = $this->connection->createConsumer($queue);

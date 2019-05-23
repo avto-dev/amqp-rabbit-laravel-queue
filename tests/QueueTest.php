@@ -61,23 +61,23 @@ class QueueTest extends AbstractTestCase
     {
         $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
 
-        $this->assertSame(0, $this->queue->size());
+        $this->assertSame(0, @$this->queue->size());
 
         $this->pushMessage();
 
-        $this->assertSame(1, $this->queue->size());
+        $this->assertSame(1, @$this->queue->size());
 
         $this->pushMessage();
 
-        $this->assertSame(2, $this->queue->size());
+        $this->assertSame(2, @$this->queue->size());
 
         $this->temp_rabbit_connection->deleteQueue($this->temp_rabbit_queue);
 
-        $this->assertSame(0, $this->queue->size());
+        $this->assertSame(0, @$this->queue->size());
 
         $this->pushMessage();
 
-        $this->assertSame(1, $this->queue->size());
+        $this->assertSame(1, @$this->queue->size());
     }
 
     /**
