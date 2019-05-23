@@ -163,7 +163,7 @@ At the end, don't forget to execute command `php ./artisan rabbit:setup`.
 Very simple:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/avto-dev/amqp-rabbit-laravel-queue/master/.github/queue-delay.svg" width="100%" alt="" />
+  <img src="https://cdn.jsdelivr.net/gh/avto-dev/amqp-rabbit-laravel-queue/.github/queue-delay.svg" width="100%" alt="" />
 </div>
 
 ## Usage
