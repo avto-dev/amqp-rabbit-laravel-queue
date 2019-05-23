@@ -188,6 +188,8 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     /**
      * Get count of failed jobs.
      *
+     * !!! You should avoid to use this method (broker does not guarantee operations order) !!!
+     *
      * @param int|null $sleep Sleep for a some time before broker calling, in micro seconds
      *
      * @return int
@@ -205,6 +207,8 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
      * Move messages into temporary queue and back after, using closure for messages filtering.
      *
      * Closure CAN allows `Message $message` as first argument, an if closure returns FALSE - message will be skipped.
+     *
+     * !!! You should avoid to use this method !!!
      *
      * @param Queue    $queue
      * @param callable $callback
