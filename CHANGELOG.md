@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## v1.0.1
+
+### Fixed
+
+- Wrong worker class binding for `WorkCommand` (queue `Worker` class was not used because of this)
+
 ## v1.0.0
 
 ### Added

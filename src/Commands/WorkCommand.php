@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Commands;
 
 use Illuminate\Contracts\Queue\Job;
+use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 
 /**
  * You should NOT register this command in console kernel.
@@ -13,6 +14,16 @@ use Illuminate\Contracts\Queue\Job;
  */
 class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
 {
+    /**
+     * Create a new queue work command.
+     *
+     * @param Worker $worker
+     */
+    public function __construct(Worker $worker)
+    {
+        parent::__construct($worker);
+    }
+
     /**
      * {@inheritdoc}
      *
