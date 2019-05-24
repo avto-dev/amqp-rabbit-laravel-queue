@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Commands;
 
+use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
-use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand<extended>
