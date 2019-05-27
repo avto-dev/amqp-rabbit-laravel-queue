@@ -145,8 +145,8 @@ return [
             'connection'          => 'rabbit-default',
             'queue_id'            => 'jobs',
             'delayed_exchange_id' => 'delayed-jobs',
-            'timeout'             => 0, // The timeout is in milliseconds
-            'resume'              => false, // Resume consuming when timeout is over
+            'timeout'             => (int) env('QUEUE_TIMEOUT', 0), // The timeout is in milliseconds
+            'resume'              => (bool) env('QUEUE_RESUME', false), // Resume consuming when timeout is over
         ],
     ],
 

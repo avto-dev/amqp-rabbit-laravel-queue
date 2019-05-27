@@ -18,17 +18,17 @@ class Worker extends \Illuminate\Queue\Worker
      */
     public function daemon($connectionName, $queue_names, WorkerOptions $options): void
     {
-        $current_queue = $this->manager->connection($connectionName);
+        $queue = $this->manager->connection($connectionName);
 
         // This worker should work with RabbitMQ queue, or not?
-        if ($current_queue instanceof Queue) {
+        if ($queue instanceof Queue) {
             if ($this->supportsAsyncSignals()) {
                 $this->listenForSignals();
             }
 
             $last_restart      = (int) $this->getTimestampOfLastQueueRestart();
-            $rabbit_connection = $current_queue->getRabbitConnection();
-            $rabbit_queue      = $current_queue->getRabbitQueue();
+            $rabbit_connection = $queue->getRabbitConnection();
+            $rabbit_queue      = $queue->getRabbitQueue();
 
             $consumer   = $rabbit_connection->createConsumer($rabbit_queue);
             $subscriber = $rabbit_connection->createSubscriptionConsumer();
@@ -37,7 +37,7 @@ class Worker extends \Illuminate\Queue\Worker
                 $subscriber->subscribe(
                     $consumer,
                     function (Message $message, Consumer $consumer) use (
-                        $current_queue,
+                        $queue,
                         $connectionName,
                         $queue_names,
                         $options,
@@ -56,7 +56,7 @@ class Worker extends \Illuminate\Queue\Worker
 
                         // Make job instance, based on incoming message
                         try {
-                            $job = $current_queue->convertMessageToJob($message, $consumer);
+                            $job = $queue->convertMessageToJob($message, $consumer);
                         } catch (Throwable $e) {
                             $consumer->reject($message); // @todo: move to the failed jobs queue?
 
@@ -86,11 +86,11 @@ class Worker extends \Illuminate\Queue\Worker
                     }
                 );
 
-                $subscriber->consume($current_queue->getTimeout()); // Start `subscribe` method loop
+                $subscriber->consume($this->getTimeoutForWork($options, $queue)); // Start `subscribe` method loop
 
                 $subscriber->unsubscribe($consumer);
             } while (
-                $current_queue->shouldResume() === true && $this->needToStop($options, $last_restart) === false
+                $queue->shouldResume() === true && $this->needToStop($options, $last_restart) === false
             );
 
             $this->closeRabbitConnection($rabbit_connection);
@@ -102,6 +102,25 @@ class Worker extends \Illuminate\Queue\Worker
             parent::daemon($connectionName, $queue_names, $options);
         }
         // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Get timeout for a work.
+     *
+     * @param WorkerOptions $options
+     * @param Queue         $queue
+     *
+     * @return int In milliseconds
+     */
+    protected function getTimeoutForWork(WorkerOptions $options, Queue $queue): int
+    {
+        $worker_timeout = (int) $options->timeout;
+
+        if ($worker_timeout >= 0) {
+            return $worker_timeout * 1000; // Seconds to milliseconds
+        }
+
+        return $queue->getTimeout();
     }
 
     /**

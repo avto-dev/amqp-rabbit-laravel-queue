@@ -19,6 +19,11 @@ require __DIR__.'/../../vendor/autoload.php';
 
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
+// Load customized configuration
+foreach (glob(__DIR__ . '/../config/*.php') as $file) {
+    config()->set(basename($file, '.php'), require $file);
+}
+
 /*
 |--------------------------------------------------------------------------
 | Run The Artisan Application

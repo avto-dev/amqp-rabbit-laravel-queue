@@ -21,6 +21,16 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
      */
     public function __construct(Worker $worker)
     {
+        // Override default timeout value ('60' to '-1')
+        $this->signature = (string) \preg_replace(
+            '~(\-\-timeout=)\d+~', '$1-1', $this->signature
+        );
+
+        // Mark 'sleep' option as not used
+        $this->signature = (string) \preg_replace(
+            '~(\-\-sleep.*)\}~', '$1 <options=bold>(not used)</> }', $this->signature
+        );
+
         parent::__construct($worker);
     }
 
