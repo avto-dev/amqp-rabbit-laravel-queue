@@ -92,12 +92,14 @@ abstract class AbstractFeatureTest extends AbstractTestCase
      * @param string     $command
      * @param array      $arguments
      * @param float|null $process_timeout
+     * @param array|null $env
      *
      * @return array
      */
     protected function startArtisan(string $command,
                                     array $arguments = [],
-                                    ?float $process_timeout = null): array
+                                    ?float $process_timeout = null,
+                                    ?array $env = null): array
     {
         $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', $process_timeout ?? 0.65);
 
@@ -110,7 +112,7 @@ abstract class AbstractFeatureTest extends AbstractTestCase
             \realpath(__DIR__ . '/../bin/artisan'),
             $command,
             '--no-ansi',
-        ], $arguments), base_path(), null, null, $process_timeout);
+        ], $arguments), base_path(), $env, null, $process_timeout);
 
         $lineToArray = function (string $line): array {
             $lines = \preg_split("~(\r|\n)~", $line);

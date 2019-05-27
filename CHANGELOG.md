@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## v2.0.0
+
+### Added
+
+- Queue driver `resume` option _(can be used for periodic connection reloading)_
+
+### Changed
+
+- `Queue` class constructor signature
+- Option `sleep` for `queue:work` command marked as unused
+- Option `timeout` for `queue:work` now `-1` by default. It means next - by default used timeout value from configuration file, but this value can be overridden by passing `--timeout` option with `0..+n` value
+
 ## v1.0.1
 
 ### Fixed

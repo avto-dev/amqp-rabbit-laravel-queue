@@ -250,6 +250,7 @@ class QueueTest extends AbstractTestCase
             $this->temp_rabbit_connection,
             $this->temp_rabbit_queue,
             0,
+            false,
             $this->temp_rabbit_exchange,
         ])
             ->shouldAllowMockingProtectedMethods()
@@ -340,6 +341,7 @@ class QueueTest extends AbstractTestCase
             $this->app,
             $this->temp_rabbit_connection,
             $this->temp_rabbit_queue,
+            false,
             0,
             $this->temp_rabbit_exchange,
         ])
@@ -410,6 +412,7 @@ class QueueTest extends AbstractTestCase
             $this->app,
             $this->temp_rabbit_connection,
             $this->temp_rabbit_queue,
+            false,
             0,
             $this->temp_rabbit_exchange,
         ])
@@ -480,6 +483,7 @@ class QueueTest extends AbstractTestCase
             $this->app,
             $this->temp_rabbit_connection,
             $this->temp_rabbit_queue,
+            false,
             0,
             $this->temp_rabbit_exchange,
         ])

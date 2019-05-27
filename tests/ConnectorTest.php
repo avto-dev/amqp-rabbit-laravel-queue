@@ -77,6 +77,34 @@ class ConnectorTest extends AbstractTestCase
      *
      * @return void
      */
+    public function testCommentWithResumeParameter(): void
+    {
+        /* @var Queue $queue */
+        $this->assertInstanceOf(Queue::class, $queue = $this->connector->connect([
+            'connection' => $this->temp_rabbit_connection_name,
+            'queue_id'   => $this->temp_rabbit_queue_id,
+            'timeout'    => 100,
+            'resume'     => $resume = true,
+        ]));
+
+        $this->assertSame($resume, $queue->shouldResume());
+
+        /* @var Queue $queue */
+        $this->assertInstanceOf(Queue::class, $queue = $this->connector->connect([
+            'connection' => $this->temp_rabbit_connection_name,
+            'queue_id'   => $this->temp_rabbit_queue_id,
+            'timeout'    => 100,
+            'resume'     => $resume = false,
+        ]));
+
+        $this->assertSame($resume, $queue->shouldResume());
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
     public function testExceptionThrownWithoutConnectionPassing(): void
     {
         $this->expectException(InvalidArgumentException::class);
