@@ -67,7 +67,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
         $this->queue            = $queue;
         $this->timeout          = \max(0, $timeout);
         $this->delayed_exchange = $delayed_exchange;
-        $this->resume = $resume;
+        $this->resume           = $resume;
     }
 
     /**
@@ -275,6 +275,16 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
+     * Resume consuming when timeout is over.
+     *
+     * @return bool
+     */
+    public function shouldResume(): bool
+    {
+        return $this->resume;
+    }
+
+    /**
      * Send message using AMQP producer.
      *
      * @param Producer            $producer
@@ -286,15 +296,5 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     protected function sendMessage(Producer $producer, $destination, Message $message): void
     {
         $producer->send($destination, $message);
-    }
-
-    /**
-     * Resume consuming when timeout is over.
-     *
-     * @return bool
-     */
-    public function shouldResume(): bool
-    {
-        return $this->resume;
     }
 }
