@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## v2.0.0
+
+### Added
+
+- Queue driver `resume` option _(can be used for periodic connection reloading)_
+
+### Changed
+
+- `Queue` class constructor signature
+
 ## v1.0.1
 
 ### Fixed

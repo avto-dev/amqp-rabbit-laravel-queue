@@ -27,7 +27,7 @@ For jobs delaying you also should install [`rabbitmq-delayed-message-exchange`][
 Require this package with composer using the following command:
 
 ```shell
-$ composer require avto-dev/amqp-rabbit-laravel-queue "^1.0"
+$ composer require avto-dev/amqp-rabbit-laravel-queue "^2.0"
 ```
 
 > Installed `composer` is required ([how to install composer][getcomposer]). Also you need to fix the major version of package.
@@ -51,6 +51,8 @@ Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to man
 After that you should modify your configuration files:
 
 ### `./config/rabbitmq.php`
+
+RabbitMQ queues and exchanges configuration:
 
 ```php
 <?php
@@ -119,6 +121,8 @@ return [
 
 ### `./config/queue.php`
 
+Laravel queue settings: 
+
 ```php
 <?php
 
@@ -142,6 +146,7 @@ return [
             'queue_id'            => 'jobs',
             'delayed_exchange_id' => 'delayed-jobs',
             'timeout'             => 0, // The timeout is in milliseconds
+            'resume'              => false, // Resume consuming when timeout is over
         ],
     ],
 
@@ -153,6 +158,8 @@ return [
     ],
 ];
 ```
+
+> `resume` can be used with non-zero `timeout` value for periodic connection reloading _(for example, if you set `'timeout' => 30000` and `'resume' => true`, queue worker will unsubscribe and subscribe back to the queue every 30 seconds **without** process exiting)_.
 
 You can remove `delayed_exchange_id` for disabling delayed jobs feature.
 

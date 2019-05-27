@@ -75,11 +75,12 @@ class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
         $connection = $this->connections->make($config['connection']);
         $queue      = $this->queues->make($config['queue_id']);
         $timeout    = (int) ($config['timeout'] ?? 0);
+        $resume     = (bool) ($config['resume'] ?? false); // !!!!
 
         $delayed_exchange = isset($config['delayed_exchange_id'])
             ? $this->exchanges->make($config['delayed_exchange_id'])
             : null;
 
-        return new Queue($this->container, $connection, $queue, $timeout, $delayed_exchange);
+        return new Queue($this->container, $connection, $queue, $timeout, $resume, $delayed_exchange);
     }
 }

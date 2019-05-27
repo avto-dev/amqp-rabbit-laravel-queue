@@ -33,65 +33,70 @@ class Worker extends \Illuminate\Queue\Worker
             $consumer   = $rabbit_connection->createConsumer($rabbit_queue);
             $subscriber = $rabbit_connection->createSubscriptionConsumer();
 
-            $subscriber->subscribe(
-                $consumer,
-                function (Message $message, Consumer $consumer) use (
-                    $current_queue,
-                    $connectionName,
-                    $queue_names,
-                    $options,
-                    $last_restart
-                ): bool {
-                    // Before reserving any jobs, we will make sure this queue is not paused and
-                    // if it is we will just pause this worker for a given amount of time and
-                    // make sure we do not need to kill this worker process off completely.
-                    if (! $this->daemonShouldRun($options, $connectionName, $queue_names)) {
-                        $consumer->reject($message);
+            do {
+                $subscriber->subscribe(
+                    $consumer,
+                    function (Message $message, Consumer $consumer) use (
+                        $current_queue,
+                        $connectionName,
+                        $queue_names,
+                        $options,
+                        $last_restart
+                    ): bool {
+                        // Before reserving any jobs, we will make sure this queue is not paused and
+                        // if it is we will just pause this worker for a given amount of time and
+                        // make sure we do not need to kill this worker process off completely.
+                        if (! $this->daemonShouldRun($options, $connectionName, $queue_names)) {
+                            $consumer->reject($message);
 
-                        $this->pauseWorker($options, $last_restart);
+                            $this->pauseWorker($options, $last_restart);
+
+                            return true;
+                        }
+
+                        // Make job instance, based on incoming message
+                        try {
+                            $job = $current_queue->convertMessageToJob($message, $consumer);
+                        } catch (Throwable $e) {
+                            $consumer->reject($message); // @todo: move to the failed jobs queue?
+
+                            $this->exceptions->report($e = new FatalThrowableError($e));
+                            $this->stopWorkerIfLostConnection($e);
+                            $this->sleep(3);
+
+                            return true;
+                        }
+
+                        if ($this->supportsAsyncSignals()) {
+                            $this->registerTimeoutHandler($job, $options);
+                        }
+
+                        declare(ticks = 100) {
+                            $this->runJob($job, $connectionName, $options);
+                        }
+
+                        // Finally, we will check to see if we have exceeded our memory limits or if
+                        // the queue should restart based on other indications. If so, we'll stop
+                        // this worker and let whatever is "monitoring" it restart the process.
+                        if ($this->needToStop($options, $last_restart, $job)) {
+                            return false;
+                        }
 
                         return true;
                     }
+                );
 
-                    // Make job instance, based on incoming message
-                    try {
-                        $job = $current_queue->convertMessageToJob($message, $consumer);
-                    } catch (Throwable $e) {
-                        $consumer->reject($message); // @todo: move to the failed jobs queue?
+                $subscriber->consume($current_queue->getTimeout()); // Start `subscribe` method loop
 
-                        $this->exceptions->report($e = new FatalThrowableError($e));
-                        $this->stopWorkerIfLostConnection($e);
-                        $this->sleep(3);
-
-                        return true;
-                    }
-
-                    if ($this->supportsAsyncSignals()) {
-                        $this->registerTimeoutHandler($job, $options);
-                    }
-
-                    declare(ticks = 100) {
-                        $this->runJob($job, $connectionName, $options);
-                    }
-
-                    // Finally, we will check to see if we have exceeded our memory limits or if
-                    // the queue should restart based on other indications. If so, we'll stop
-                    // this worker and let whatever is "monitoring" it restart the process.
-                    if ($this->needToStop($options, $last_restart, $job)) {
-                        return false;
-                    }
-
-                    return true;
-                }
+                $subscriber->unsubscribe($consumer);
+            } while (
+                $current_queue->shouldResume() === true && $this->needToStop($options, $last_restart) === false
             );
 
-            $subscriber->consume($current_queue->getTimeout()); // Start `subscribe` method loop
-
-            $subscriber->unsubscribe($consumer);
             $this->closeRabbitConnection($rabbit_connection);
 
             $this->stop();
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         } else {
             // Backward compatibility is our everything =)
             parent::daemon($connectionName, $queue_names, $options);

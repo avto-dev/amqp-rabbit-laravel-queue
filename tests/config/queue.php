@@ -11,7 +11,8 @@ return [
             'connection'          => 'rabbit-default',
             'queue_id'            => 'jobs',
             'delayed_exchange_id' => 'delayed-jobs',
-            'timeout'             => 0,
+            'timeout'             => (int) env('QUEUE_TIMEOUT', 0),
+            'resume'              => (bool) env('QUEUE_RESUME', false),
         ],
     ],
 

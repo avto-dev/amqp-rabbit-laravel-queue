@@ -267,4 +267,53 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $this->assertEquals($this->now + $job->delay, $when, 'Jobs processed with wrong delay', 1);
     }
+
+    /**
+     * @medium
+     *
+     * @return void
+     */
+    public function testWithWorkerTimeout(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        $this->dispatcher->dispatch($job = new SimpleQueueJob);
+        $this->dispatcher->dispatch((new SimpleQueueJob)->delay(3)); // Should be grater then timeout
+
+        $process_info = $this->startArtisan('queue:work', [], 2.0, ['QUEUE_TIMEOUT' => 1500]);
+        $this->assertFalse($process_info['timed_out']);
+
+        \usleep(1500000); // 1.5 sec
+
+        $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+
+        $when = Sharer::get(SimpleQueueJob::class . '-when');
+
+        $this->assertEquals($this->now, $when, 'Jobs processed with wrong delay', 1);
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     *
+     * @group foo
+     */
+    public function testWithWorkerTimeoutAndResume(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+
+        $this->dispatcher->dispatch(new SimpleQueueJob);
+        $this->dispatcher->dispatch((new SimpleQueueJob)->delay(1)); // Should be grater then queue timeout
+
+        $process_info = $this->startArtisan('queue:work', [], 2.0, [
+            'QUEUE_TIMEOUT' => 800,
+            'QUEUE_RESUME'  => true,
+        ]);
+        $this->assertTrue($process_info['timed_out']);
+
+        $this->assertSame(2, Sharer::get(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+    }
 }

@@ -41,18 +41,25 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     protected $delayed_exchange;
 
     /**
+     * @var bool
+     */
+    protected $resume;
+
+    /**
      * Create a new Queue instance.
      *
      * @param Container      $container
      * @param Context        $connection
      * @param AmqpQueue      $queue
      * @param int            $timeout
+     * @param bool           $resume
      * @param AmqpTopic|null $delayed_exchange
      */
     public function __construct(Container $container,
                                 Context $connection,
                                 AmqpQueue $queue,
                                 int $timeout = 0,
+                                bool $resume = false,
                                 ?AmqpTopic $delayed_exchange = null)
     {
         $this->container        = $container;
@@ -60,6 +67,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
         $this->queue            = $queue;
         $this->timeout          = \max(0, $timeout);
         $this->delayed_exchange = $delayed_exchange;
+        $this->resume = $resume;
     }
 
     /**
@@ -278,5 +286,15 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     protected function sendMessage(Producer $producer, $destination, Message $message): void
     {
         $producer->send($destination, $message);
+    }
+
+    /**
+     * Resume consuming when timeout is over.
+     *
+     * @return bool
+     */
+    public function shouldResume(): bool
+    {
+        return $this->resume;
     }
 }
