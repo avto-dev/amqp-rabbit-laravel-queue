@@ -30,8 +30,6 @@ ENV PERMANENT_DEPS \
     binutils \
     git
 
-RUN echo $PATH && exit
-
 RUN set -xe \
     && apk add --no-cache ${PERMANENT_DEPS} \
     && apk add --no-cache --virtual .build-deps ${RUNTIME_DEPS} \
