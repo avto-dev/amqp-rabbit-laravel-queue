@@ -86,9 +86,10 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     }
 
     /**
-     * {@inheritdoc}
+     * Release the job back into the queue.
      *
-     * @param int|float $delay
+     * @param  int|float $delay
+     * @return void
      */
     public function release($delay = 0): void
     {
