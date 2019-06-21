@@ -94,7 +94,7 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
      */
     public function release($delay = 0): void
     {
-        parent::release($delay);
+        parent::release((int) $delay);
 
         $this->consumer->acknowledge($this->message);
 
