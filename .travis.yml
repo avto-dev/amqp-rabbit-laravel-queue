@@ -26,6 +26,8 @@ env:
     - DELAYED_MESSAGES_VER=20171201
     - RABBITMQ_VER=3.7.4
     - RABBIT_HOST=127.0.0.1
+    - RABBIT_LOGIN=live111
+    - RABBIT_PASSWORD=evil222
     - ARTISAN_PROCESS_TIMEOUT=3
     - setup=basic
     - coverage=false
@@ -79,6 +81,11 @@ install:
   - if [[ $setup = 'lowest' ]]; then travis_retry composer update --prefer-dist --no-interaction --no-suggest --prefer-lowest; fi
   - if [[ $laravel != 'default' ]]; then travis_retry composer require --dev --update-with-dependencies --prefer-dist --no-interaction --no-suggest laravel/laravel "$laravel"; fi
   - composer info | grep -e laravel/laravel -e phpunit/phpunit -e phpstan/phpstan
+
+before_script:
+  - sudo rabbitmqctl add_user $RABBIT_LOGIN $RABBIT_PASSWORD
+  - sudo rabbitmqctl set_permissions $RABBIT_LOGIN ".*" ".*" ".*"
+  - sudo rabbitmqctl set_topic_permissions $RABBIT_LOGIN ".*" ".*" ".*"
 
 script:
   - if [[ $coverage = 'true' ]]; then composer test-cover; else composer test; fi
