@@ -89,8 +89,8 @@ trait WithTemporaryRabbitConnectionTrait
             'host'     => env('TEST_RABBIT_HOST', env('RABBIT_HOST', 'rabbitmq')),
             'port'     => (int) env('TEST_RABBIT_PORT', env('RABBIT_PORT', 5672)),
             'vhost'    => env('TEST_RABBIT_VHOST', env('RABBIT_VHOST', '/')),
-            'user'    => env('TEST_RABBIT_LOGIN', env('RABBIT_LOGIN', 'guest')),
-            'pass' => env('TEST_RABBIT_PASSWORD', env('RABBIT_PASSWORD', 'guest')),
+            'user'     => env('TEST_RABBIT_LOGIN', env('RABBIT_LOGIN', 'guest')),
+            'pass'     => env('TEST_RABBIT_PASSWORD', env('RABBIT_PASSWORD', 'guest')),
         ]);
 
         // Register queue factory
