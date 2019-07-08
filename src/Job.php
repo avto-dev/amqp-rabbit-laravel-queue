@@ -91,21 +91,30 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     }
 
     /**
+     * Set the message context under a special key.
+     *
      * @param mixed $data
+     *
+     * @throws \InvalidArgumentException
      */
     public function setMessageContext($data): void
     {
+        if (\is_resource($data)) {
+            throw new \InvalidArgumentException;
+        }
         $this->message->setProperty(static::CONTEXT_PROPERTY, \serialize($data));
     }
 
     /**
+     * Get the message context under a special key.
+     *
+     * @param $default
+     *
      * @return mixed|null
      */
-    public function getMessageContext()
+    public function getMessageContext($default = null)
     {
-        $data = $this->message->getProperty(static::CONTEXT_PROPERTY);
-
-        return $data !== null
+        return ($data = $this->message->getProperty(static::CONTEXT_PROPERTY, $default)) !== null
             ? \unserialize($data)
             : null;
     }

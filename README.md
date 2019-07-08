@@ -181,7 +181,8 @@ You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->
 
 - Jobs delaying (plugin `rabbitmq_delayed_message_exchange` for RabbitMQ server is required);
 - Jobs priority (job should implements `PrioritizedJobInterface` interface);
-- Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation).
+- Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation);
+- You can save the state of the `Job` when it is restarted (job should implements `StoreStateInterface` interface). For convenience, there is a `WithJobStateTrait` trait with a setter and a getter. 
 
 ### :warning: Warning
 

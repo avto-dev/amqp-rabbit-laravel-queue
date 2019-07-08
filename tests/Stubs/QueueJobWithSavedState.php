@@ -13,26 +13,11 @@ class QueueJobWithSavedState extends SimpleQueueJob implements StoreStateInterfa
     use WithJobStateTrait, InteractsWithQueue;
 
     /**
-     * Magic name of state name.
-     */
-    public const MAGIC_PROPERTY = 'magic_counter';
-
-    /**
-     * Count of tries for calculate in test.
-     */
-    public const COUNT_OF_TRIES = 4;
-
-    /**
-     * Increment value for each iteration after Throw.
-     */
-    public const ITERATION_INCREMENT = 23;
-
-    /**
      * The number of times the job may be attempted.
      *
      * @var int
      */
-    public $tries = self::COUNT_OF_TRIES;
+    public $tries = 4;
 
     /**
      * {@inheritdoc}
@@ -41,8 +26,6 @@ class QueueJobWithSavedState extends SimpleQueueJob implements StoreStateInterfa
      */
     public function handle(Dispatcher $events): void
     {
-        $state       = $this->getState();
-        $magic_value = ($state[static::MAGIC_PROPERTY] ?? 0) + static::ITERATION_INCREMENT;
 
         $key = static::class . '-handled';
 
@@ -54,9 +37,9 @@ class QueueJobWithSavedState extends SimpleQueueJob implements StoreStateInterfa
 
         Sharer::put(static::class . '-when', (new \DateTime)->getTimestamp());
 
-        $this->setState([static::MAGIC_PROPERTY => $magic_value]);
+        $this->setState($magic_value = ($this->getState() ?? 0) + 23);
 
-        Sharer::put(static::MAGIC_PROPERTY, $magic_value);
+        Sharer::put(static::class . '-triggered', $magic_value);
         throw new \InvalidArgumentException;
     }
 }

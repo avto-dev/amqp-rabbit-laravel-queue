@@ -6,13 +6,12 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use AvtoDev\AmqpRabbitLaravelQueue\Job as RabbitJob;
 
-/**
- * @property RabbitJob $job
- */
 trait WithJobStateTrait
 {
     /**
-     * {@inheritdoc}
+     * Store state in job.
+     *
+     * @param mixed $data Data must allows serialization
      */
     public function setState($data)
     {
@@ -22,12 +21,16 @@ trait WithJobStateTrait
     }
 
     /**
-     * {@inheritdoc}
+     * Returns stored state of job.
+     *
+     * @param $default
+     *
+     * @return mixed|null
      */
-    public function getState()
+    public function getState($default = null)
     {
         return $this->job instanceof RabbitJob
-            ? $this->job->getMessageContext()
+            ? $this->job->getMessageContext($default)
             : null;
     }
 }

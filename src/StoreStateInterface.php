@@ -4,11 +4,6 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-/**
- * Interface StoreStateInterface.
- *
- * Store state in job's message.
- */
 interface StoreStateInterface
 {
     /**

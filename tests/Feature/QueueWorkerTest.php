@@ -329,18 +329,13 @@ class QueueWorkerTest extends AbstractFeatureTest
     {
         $this->assertFalse(Sharer::has(QueueJobWithSavedState::class . '-handled'));
 
-        $this->dispatcher->dispatch((new QueueJobWithSavedState)->delay(1)); // Should be grater then queue timeout
+        $this->dispatcher->dispatch((new QueueJobWithSavedState)); // Should be grater then queue timeout
 
-        $process_info = $this->startArtisan('queue:work', [], 2.0, [
-            'QUEUE_TIMEOUT' => 800,
-            'QUEUE_RESUME'  => true,
-        ]);
+        $process_info = $this->startArtisan('queue:work', [], 2.0);
+
         $this->assertTrue($process_info['timed_out']);
-        $this->assertSame(QueueJobWithSavedState::COUNT_OF_TRIES,
-            Sharer::get(QueueJobWithSavedState::class . '-handled'));
+        $this->assertSame(4, Sharer::get(QueueJobWithSavedState::class . '-handled'));
         $this->assertTrue(Sharer::has(QueueJobWithSavedState::class . '-failed'));
-        $expected_value = QueueJobWithSavedState::COUNT_OF_TRIES * QueueJobWithSavedState::ITERATION_INCREMENT;
-
-        self::assertEquals($expected_value, Sharer::get(QueueJobWithSavedState::MAGIC_PROPERTY));
+        $this->assertEquals(92, Sharer::get(QueueJobWithSavedState::class . '-triggered'));
     }
 }
