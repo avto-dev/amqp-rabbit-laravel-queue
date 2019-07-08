@@ -26,7 +26,6 @@ class QueueJobWithSavedState extends SimpleQueueJob implements StoreStateInterfa
      */
     public function handle(Dispatcher $events): void
     {
-
         $key = static::class . '-handled';
 
         if (Sharer::has($key)) {
