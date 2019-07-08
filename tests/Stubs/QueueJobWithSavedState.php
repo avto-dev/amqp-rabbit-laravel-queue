@@ -15,9 +15,17 @@ class QueueJobWithSavedState extends SimpleQueueJob implements StoreStateInterfa
     /**
      * Magic name of state name.
      */
-    public const MAGIC_PROPERTY = 'magic_counter',
-        COUNT_OF_TRIES = 4,
-        ITERATION_INCREMENT = 23;
+    public const MAGIC_PROPERTY = 'magic_counter';
+
+    /**
+     * Count of tries for calculate in test.
+     */
+    public const COUNT_OF_TRIES = 4;
+
+    /**
+     * Increment value for each iteration after Throw.
+     */
+    public const ITERATION_INCREMENT = 23;
 
     /**
      * The number of times the job may be attempted.
