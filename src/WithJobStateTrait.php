@@ -16,7 +16,7 @@ trait WithJobStateTrait
      */
     public function setState($data)
     {
-        if (! $this->job instanceof RabbitJob) {
+        if ($this->job instanceof RabbitJob) {
             $this->job->setMessageContext($data);
         }
     }
@@ -26,7 +26,7 @@ trait WithJobStateTrait
      */
     public function getState()
     {
-        return ! $this->job instanceof RabbitJob
+        return $this->job instanceof RabbitJob
             ? $this->job->getMessageContext()
             : null;
     }
