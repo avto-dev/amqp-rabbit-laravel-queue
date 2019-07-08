@@ -23,6 +23,11 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     public const ATTEMPTS_PROPERTY = 'job-attempts';
 
     /**
+     * Store state property name.
+     */
+    public const CONTEXT_PROPERTY = 'job-context';
+
+    /**
      * @var AmqpTopic|null
      */
     protected $delayed_exchange;
@@ -83,6 +88,26 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         parent::delete();
 
         $this->consumer->acknowledge($this->message);
+    }
+
+    /**
+     * @param mixed $data
+     */
+    public function setMessageContext($data): void
+    {
+        $this->message->setProperty(static::CONTEXT_PROPERTY, \serialize($data));
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getMessageContext()
+    {
+        $data = $this->message->getProperty(static::CONTEXT_PROPERTY);
+
+        return $data !== null
+            ? \unserialize($data)
+            : null;
     }
 
     /**

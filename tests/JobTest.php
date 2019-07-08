@@ -258,5 +258,15 @@ class JobTest extends AbstractTestCase
         // Get Message
 
         $this->assertSame($this->message, $this->job->getMessage());
+
+        // Message Context
+
+        $this->assertNull($this->message->getProperty($this->job::CONTEXT_PROPERTY));
+
+        $this->job->setMessageContext($data = ['foo_key' => 'bar_value']);
+
+        $this->assertSame(\serialize($data), $this->message->getProperty($this->job::CONTEXT_PROPERTY));
+
+        $this->assertSame($data, $this->job->getMessageContext());
     }
 }
