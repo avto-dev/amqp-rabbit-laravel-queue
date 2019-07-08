@@ -8,6 +8,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedState;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
 
 /**
@@ -315,5 +316,31 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $this->assertSame(2, Sharer::get(SimpleQueueJob::class . '-handled'));
         $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     *
+     * @group foo
+     */
+    public function testStoringStateJob(): void
+    {
+        $this->assertFalse(Sharer::has(QueueJobWithSavedState::class . '-handled'));
+
+        $this->dispatcher->dispatch((new QueueJobWithSavedState)->delay(1)); // Should be grater then queue timeout
+
+        $process_info = $this->startArtisan('queue:work', [], 2.0, [
+            'QUEUE_TIMEOUT' => 800,
+            'QUEUE_RESUME'  => true,
+        ]);
+        $this->assertTrue($process_info['timed_out']);
+        $this->assertSame(QueueJobWithSavedState::COUNT_OF_TRIES,
+            Sharer::get(QueueJobWithSavedState::class . '-handled'));
+        $this->assertTrue(Sharer::has(QueueJobWithSavedState::class . '-failed'));
+        $expected_value = QueueJobWithSavedState::COUNT_OF_TRIES * QueueJobWithSavedState::ITERATION_INCREMENT;
+
+        self::assertEquals($expected_value, Sharer::get(QueueJobWithSavedState::MAGIC_PROPERTY));
     }
 }
