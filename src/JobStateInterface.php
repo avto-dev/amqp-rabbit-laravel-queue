@@ -7,14 +7,14 @@ use Serializable;
 interface JobStateInterface extends Serializable
 {
     /**
-     * Get all of the items in the collection.
+     * Get all items from the state.
      *
      * @return array
      */
     public function all();
 
     /**
-     * Determine if an item exists in the collection by key.
+     * Determine if an item exists in the state by key.
      *
      * @param string $key
      *
@@ -23,7 +23,7 @@ interface JobStateInterface extends Serializable
     public function has($key);
 
     /**
-     * Get an item from the collection by key.
+     * Get an item from the state by key.
      *
      * @param string $key
      * @param mixed  $default
@@ -33,10 +33,24 @@ interface JobStateInterface extends Serializable
     public function get($key, $default = null);
 
     /**
-     * Put an item in the collection by key.
+     * Put an item in the state by key.
      *
      * @param string $key
      * @param mixed  $value
      */
     public function put($key, $value);
+
+    /**
+     * Determine if the state is empty or not.
+     *
+     * @return bool
+     */
+    public function isEmpty();
+
+    /**
+     * Remove an item from the state by key.
+     *
+     * @param  string $key
+     */
+    public function forget($key);
 }

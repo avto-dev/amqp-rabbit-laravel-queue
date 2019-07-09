@@ -7,21 +7,12 @@ use Illuminate\Contracts\Events\Dispatcher;
 use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 
-class QueueJobWithSavedState extends SimpleQueueJob
+class QueueJobWithSavedStateDelay extends SimpleQueueJob
 {
     use WithJobStateTrait, InteractsWithQueue;
 
     /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 4;
-
-    /**
      * {@inheritdoc}
-     *
-     * @throws \InvalidArgumentException
      */
     public function handle(Dispatcher $events): void
     {
@@ -32,6 +23,7 @@ class QueueJobWithSavedState extends SimpleQueueJob
         } else {
             Sharer::put($key, 1);
         }
+        Sharer::put(static::class . '-when', (new \DateTime)->getTimestamp());
 
         $magic_value = $this->getState()->get('state-counter', 0) + 1;
 
@@ -39,6 +31,6 @@ class QueueJobWithSavedState extends SimpleQueueJob
 
         Sharer::put(static::class . '-state-counter', $magic_value);
 
-        throw new \InvalidArgumentException;
+        $events->dispatch(static::class . '-handled');
     }
 }

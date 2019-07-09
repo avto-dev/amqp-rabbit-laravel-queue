@@ -182,7 +182,11 @@ You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->
 - Jobs delaying (plugin `rabbitmq_delayed_message_exchange` for RabbitMQ server is required);
 - Jobs priority (job should implements `PrioritizedJobInterface` interface);
 - Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation);
-- You can store the state of the `Job` when it is restarted (job should implements `StoreStateInterface` interface). For convenience, there is a `WithJobStateTrait` trait with a setter and a getter. 
+- The ability to store the state of `job`
+
+#### Store state
+ 
+Using this package you can store any valiables (except resources and callable entities) between job restarts (just use trait `WithJobStateTrait` in your job class). But you should remember - state is available only inside job `handle` method.
 
 ### :warning: Warning
 

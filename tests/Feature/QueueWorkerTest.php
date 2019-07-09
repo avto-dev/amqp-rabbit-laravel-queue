@@ -10,6 +10,8 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedState;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedStateDelay;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJobWithState;
 
 /**
  * @group feature
@@ -329,13 +331,109 @@ class QueueWorkerTest extends AbstractFeatureTest
     {
         $this->assertFalse(Sharer::has(QueueJobWithSavedState::class . '-handled'));
 
-        $this->dispatcher->dispatch((new QueueJobWithSavedState)); // Should be grater then queue timeout
+        $this->dispatcher->dispatch((new QueueJobWithSavedState));
 
         $process_info = $this->startArtisan('queue:work', [], 2.0);
 
         $this->assertTrue($process_info['timed_out']);
         $this->assertSame(4, Sharer::get(QueueJobWithSavedState::class . '-handled'));
         $this->assertTrue(Sharer::has(QueueJobWithSavedState::class . '-failed'));
-        $this->assertEquals(92, Sharer::get(QueueJobWithSavedState::class . '-triggered'));
+        $this->assertEquals(4, Sharer::get(QueueJobWithSavedState::class . '-state-counter'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     *
+     * @group foo
+     */
+    public function testStoringStateJobOnce(): void
+    {
+        $this->assertFalse(Sharer::has(QueueJobWithSavedStateDelay::class . '-handled'));
+
+        $this->dispatcher->dispatch((new QueueJobWithSavedStateDelay));
+        $this->dispatcher->dispatch((new QueueJobWithSavedStateDelay));
+
+        $process_info = $this->startArtisan('queue:work', ['--once']);
+
+        $this->assertFalse($process_info['timed_out']);
+        /** @var CommandOutput $output */
+        $output = $process_info['stdout'];
+
+        $this->assertGreaterThanOrEqual(3, $output->count(), $output->getAsPlaintText());
+        $this->assertEquals(1, Sharer::get(QueueJobWithSavedStateDelay::class . '-handled'));
+        $this->assertEquals(1, Sharer::get(QueueJobWithSavedStateDelay::class . '-state-counter'));
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     *
+     * @group foo
+     */
+    public function testStoringStateJobWithDelay(): void
+    {
+        $this->assertFalse(Sharer::has(QueueJobWithSavedStateDelay::class . '-handled'));
+
+        $this->dispatcher->dispatch(new QueueJobWithSavedStateDelay);
+        $this->dispatcher->dispatch((new QueueJobWithSavedStateDelay)->delay($delay = 4));
+
+        $process_info = $this->startArtisan('queue:work', [], 3.0, ['QUEUE_TIMEOUT' => 1500]);
+
+        $this->assertFalse($process_info['timed_out']);
+        \usleep(2500000);
+
+        $this->assertEquals(1, Sharer::get(QueueJobWithSavedStateDelay::class . '-handled'));
+        $this->assertFalse(Sharer::has(QueueJobWithSavedStateDelay::class . '-failed'));
+
+        $when = Sharer::get(QueueJobWithSavedStateDelay::class . '-when');
+
+        $this->assertEquals((new \DateTime)->getTimestamp(), $when + $delay, 'Jobs processed with wrong delay');
+    }
+
+    /**
+     * @medium
+     *
+     * @return void
+     *
+     * @group foo
+     */
+    public function testStoringStateJobWithPriority(): void
+    {
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-handled'));
+        $this->assertFalse(Sharer::has(QueueJobWithSavedState::class . '-handled'));
+        $this->assertFalse(Sharer::has(QueueJobWithSavedStateDelay::class . '-handled'));
+        $this->assertFalse(Sharer::has(PrioritizedQueueJobWithState::class . '-handled'));
+
+        $this->dispatcher->dispatch(new SimpleQueueJob);
+        $this->dispatcher->dispatch(new QueueJobWithSavedState);
+        $this->dispatcher->dispatch((new QueueJobWithSavedStateDelay)->delay($delay = 4));
+        $this->dispatcher->dispatch(new PrioritizedQueueJobWithState);
+
+        $process_info = $this->startArtisan('queue:work', [], 2.0);
+
+        $this->assertTrue($process_info['timed_out']);
+        /** @var CommandOutput $output */
+        $output            = $process_info['stdout'];
+        $priority_job_name = \preg_quote(PrioritizedQueueJobWithState::class, '/');
+
+        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
+        $this->assertRegExp("~^.+processing.+{$priority_job_name}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
+        $this->assertRegExp("~^.+processed.+{$priority_job_name}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
+
+        $this->assertEquals(1, Sharer::get(PrioritizedQueueJobWithState::class . '-handled'));
+        $this->assertEquals(
+            'state-counter-value',
+            Sharer::get(PrioritizedQueueJobWithState::class . '-state-counter')
+        );
+
+        $this->assertFalse(Sharer::has(SimpleQueueJob::class . '-failed'));
+        $this->assertEquals(4, Sharer::get(QueueJobWithSavedState::class . '-handled'));
+        $this->assertTrue(Sharer::has(QueueJobWithSavedState::class . '-failed'));
+
+        $this->assertFalse(Sharer::has(QueueJobWithSavedStateDelay::class . '-handled'));
+        $this->assertFalse(Sharer::has(QueueJobWithSavedStateDelay::class . '-failed'));
     }
 }
