@@ -7,6 +7,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 use Mockery as m;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpTopic;
+use InvalidArgumentException;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
 use Interop\Amqp\AmqpMessage as Message;
 use Interop\Amqp\Impl\AmqpQueue as Queue;
@@ -260,12 +261,21 @@ class JobTest extends AbstractTestCase
         $this->assertSame($this->message, $this->job->getMessage());
 
         // Message Context
-
-        $this->assertNull($this->message->getProperty($this->job::CONTEXT_PROPERTY));
-
-        $this->job->setMessageContext($data = ['foo_key' => 'bar_value']);
-
-        $this->assertSame($data, $this->job->getMessageContext());
+        $state = $this->job->state();
+        $this->assertEquals([], $state->all());
+        $items = [
+            'foo_int'       => 13,
+            'key_foo'       => 'value_bar',
+            'key_foo_array' => [
+                'bar', 'bar2', 'bar3',
+            ],
+        ];
+        foreach ($items as $key => $value) {
+            $state->put($key, $value);
+            $this->assertSame($value, $state->get($key));
+            $this->assertTrue($state->has($key));
+        }
+        $this->assertSame($items, $state->all());
     }
 
     /**
@@ -275,9 +285,9 @@ class JobTest extends AbstractTestCase
      */
     public function testSettingMessageContextWithClosureException(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->job->setMessageContext(function (): void {
+        $this->job->state()->put('closure', function (): void {
         });
     }
 
@@ -286,10 +296,10 @@ class JobTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testSettingMessageContextWithResourseException(): void
+    public function testSettingMessageContextWithResourceException(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->job->setMessageContext(\tmpfile());
+        $this->job->state()->put('tmpfile', \tmpfile());
     }
 }

@@ -11,26 +11,28 @@ trait WithJobStateTrait
     /**
      * Store state in job.
      *
-     * @param mixed $data Data must allows serialization
+     * @param string $key
+     * @param mixed  $data Data must allows serialization
      */
-    public function setState($data)
+    public function setState(string $key, $data)
     {
         if ($this->job instanceof RabbitJob) {
-            $this->job->setMessageContext($data);
+            $this->job->state()->put($key, $data);
         }
     }
 
     /**
      * Returns stored state of job.
      *
-     * @param $default
+     * @param string     $key
+     * @param mixed|null $default
      *
      * @return mixed|null
      */
-    public function getState($default = null)
+    public function getState(string $key, $default = null)
     {
         return $this->job instanceof RabbitJob
-            ? $this->job->getMessageContext($default)
+            ? $this->job->state()->get($key, $default)
             : null;
     }
 }

@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ### Added
 
-- Set the message context under a special key for a `job`
+- Added feature which can store the state of `Job` in the form of a `Collection`
 
 ## v2.0.2
 

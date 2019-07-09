@@ -48,6 +48,11 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     private $message;
 
     /**
+     * @var JobStateInterface
+     */
+    private $state;
+
+    /**
      * Job constructor.
      *
      * @param Container      $container
@@ -70,6 +75,10 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         $this->message          = $message;
         $this->connectionName   = $connection_name;
         $this->delayed_exchange = $delayed_exchange;
+
+        $current_state = $message->getProperty(static::CONTEXT_PROPERTY, 'N;');
+
+        $this->state = \unserialize($current_state) ?? new JobState;
     }
 
     /**
@@ -91,32 +100,13 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     }
 
     /**
-     * Set the message context under a special key.
+     * Get current job state.
      *
-     * @param mixed $data
-     *
-     * @throws \InvalidArgumentException
+     * @return JobStateInterface|JobState
      */
-    public function setMessageContext($data): void
+    public function state(): JobStateInterface
     {
-        if (\is_resource($data)) {
-            throw new \InvalidArgumentException;
-        }
-        $this->message->setProperty(static::CONTEXT_PROPERTY, \serialize($data));
-    }
-
-    /**
-     * Get the message context under a special key.
-     *
-     * @param $default
-     *
-     * @return mixed|null
-     */
-    public function getMessageContext($default = null)
-    {
-        return ($data = $this->message->getProperty(static::CONTEXT_PROPERTY, $default)) !== null
-            ? \unserialize($data)
-            : null;
+        return $this->state;
     }
 
     /**
@@ -137,6 +127,7 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         $recipient       = $this->consumer->getQueue(); // Default way
 
         $requeue_message->setProperty(self::ATTEMPTS_PROPERTY, $this->attempts() + 1);
+        $requeue_message->setProperty(self::CONTEXT_PROPERTY, \serialize($this->state));
 
         // If delayed exchange are defined and message should be sent with delay - change the recipient
         if ($delay > 0 && $this->delayed_exchange instanceof AmqpTopic) {

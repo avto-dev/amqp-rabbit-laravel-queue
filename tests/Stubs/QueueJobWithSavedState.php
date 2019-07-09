@@ -36,7 +36,9 @@ class QueueJobWithSavedState extends SimpleQueueJob implements StoreStateInterfa
 
         Sharer::put(static::class . '-when', (new \DateTime)->getTimestamp());
 
-        $this->setState($magic_value = ($this->getState() ?? 0) + 23);
+        $magic_value = (int) $this->getState('triggered', 0) + 23;
+
+        $this->setState('triggered', $magic_value);
 
         Sharer::put(static::class . '-triggered', $magic_value);
         throw new \InvalidArgumentException;

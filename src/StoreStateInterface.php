@@ -9,14 +9,18 @@ interface StoreStateInterface
     /**
      * Store state in job.
      *
-     * @param mixed $data
+     * @param string     $key
+     * @param mixed|null $data
      */
-    public function setState($data);
+    public function setState(string $key, $data);
 
     /**
      * Returns stored state of job.
      *
+     * @param string     $key
+     * @param mixed|null $default
+     *
      * @return mixed|null
      */
-    public function getState();
+    public function getState(string $key, $default = null);
 }
