@@ -23,7 +23,7 @@ trait WithJobStateTrait
     public function getState()
     {
         if (! \property_exists($this, 'job') || ! $this->job instanceof Job) {
-            throw new RuntimeException('foo');
+            throw new RuntimeException('Must have the property job');
         }
 
         return $this->job->state();

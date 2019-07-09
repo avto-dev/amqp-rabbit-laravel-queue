@@ -14,6 +14,7 @@ use Interop\Amqp\Impl\AmqpQueue as Queue;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
@@ -71,6 +72,7 @@ class JobTest extends AbstractTestCase
         );
 
         $this->assertInstanceOf(JobContract::class, $this->job);
+        $this->assertInstanceOf(JobStateInterface::class, $this->job->state());
     }
 
     /**
