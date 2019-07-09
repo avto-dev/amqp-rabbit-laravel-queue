@@ -50,7 +50,7 @@ interface JobStateInterface extends Serializable
     /**
      * Remove an item from the state by key.
      *
-     * @param  string $key
+     * @param string $key
      */
     public function forget($key);
 }
