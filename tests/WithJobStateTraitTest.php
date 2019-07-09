@@ -4,16 +4,14 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use RuntimeException;
+use Illuminate\Support\Str;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
+use Illuminate\Queue\InteractsWithQueue;
 use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedStateDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
-
-use Illuminate\Support\Str;
-use Mockery\Mock;
-use RuntimeException;
-use Illuminate\Queue\InteractsWithQueue;
-use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
 
 class WithJobStateTraitTest extends AbstractTestCase
 {
@@ -57,8 +55,7 @@ class WithJobStateTraitTest extends AbstractTestCase
     public function testGetStateWithoutProperty(): void
     {
         $this->expectException(RuntimeException::class);
-        $object = new class
-        {
+        $object = new class {
             use WithJobStateTrait;
         };
 
@@ -73,8 +70,7 @@ class WithJobStateTraitTest extends AbstractTestCase
     public function testGetStateWithoutNeededInstanceProperty()
     {
         $this->expectException(RuntimeException::class);
-        $object = new class
-        {
+        $object = new class {
             use WithJobStateTrait, InteractsWithQueue;
         };
 
