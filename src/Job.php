@@ -76,9 +76,11 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         $this->connectionName   = $connection_name;
         $this->delayed_exchange = $delayed_exchange;
 
-        $current_state = $message->getProperty(static::CONTEXT_PROPERTY, 'N;');
+        $current_state = $message->getProperty(static::CONTEXT_PROPERTY);
 
-        $this->state = \unserialize($current_state) ?? new JobState;
+        $this->state = $current_state !== null
+            ? \unserialize($current_state)
+            : new JobState;
     }
 
     /**

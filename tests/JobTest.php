@@ -276,6 +276,8 @@ class JobTest extends AbstractTestCase
             $this->assertTrue($state->has($key));
         }
         $this->assertSame($items, $state->all());
+
+        $this->assertEquals(\serialize($state->all()), $state->serialize());
     }
 
     /**
