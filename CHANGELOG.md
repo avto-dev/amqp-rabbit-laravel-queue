@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ### Added
 
-- Added feature which can store the state of `Job` in the form of a `Collection`
+- Added feature for storing `job` state between `job` tries
 
 ## v2.0.2
 
