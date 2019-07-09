@@ -4,11 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
-## Unreleased
+## v2.1.0
 
 ### Added
 
-- Added feature for storing `job` state between `job` tries
+- Feature for storing `job` state between `job` tries
 
 ## v2.0.2
 

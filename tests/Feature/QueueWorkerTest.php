@@ -390,7 +390,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(QueueJobWithSavedStateDelay::class . '-when');
 
-        $this->assertEquals((new \DateTime)->getTimestamp(), $when + $delay, 'Jobs processed with wrong delay');
+        $this->assertEquals((new \DateTime)->getTimestamp(), $when + $delay, 'Jobs processed with wrong delay', 1);
     }
 
     /**

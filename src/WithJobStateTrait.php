@@ -7,8 +7,6 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 use RuntimeException;
 
 /**
- * Trait WithJobStateTrait.
- *
  * @property Job $job
  */
 trait WithJobStateTrait

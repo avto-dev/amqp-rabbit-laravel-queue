@@ -25,7 +25,7 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
     /**
      * Store state property name.
      */
-    public const CONTEXT_PROPERTY = 'job-context';
+    public const STATE_PROPERTY = 'job-state';
 
     /**
      * @var AmqpTopic|null
@@ -76,7 +76,7 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         $this->connectionName   = $connection_name;
         $this->delayed_exchange = $delayed_exchange;
 
-        $current_state = $message->getProperty(static::CONTEXT_PROPERTY);
+        $current_state = $message->getProperty(static::STATE_PROPERTY);
 
         $this->state = $current_state !== null
             ? \unserialize($current_state)
@@ -129,7 +129,7 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
         $recipient       = $this->consumer->getQueue(); // Default way
 
         $requeue_message->setProperty(self::ATTEMPTS_PROPERTY, $this->attempts() + 1);
-        $requeue_message->setProperty(self::CONTEXT_PROPERTY, \serialize($this->state));
+        $requeue_message->setProperty(self::STATE_PROPERTY, \serialize($this->state));
 
         // If delayed exchange are defined and message should be sent with delay - change the recipient
         if ($delay > 0 && $this->delayed_exchange instanceof AmqpTopic) {

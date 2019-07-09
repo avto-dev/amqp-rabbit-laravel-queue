@@ -184,7 +184,7 @@ You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->
 - Automatically delayed messages exchanges bindings (only if you use command `rabbit:setup` for queues and exchanges creation);
 - The ability to store the state of `job`
 
-#### Store state
+#### State storing
  
 Using this package you can store any valiables (except resources and callable entities) between job restarts (just use trait `WithJobStateTrait` in your job class). But you should remember - state is available only inside job `handle` method.
 

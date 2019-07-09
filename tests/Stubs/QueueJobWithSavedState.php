@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
 use Illuminate\Queue\InteractsWithQueue;
