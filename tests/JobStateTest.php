@@ -80,4 +80,16 @@ class JobStateTest extends AbstractTestCase
             $this->assertSame([$item], $this->job_state_class->get($item));
         }
     }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testGetInstanceFromUnserialize(): void
+    {
+        $data = [123, 'foo' => 'bar', false, null, \M_PI];
+
+        $this->assertSame($data, \unserialize(\serialize(new JobState($data)))->all());
+    }
 }
