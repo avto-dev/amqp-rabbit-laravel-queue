@@ -7,12 +7,14 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 use Mockery as m;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpTopic;
+use InvalidArgumentException;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
 use Interop\Amqp\AmqpMessage as Message;
 use Interop\Amqp\Impl\AmqpQueue as Queue;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
@@ -70,6 +72,7 @@ class JobTest extends AbstractTestCase
         );
 
         $this->assertInstanceOf(JobContract::class, $this->job);
+        $this->assertInstanceOf(JobStateInterface::class, $this->job->state());
     }
 
     /**
@@ -258,5 +261,49 @@ class JobTest extends AbstractTestCase
         // Get Message
 
         $this->assertSame($this->message, $this->job->getMessage());
+
+        // Message Context
+        $state = $this->job->state();
+        $this->assertEquals([], $state->all());
+        $items = [
+            'foo_int'       => 13,
+            'key_foo'       => 'value_bar',
+            'key_foo_array' => [
+                'bar', 'bar2', 'bar3',
+            ],
+        ];
+        foreach ($items as $key => $value) {
+            $state->put($key, $value);
+            $this->assertSame($value, $state->get($key));
+            $this->assertTrue($state->has($key));
+        }
+        $this->assertSame($items, $state->all());
+
+        $this->assertEquals(\serialize($state->all()), $state->serialize());
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testSettingMessageContextWithClosureException(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->job->state()->put('closure', function (): void {
+        });
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testSettingMessageContextWithResourceException(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->job->state()->put('tmpfile', \tmpfile());
     }
 }
