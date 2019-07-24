@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
@@ -56,6 +58,7 @@ class ServiceProviderTest extends AbstractTestCase
     {
         $this->assertContains(CreateExchangeBind::class, $this->getEventListenersClasses(ExchangeCreated::class));
         $this->assertContains(RemoveExchangeBind::class, $this->getEventListenersClasses(ExchangeDeleting::class));
+        $this->assertContains(BindJobStateListener::class, $this->getEventListenersClasses(JobProcessing::class));
     }
 
     /**

@@ -34,7 +34,7 @@ class JobState extends Collection implements JobStateInterface
     public function put($key, $value)
     {
         if (\is_resource($value) || $value instanceof Closure) {
-            throw new InvalidArgumentException;
+            throw new InvalidArgumentException('Wrong value passed');
         }
 
         parent::put($key, $value);

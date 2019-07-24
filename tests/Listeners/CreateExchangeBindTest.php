@@ -11,6 +11,8 @@ use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
+ * @group listeners
+ *
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind<extended>
  */
 class CreateExchangeBindTest extends AbstractExchangeListenerTestCase
