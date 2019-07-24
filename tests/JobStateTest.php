@@ -113,7 +113,8 @@ class JobStateTest extends AbstractTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('~Wrong value passed~i');
 
-        $this->instance->put('foo', function (): void {});
+        $this->instance->put('foo', function (): void {
+        });
     }
 
     /**
