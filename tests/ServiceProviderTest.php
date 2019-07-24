@@ -6,6 +6,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use Illuminate\Queue\Events\JobProcessing;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
@@ -14,6 +15,7 @@ use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind;
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener;
 use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
@@ -56,6 +58,7 @@ class ServiceProviderTest extends AbstractTestCase
     {
         $this->assertContains(CreateExchangeBind::class, $this->getEventListenersClasses(ExchangeCreated::class));
         $this->assertContains(RemoveExchangeBind::class, $this->getEventListenersClasses(ExchangeDeleting::class));
+        $this->assertContains(BindJobStateListener::class, $this->getEventListenersClasses(JobProcessing::class));
     }
 
     /**

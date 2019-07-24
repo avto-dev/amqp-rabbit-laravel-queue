@@ -6,6 +6,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use Illuminate\Queue\QueueManager;
 use Illuminate\Container\Container;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Queue\Worker as IlluminateWorker;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
@@ -150,5 +151,6 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $events->listen(ExchangeCreated::class, Listeners\CreateExchangeBind::class);
         $events->listen(ExchangeDeleting::class, Listeners\RemoveExchangeBind::class);
+        $events->listen(JobProcessing::class, Listeners\BindJobStateListener::class);
     }
 }
