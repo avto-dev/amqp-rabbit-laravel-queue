@@ -88,7 +88,7 @@ class Worker extends \Illuminate\Queue\Worker
 
                 $subscriber->consume($this->getTimeoutForWork($options, $queue)); // Start `subscribe` method loop
 
-                $subscriber->unsubscribe($consumer);
+//                $subscriber->unsubscribe($consumer);
             } while (
                 $queue->shouldResume() === true && $this->needToStop($options, $last_restart) === false
             );
