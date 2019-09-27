@@ -42,9 +42,7 @@ branches:
 
 before_install:
   # Install RabbitMQ server
-  - sudo mv /opt/jdk_switcher/jdk_switcher.sh /tmp
-    && sudo apt-get install rabbitmq-server=${RABBITMQ_VER}-1
-    && sudo mv /tmp/jdk_switcher.sh /opt/jdk_switcher/
+  - sudo apt-get install rabbitmq-server=${RABBITMQ_VER}-1
   # Install rabbit-c
   - if [ ! -d "$HOME/rabbitmq-c/${RABBIT_C_VER}" ]; then
     travis_retry git clone --branch v${RABBIT_C_VER} https://github.com/alanxz/rabbitmq-c.git $HOME/rabbitmq-c/${RABBIT_C_VER};
