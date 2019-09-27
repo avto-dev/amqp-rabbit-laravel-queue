@@ -42,6 +42,7 @@ branches:
 
 before_install:
   # Install RabbitMQ server
+  - find / -type f -name jdk_switcher.sh 2> /dev/null
   - sudo mv /opt/jdk_switcher/jdk_switcher.sh /tmp
     && sudo apt-get install rabbitmq-server=${RABBITMQ_VER}-1
     && sudo mv /tmp/jdk_switcher.sh /opt/jdk_switcher/
