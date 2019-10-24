@@ -14,6 +14,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
  * @group listeners
  *
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind<extended>
+ * @group  usesExternalServices
  */
 class RemoveExchangeBindTest extends AbstractExchangeListenerTestCase
 {

@@ -15,6 +15,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
  * @group  listeners
  *
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener<extended>
+ * @group  usesExternalServices
  */
 class BindJobStateListenerTest extends AbstractExchangeListenerTestCase
 {
