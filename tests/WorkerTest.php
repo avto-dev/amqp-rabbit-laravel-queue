@@ -24,6 +24,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Worker<extended>
  *
  * @group  queue
+ * @group  usesExternalServices
  */
 class WorkerTest extends AbstractTestCase
 {

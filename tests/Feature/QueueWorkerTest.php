@@ -15,6 +15,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJobWithState;
 
 /**
  * @group feature
+ * @group usesExternalServices
  */
 class QueueWorkerTest extends AbstractFeatureTest
 {

@@ -42,5 +42,8 @@ jobs: # Docs: <https://help.github.com/en/articles/workflow-syntax-for-github-ac
       - name: Show most important packages versions
         run: composer info | grep -e laravel/laravel -e phpunit/phpunit -e phpstan/phpstan
 
-      - name: Execute tests
-        run: composer test
+      - name: Execute phpstan
+        run: composer phpstan
+
+      - name: Execute phpunit
+        run: php ./vendor/bin/phpunit --no-coverage --exclude-group usesExternalServices

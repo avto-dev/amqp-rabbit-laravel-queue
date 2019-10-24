@@ -14,6 +14,8 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider<extended>
+ *
+ * @group usesExternalServices
  */
 class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 {
