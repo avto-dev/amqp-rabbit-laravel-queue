@@ -6,6 +6,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Commands;
 
 use Illuminate\Contracts\Queue\Job;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use Illuminate\Contracts\Cache\Repository as Cache;
 
 /**
  * You should NOT register this command in console kernel.
@@ -18,8 +19,9 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
      * Create a new queue work command.
      *
      * @param Worker $worker
+     * @param Cache  $cache
      */
-    public function __construct(Worker $worker)
+    public function __construct(Worker $worker, Cache $cache = null)
     {
         // Override default timeout value ('60' to '-1')
         $this->signature = (string) \preg_replace(
@@ -31,7 +33,24 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
             '~(\-\-sleep.*)\}~', '$1 <options=bold>(not used)</> }', $this->signature
         );
 
-        parent::__construct($worker);
+        // @todo: WIP
+
+        static $parameters_number;
+
+        if (! \is_int($parameters_number)) {
+            $parameters_number = (new \ReflectionMethod(static::class, '__construct'))->getNumberOfParameters();
+        }
+
+        if ($parameters_number === 1) {
+            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Console/WorkCommand.php#L53
+            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Console/WorkCommand.php#L53
+            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Console/WorkCommand.php#L53
+            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Console/WorkCommand.php#L54
+            parent::__construct($worker);
+        } elseif ($parameters_number === 2) {
+            // @link: https://github.com/laravel/framework/blob/v6.0.0/src/Illuminate/Queue/Console/WorkCommand.php#L63
+            parent::__construct($worker, $cache);
+        }
     }
 
     /**
