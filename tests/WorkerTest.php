@@ -104,6 +104,7 @@ class WorkerTest extends AbstractTestCase
             $this->app->make(QueueManager::class),
             $this->app->make(EventsDispatcher::class),
             $this->app->make(ExceptionHandler::class),
+            static function () {},
         ])
             ->shouldAllowMockingProtectedMethods()
             ->makePartial()
@@ -148,6 +149,7 @@ class WorkerTest extends AbstractTestCase
             $this->app->make(QueueManager::class),
             $this->app->make(EventsDispatcher::class),
             $this->app->make(ExceptionHandler::class),
+            static function () {},
         ])
             ->shouldAllowMockingProtectedMethods()
             ->makePartial()
