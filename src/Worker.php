@@ -96,7 +96,7 @@ class Worker extends \Illuminate\Queue\Worker
             $this->closeRabbitConnection($rabbit_connection);
 
             $this->stop();
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         } else {
             // Backward compatibility is our everything =)
             parent::daemon($connectionName, $queue_names, $options);

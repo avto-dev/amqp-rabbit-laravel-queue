@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace DummyNamespace;
 
-    use Illuminate\Bus\Queueable;
+use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 class DummyClass
@@ -19,7 +19,7 @@ class DummyClass
     public $tries = 5;
 
     /**
-     * DummyClass constructor.
+     * Create a new job instance.
      */
     public function __construct()
     {
