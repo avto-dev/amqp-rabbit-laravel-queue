@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use Illuminate\Queue\QueueManager;
-use Illuminate\Container\Container;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Queue\Worker as IlluminateWorker;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
@@ -34,6 +34,7 @@ class ServiceProvider extends IlluminateServiceProvider
     public function register(): void
     {
         $this->overrideFailedJobService();
+        $this->registerQueueWorker();
         $this->overrideQueueWorker();
 
         if ($this->app->runningInConsole()) {
@@ -65,7 +66,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->app->extend(
             'queue.failer',
-            function ($original_service, Container $container): FailedJobProviderInterface {
+            static function ($original_service, Container $container): FailedJobProviderInterface {
                 $config = (array) $container->make(ConfigRepository::class)->get('queue.failed');
 
                 if (isset($config['connection'], $config['queue_id'])) {
@@ -82,6 +83,25 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
+     * Register our queue worker.
+     *
+     * @return void
+     */
+    protected function registerQueueWorker(): void
+    {
+        $this->app->singleton(Worker::class, function (Container $container): Worker {
+            return new Worker(...[
+                $container->make('queue'),
+                $container->make('events'),
+                $container->make(ExceptionHandler::class),
+                function () { // Required since illuminate/queue ^6.0
+                    return $this->app->isDownForMaintenance();
+                },
+            ]);
+        });
+    }
+
+    /**
      * Override original queue worker.
      *
      * @return void
@@ -90,7 +110,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->app->extend(
             'queue.worker',
-            function (IlluminateWorker $worker, Container $container): IlluminateWorker {
+            static function (IlluminateWorker $worker, Container $container): IlluminateWorker {
                 return $container->make(Worker::class);
             }
         );
@@ -105,7 +125,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->app->extend(
             'command.queue.work',
-            function (IlluminateWorkCommand $original_command, Container $container): IlluminateWorkCommand {
+            static function (IlluminateWorkCommand $command, Container $container): IlluminateWorkCommand {
                 return $container->make(WorkCommand::class);
             }
         );
@@ -120,7 +140,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->app->extend(
             'command.job.make',
-            function (IlluminateJobMakeCommand $original_command, Container $container): IlluminateJobMakeCommand {
+            static function (IlluminateJobMakeCommand $command, Container $container): IlluminateJobMakeCommand {
                 return $container->make(JobMakeCommand::class);
             }
         );
@@ -133,7 +153,7 @@ class ServiceProvider extends IlluminateServiceProvider
      *
      * @return void
      */
-    protected function bootQueueDriver($queue): void
+    protected function bootQueueDriver(QueueManager $queue): void
     {
         $queue->addConnector(Connector::NAME, function (): IlluminateQueueConnector {
             return $this->app->make(Connector::class);

@@ -13,6 +13,9 @@ use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedStateDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
+/**
+ * @group  usesExternalServices
+ */
 class WithJobStateTraitTest extends AbstractTestCase
 {
     use WithTemporaryRabbitConnectionTrait;

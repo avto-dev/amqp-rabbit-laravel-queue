@@ -27,6 +27,11 @@ class ServiceProviderTest extends AbstractTestCase
     use WithTemporaryRabbitConnectionTrait;
 
     /**
+     * @var bool
+     */
+    public $disable_rabbitmq_temporary = true;
+
+    /**
      * @small
      *
      * @return void

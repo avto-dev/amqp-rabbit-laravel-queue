@@ -30,7 +30,7 @@ class DummyClass implements ShouldQueue, PrioritizedJobInterface
     protected $priority = 0;
 
     /**
-     * DummyClass constructor.
+     * Create a new job instance.
      */
     public function __construct()
     {

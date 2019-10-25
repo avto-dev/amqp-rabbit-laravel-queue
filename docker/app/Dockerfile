@@ -1,6 +1,6 @@
 FROM composer:1.8.5 AS composer
 
-FROM php:7.1.3-alpine
+FROM php:7.2.23-alpine
 
 ENV \
     # <https://github.com/alanxz/rabbitmq-c>

@@ -20,6 +20,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Queue<extended>
  *
  * @group  queue
+ * @group  usesExternalServices
  */
 class QueueTest extends AbstractTestCase
 {

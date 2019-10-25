@@ -20,6 +20,11 @@ class ConnectorTest extends AbstractTestCase
     use WithTemporaryRabbitConnectionTrait;
 
     /**
+     * @var bool
+     */
+    public $disable_rabbitmq_temporary = true;
+
+    /**
      * @var Connector
      */
     protected $connector;
