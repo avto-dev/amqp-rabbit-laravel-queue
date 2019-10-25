@@ -89,15 +89,15 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function registerQueueWorker(): void
     {
-        $this->app->bind(Worker::class, function (Container $container): Worker {
-            return new Worker(
+        $this->app->singleton(Worker::class, function (Container $container): Worker {
+            return new Worker(...[
                 $container->make('queue'),
                 $container->make('events'),
                 $container->make(ExceptionHandler::class),
-                function () {
+                function () { // Required since illuminate/queue ^6.0
                     return $this->app->isDownForMaintenance();
-                }
-            );
+                },
+            ]);
         });
     }
 
