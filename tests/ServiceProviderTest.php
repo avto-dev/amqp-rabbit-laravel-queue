@@ -20,13 +20,16 @@ use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @group  usesExternalServices
- *
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider<extended>
  */
 class ServiceProviderTest extends AbstractTestCase
 {
     use WithTemporaryRabbitConnectionTrait;
+
+    /**
+     * @var bool
+     */
+    public $disable_rabbitmq_temporary = true;
 
     /**
      * @small
