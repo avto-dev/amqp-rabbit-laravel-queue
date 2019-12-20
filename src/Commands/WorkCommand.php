@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Commands;
 
-use Illuminate\Contracts\Queue\Job;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Contracts\Queue\Job;
 
 /**
  * You should NOT register this command in console kernel.

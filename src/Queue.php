@@ -5,16 +5,16 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use DateTime;
-use RuntimeException;
+use Enqueue\AmqpExt\AmqpConsumer as Consumer;
+use Enqueue\AmqpExt\AmqpContext as Context;
+use Enqueue\AmqpExt\AmqpProducer as Producer;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Support\Str;
+use Interop\Amqp\AmqpMessage as Message;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
-use Illuminate\Container\Container;
-use Interop\Amqp\AmqpMessage as Message;
-use Enqueue\AmqpExt\AmqpContext as Context;
-use Enqueue\AmqpExt\AmqpConsumer as Consumer;
-use Enqueue\AmqpExt\AmqpProducer as Producer;
-use Illuminate\Contracts\Queue\Queue as QueueContract;
+use RuntimeException;
 
 class Queue extends \Illuminate\Queue\Queue implements QueueContract
 {

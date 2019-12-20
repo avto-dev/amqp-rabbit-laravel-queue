@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use RuntimeException;
-use Illuminate\Support\Str;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
-use Illuminate\Queue\InteractsWithQueue;
 use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
-use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedStateDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * @group  usesExternalServices

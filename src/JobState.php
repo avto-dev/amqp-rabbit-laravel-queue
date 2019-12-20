@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use Closure;
-use InvalidArgumentException;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 class JobState extends Collection implements JobStateInterface
 {

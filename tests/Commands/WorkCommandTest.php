@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Commands;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Worker;
-use Symfony\Component\Console\Input\InputOption;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
+use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand<extended>

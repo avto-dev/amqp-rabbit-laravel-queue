@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
+use Enqueue\AmqpExt\AmqpConsumer as Consumer;
+use Enqueue\AmqpExt\AmqpContext as Context;
+use Enqueue\AmqpExt\AmqpProducer as Producer;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Queue\Job as JobContract;
+use Interop\Amqp\AmqpMessage as Message;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
-use Illuminate\Container\Container;
-use Interop\Amqp\AmqpMessage as Message;
-use Enqueue\AmqpExt\AmqpContext as Context;
-use Enqueue\AmqpExt\AmqpConsumer as Consumer;
-use Enqueue\AmqpExt\AmqpProducer as Producer;
-use Illuminate\Contracts\Queue\Job as JobContract;
 
 class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
 {

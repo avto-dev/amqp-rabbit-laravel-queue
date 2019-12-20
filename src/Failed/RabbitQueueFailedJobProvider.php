@@ -4,17 +4,17 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Failed;
 
-use DateTime;
-use stdClass;
-use Exception;
-use Throwable;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
-use Interop\Amqp\AmqpQueue as Queue;
-use Interop\Amqp\AmqpMessage as Message;
+use DateTime;
 use Enqueue\AmqpExt\AmqpContext as Context;
+use Exception;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Queue\Failed\FailedJobProviderInterface;
+use Illuminate\Support\Str;
+use Interop\Amqp\AmqpMessage as Message;
+use Interop\Amqp\AmqpQueue as Queue;
+use stdClass;
+use Throwable;
 
 /**
  * @see \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider::overrideFailedJobService()

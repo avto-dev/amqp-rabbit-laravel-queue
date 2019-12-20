@@ -4,17 +4,17 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use DateTime;
-use Mockery as m;
-use Interop\Amqp\AmqpQueue;
-use Interop\Amqp\AmqpTopic;
-use Interop\Amqp\AmqpMessage as Message;
 use AvtoDev\AmqpRabbitLaravelQueue\Queue;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use DateTime;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use Interop\Amqp\AmqpMessage as Message;
+use Interop\Amqp\AmqpQueue;
+use Interop\Amqp\AmqpTopic;
+use Mockery as m;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Queue<extended>

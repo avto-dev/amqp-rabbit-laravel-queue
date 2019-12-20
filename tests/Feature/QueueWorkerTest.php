@@ -5,13 +5,13 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedState;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedStateDelay;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJobWithState;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithDelay;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedState;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobWithSavedStateDelay;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
 
 /**
  * @group feature

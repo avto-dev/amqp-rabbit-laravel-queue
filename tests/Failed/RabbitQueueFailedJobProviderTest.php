@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Failed;
 
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpMessage as Message;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider<extended>
@@ -140,7 +140,8 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertNull($this->provider->find('foo'));
         $this->assertNull($this->provider->find([]));
         $this->assertNull($this->provider->find(new \stdClass));
-        $this->assertNull($this->provider->find(function () {}));
+        $this->assertNull($this->provider->find(function () {
+        }));
         $this->assertNull($this->provider->find(true));
         $this->assertNull($this->provider->find(false));
     }
@@ -254,7 +255,8 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertFalse($this->provider->forget('foo'));
         $this->assertFalse($this->provider->forget([]));
         $this->assertFalse($this->provider->forget(new \stdClass));
-        $this->assertFalse($this->provider->forget(function () {}));
+        $this->assertFalse($this->provider->forget(function () {
+        }));
         $this->assertFalse($this->provider->forget(true));
         $this->assertFalse($this->provider->forget(false));
     }

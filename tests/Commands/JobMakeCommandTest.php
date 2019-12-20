@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Commands;
 
-use Illuminate\Filesystem\Filesystem;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
+use Illuminate\Filesystem\Filesystem;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand<extended>
