@@ -130,6 +130,19 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertSame($message_body2, $found->payload);
         $this->assertSame((string) $exception2, $found->exception);
         $this->assertInstanceOf(Carbon::class, $found->failed_at);
+
+        // Check if required message id has string type
+        $found_by_string = $this->provider->find((string) $id2);
+        $this->assertSame($id2, $found_by_string->id);
+
+        // Check with some unexpected parameters
+        $this->assertNull($this->provider->find(null));
+        $this->assertNull($this->provider->find('foo'));
+        $this->assertNull($this->provider->find([]));
+        $this->assertNull($this->provider->find(new \stdClass));
+        $this->assertNull($this->provider->find(function () {}));
+        $this->assertNull($this->provider->find(true));
+        $this->assertNull($this->provider->find(false));
     }
 
     /**
@@ -223,6 +236,27 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
 
         $this->assertSame($id1, $all[0]->id);
         $this->assertSame($id3, $all[1]->id);
+
+        // Check if required message id has string type
+        $id4 = $this->provider->log(
+            Str::random(),
+            Str::random(),
+            Str::random(),
+            new \Exception(Str::random())
+        );
+
+        $this->assertSame(3, $this->provider->count());
+        $this->assertTrue($this->provider->forget((string) $id4));
+        $this->assertSame(2, $this->provider->count());
+
+        // Check with some unexpected parameters
+        $this->assertFalse($this->provider->forget(null));
+        $this->assertFalse($this->provider->forget('foo'));
+        $this->assertFalse($this->provider->forget([]));
+        $this->assertFalse($this->provider->forget(new \stdClass));
+        $this->assertFalse($this->provider->forget(function () {}));
+        $this->assertFalse($this->provider->forget(true));
+        $this->assertFalse($this->provider->forget(false));
     }
 
     /**
