@@ -2,14 +2,14 @@
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use ReflectionFunction;
-use ReflectionException;
-use Illuminate\Foundation\Application;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
-use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use ReflectionException;
+use ReflectionFunction;
 
 abstract class AbstractTestCase extends BaseTestCase
 {

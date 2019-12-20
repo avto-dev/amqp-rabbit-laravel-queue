@@ -4,21 +4,21 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use Mockery as m;
-use Illuminate\Support\Str;
+use AvtoDev\AmqpRabbitLaravelQueue\Connector;
+use AvtoDev\AmqpRabbitLaravelQueue\Queue;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
+use Illuminate\Queue\Connectors\ConnectorInterface as IlluminateQueueConnector;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Queue\WorkerOptions;
-use AvtoDev\AmqpRabbitLaravelQueue\Queue;
-use Illuminate\Queue\Events\JobProcessed;
-use AvtoDev\AmqpRabbitLaravelQueue\Worker;
-use Illuminate\Queue\Events\JobProcessing;
-use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\SimpleQueueJob;
-use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\QueueJobThatThrowsException;
-use Illuminate\Queue\Connectors\ConnectorInterface as IlluminateQueueConnector;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use Illuminate\Support\Str;
+use Mockery as m;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Worker<extended>

@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Listeners;
 
-use Illuminate\Support\Str;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
+use Illuminate\Support\Str;
 
 /**
  * @group listeners

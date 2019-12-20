@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 
 class SimpleQueueJob implements ShouldQueue
 {

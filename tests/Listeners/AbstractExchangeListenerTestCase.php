@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Listeners;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\AbstractExchangeBindListener;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 
 abstract class AbstractExchangeListenerTestCase extends AbstractTestCase
 {

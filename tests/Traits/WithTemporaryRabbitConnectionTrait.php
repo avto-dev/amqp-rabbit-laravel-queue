@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits;
 
+use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
+use AvtoDev\AmqpRabbitManager\ExchangesFactoryInterface;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use Enqueue\AmqpExt\AmqpContext;
 use Illuminate\Support\Str;
 use Interop\Amqp\AmqpQueue;
-use Enqueue\AmqpExt\AmqpContext;
 use Interop\Amqp\Impl\AmqpTopic;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
-use AvtoDev\AmqpRabbitManager\ExchangesFactoryInterface;
-use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 
 /**
  * @property \Illuminate\Foundation\Application app
