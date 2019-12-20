@@ -120,7 +120,7 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     public function find($id)
     {
         foreach ($this->all() as $job) {
-            if (\property_exists($job, 'id') && $job->id === $id) {
+            if (\property_exists($job, 'id') && \is_numeric($id) && ((int) $job->id) === ((int) $id)) {
                 return $job;
             }
         }
@@ -162,17 +162,20 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     {
         $deleted_count = 0;
 
-        $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
-            $message_id = $message->getMessageId();
+        if (\is_numeric($id)) {
+            $id = (int) $id;
+            $this->filterMessagesInQueue($this->queue, function (Message $message) use (&$id, &$deleted_count): bool {
+                $message_id = $message->getMessageId();
 
-            if (! empty($message_id) && ((int) $message_id) === $id) {
-                $deleted_count++;
+                if (! empty($message_id) && ((int) $message_id) === $id) {
+                    $deleted_count++;
 
-                return false;
-            }
+                    return false;
+                }
 
-            return true;
-        });
+                return true;
+            });
+        }
 
         return $deleted_count > 0;
     }

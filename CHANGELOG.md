@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## v2.3.1
+
+### Changed
+
+- Disable `alpha_ordering_imports` rule for `StyleCI`
+
+### Fixed
+
+- Fixed bug with impossibility to retry or forget failed job by ID [#12]
+
+[#12]:https://github.com/avto-dev/amqp-rabbit-laravel-queue/issues/12
+
 ## v2.3.0
 
 ### Changed
