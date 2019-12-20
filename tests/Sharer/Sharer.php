@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer;
 
 use Exception;
-use Illuminate\Filesystem\Filesystem;
 use Throwable;
+use Illuminate\Filesystem\Filesystem;
 
 class Sharer
 {

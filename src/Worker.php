@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-use Enqueue\AmqpExt\AmqpConsumer as Consumer;
-use Enqueue\AmqpExt\AmqpContext as Context;
+use Throwable;
 use Illuminate\Queue\WorkerOptions;
 use Interop\Amqp\AmqpMessage as Message;
+use Enqueue\AmqpExt\AmqpContext as Context;
+use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
-use Throwable;
 
 class Worker extends \Illuminate\Queue\Worker
 {

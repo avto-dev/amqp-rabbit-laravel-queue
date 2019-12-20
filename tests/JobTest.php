@@ -4,18 +4,18 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use Mockery as m;
+use Illuminate\Support\Str;
+use Interop\Amqp\AmqpTopic;
+use InvalidArgumentException;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
-use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use Interop\Amqp\AmqpMessage as Message;
+use Interop\Amqp\Impl\AmqpQueue as Queue;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
 use Enqueue\AmqpExt\AmqpProducer as Producer;
 use Illuminate\Contracts\Queue\Job as JobContract;
-use Illuminate\Support\Str;
-use Interop\Amqp\AmqpMessage as Message;
-use Interop\Amqp\AmqpTopic;
-use Interop\Amqp\Impl\AmqpQueue as Queue;
-use InvalidArgumentException;
-use Mockery as m;
+use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Job<extended>

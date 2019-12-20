@@ -4,25 +4,25 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
-use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
-use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
-use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
-use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
-use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Queue\QueueManager;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Queue\Worker as IlluminateWorker;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use Illuminate\Queue\Failed\FailedJobProviderInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
+use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
+use Illuminate\Queue\Console\WorkCommand as IlluminateWorkCommand;
+use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use Illuminate\Foundation\Console\JobMakeCommand as IlluminateJobMakeCommand;
 use Illuminate\Queue\Connectors\ConnectorInterface as IlluminateQueueConnector;
-use Illuminate\Queue\Console\WorkCommand as IlluminateWorkCommand;
-use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Queue\Failed\FailedJobProviderInterface;
-use Illuminate\Queue\QueueManager;
-use Illuminate\Queue\Worker as IlluminateWorker;
-use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 
 class ServiceProvider extends IlluminateServiceProvider
 {

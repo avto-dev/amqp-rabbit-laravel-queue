@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Filesystem\Filesystem;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
+use Illuminate\Contracts\Bus\Dispatcher;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 
 abstract class AbstractFeatureTest extends AbstractTestCase
 {

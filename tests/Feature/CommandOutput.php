@@ -3,8 +3,8 @@
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Feature;
 
 use Exception;
-use Illuminate\Support\Collection;
 use Throwable;
+use Illuminate\Support\Collection;
 
 class CommandOutput extends Collection
 {

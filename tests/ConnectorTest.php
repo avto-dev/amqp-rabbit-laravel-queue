@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use AvtoDev\AmqpRabbitLaravelQueue\Queue;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
-use Illuminate\Queue\Connectors\ConnectorInterface;
 use InvalidArgumentException;
+use AvtoDev\AmqpRabbitLaravelQueue\Queue;
+use AvtoDev\AmqpRabbitLaravelQueue\Connector;
+use Illuminate\Queue\Connectors\ConnectorInterface;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\Connector<extended>

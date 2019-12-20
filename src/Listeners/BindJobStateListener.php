@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Listeners;
 
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
-use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Contracts\Container\Container;
+use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 
 class BindJobStateListener
 {

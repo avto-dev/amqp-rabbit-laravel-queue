@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Listeners;
 
-use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 use Exception;
 use Interop\Amqp\Impl\AmqpBind;
+use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 
 class RemoveExchangeBind extends AbstractExchangeBindListener
 {

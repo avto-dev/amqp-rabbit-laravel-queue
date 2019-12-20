@@ -4,11 +4,11 @@ declare(strict_types = 1);
 
 namespace Tests\Unit\AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use Serializable;
+use InvalidArgumentException;
 use AvtoDev\AmqpRabbitLaravelQueue\JobState;
 use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
-use InvalidArgumentException;
-use Serializable;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\JobState<extended>

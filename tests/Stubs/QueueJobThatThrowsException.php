@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 use Illuminate\Contracts\Events\Dispatcher;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 
 class QueueJobThatThrowsException extends SimpleQueueJob
 {

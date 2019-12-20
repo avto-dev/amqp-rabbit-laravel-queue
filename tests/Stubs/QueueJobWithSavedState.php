@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
-use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Events\Dispatcher;
+use AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Sharer\Sharer;
 
 class QueueJobWithSavedState extends SimpleQueueJob
 {

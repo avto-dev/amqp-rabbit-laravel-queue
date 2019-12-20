@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Listeners;
 
+use Illuminate\Support\Str;
 use AvtoDev\AmqpRabbitLaravelQueue\Job;
+use Illuminate\Queue\Events\JobProcessing;
 use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
-use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Support\Str;
 
 /**
  * @group  listeners

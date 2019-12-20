@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
-use AvtoDev\AmqpRabbitManager\ExchangesFactoryInterface;
-use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Queue as QueueContract;
 use InvalidArgumentException;
+use Illuminate\Container\Container;
+use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
+use Illuminate\Contracts\Queue\Queue as QueueContract;
+use AvtoDev\AmqpRabbitManager\ExchangesFactoryInterface;
+use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
 
 class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
 {

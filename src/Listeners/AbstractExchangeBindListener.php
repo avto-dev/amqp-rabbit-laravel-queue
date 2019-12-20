@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Listeners;
 
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
 
 abstract class AbstractExchangeBindListener
