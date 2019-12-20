@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ## v2.3.1
 
+### Changed
+
+- Disable `alpha_ordering_imports` rule for `StyleCI`
+
 ### Fixed
 
 - Fixed bug with impossibility to retry or forget failed job by ID [#12]
