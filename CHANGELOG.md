@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## v2.4.0
+
+### Changed
+
+- Updated version of `rabbitmq-c` lib in docker container to `v0.10.0`
+
 ## v2.3.0
 
 ### Changed
