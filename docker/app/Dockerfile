@@ -4,7 +4,7 @@ FROM php:7.2.23-alpine
 
 ENV \
     # <https://github.com/alanxz/rabbitmq-c>
-    RABBITMQ_VERSION="0.9.0" \
+    RABBITMQ_VERSION="0.10.0" \
     # ext-amqp <https://github.com/pdezwart/php-amqp>
     PHP_AMQP_VERSION="1.9.4" \
     COMPOSER_ALLOW_SUPERUSER="1" \
