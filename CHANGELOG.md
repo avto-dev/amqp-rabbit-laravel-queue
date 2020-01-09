@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 ### Changed
 
 - Updated version of `rabbitmq-c` lib in docker container to `v0.10.0`
+- Enabled `StyleCI` `length_ordered_imports` rule
+- Disabled `StyleCI` `alpha_ordered_imports` rule
 
 ## v2.3.0
 
