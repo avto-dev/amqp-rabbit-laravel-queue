@@ -101,7 +101,7 @@ abstract class AbstractFeatureTest extends AbstractTestCase
                                     ?float $process_timeout = null,
                                     ?array $env = null): array
     {
-        $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', $process_timeout ?? 0.65);
+        $process_timeout = (float) env('ARTISAN_PROCESS_TIMEOUT', $process_timeout ?? 1.5);
 
         $standard_output = new CommandOutput;
         $errors_output   = new CommandOutput;

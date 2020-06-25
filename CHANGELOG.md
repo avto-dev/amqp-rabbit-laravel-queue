@@ -4,11 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
-## UNRELEASED
+## v2.4.0
 
 ### Changed
 
-- Updated version of `rabbitmq-c` lib in docker container to `v0.10.0`
+- Maximal `illuminate/*` package versions now is `7.*`
+- Returning values in methods `serialize` and `unserialize` in `JobState` now type-hinted
+- Method `put` in `JobState` now returns self instance (instead null)
+- Minimal required PHP version now is `7.2`
+- Version of `rabbitmq-c` lib in docker container updated up to `0.10.0`
+- Version of `php-amqp` lib in docker container updated up to `1.10.2`
+- Minimal required `symfony/console` version now is `^4.4` _(reason: <https://github.com/symfony/symfony/issues/32750>)_
+- CI completely moved from "Travis CI" to "Github Actions" _(travis builds disabled)_
+
+### Added
+
+- PHP 7.4 is supported now
 
 ## v2.3.1
 
