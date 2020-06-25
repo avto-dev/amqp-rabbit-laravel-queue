@@ -1,0 +1,19 @@
+FROM alpine:latest as downloader
+
+ENV PLUGIN_VERSION="20171201"
+
+RUN set -xe \
+    && apk add --no-cache curl unzip \
+    && mkdir /tmp/rabbitmq_delayed_message_exchange \
+    && curl -L https://dl.bintray.com/rabbitmq/community-plugins/3.7.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-${PLUGIN_VERSION}-3.7.x.zip -o /tmp/plugin.zip \
+    && unzip /tmp/plugin.zip -d /tmp/plugin \
+    && ls -l /tmp/plugin
+
+FROM rabbitmq:3.7-management-alpine
+
+COPY --from=downloader /tmp/plugin/*.ez /opt/rabbitmq/plugins/
+
+RUN set -x \
+    && rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange \
+    && rabbitmq-plugins enable --offline rabbitmq_consistent_hash_exchange \
+    && rabbitmq-plugins list

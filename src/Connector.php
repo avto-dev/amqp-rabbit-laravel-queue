@@ -58,9 +58,13 @@ class Connector implements \Illuminate\Queue\Connectors\ConnectorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Establish a queue connection.
+     *
+     * @param array<string, mixed> $config
      *
      * @throws InvalidArgumentException
+     *
+     * @return QueueContract
      */
     public function connect(array $config): QueueContract
     {

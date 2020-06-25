@@ -30,7 +30,7 @@ abstract class AbstractExchangeBindListener
     /**
      * Array KEY is delayed jobs exchange ID, and its VALUE is jobs queue ID.
      *
-     * @var string[]
+     * @var array<string, string>
      */
     protected $bindings_map;
 
@@ -65,7 +65,7 @@ abstract class AbstractExchangeBindListener
      *
      * @param string $key
      *
-     * @return array
+     * @return array<string, string>
      */
     protected function getBindingsMap(string $key = 'queue.connections'): array
     {

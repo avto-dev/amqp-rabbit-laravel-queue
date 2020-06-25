@@ -1,0 +1,10 @@
+parameters:
+  level: 'max'
+  ignoreErrors:
+    - # dirty hack
+      message: '~__construct\(\) expects~'
+      paths:
+        - src/Commands/WorkCommand.php
+  reportUnmatchedIgnoredErrors: false
+  paths:
+    - src
