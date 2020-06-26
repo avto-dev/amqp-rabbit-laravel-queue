@@ -9,7 +9,7 @@ interface JobStateInterface extends Serializable
     /**
      * Get all items from the state.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function all();
 
@@ -37,6 +37,8 @@ interface JobStateInterface extends Serializable
      *
      * @param string $key
      * @param mixed  $value
+     *
+     * @return mixed
      */
     public function put($key, $value);
 
@@ -51,6 +53,8 @@ interface JobStateInterface extends Serializable
      * Remove an item from the state by key.
      *
      * @param string $key
+     *
+     * @return mixed
      */
     public function forget($key);
 }

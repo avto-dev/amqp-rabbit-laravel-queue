@@ -12,7 +12,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
+      dockerfile: Dockerfile
     volumes:
       - /etc/passwd:/etc/passwd:ro
       - /etc/group:/etc/group:ro
@@ -25,8 +25,8 @@ services:
 
   rabbitmq:
     build:
-      context: ./docker/rabbitmq
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest

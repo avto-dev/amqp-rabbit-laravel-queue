@@ -2,13 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Tests\Unit\AvtoDev\AmqpRabbitLaravelQueue\Tests;
+namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Serializable;
 use InvalidArgumentException;
 use AvtoDev\AmqpRabbitLaravelQueue\JobState;
 use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\JobState<extended>
@@ -98,7 +97,7 @@ class JobStateTest extends AbstractTestCase
     public function testPutMethod(): void
     {
         foreach (['item_name', 'foo', 'bar', 23] as $item) {
-            $this->assertNull($this->instance->put($item, [$item]));
+            $this->assertInstanceOf(\get_class($this->instance), $this->instance->put($item, [$item]));
             $this->assertSame([$item], $this->instance->get($item));
         }
     }

@@ -11,25 +11,36 @@ use Illuminate\Support\Collection;
 class JobState extends Collection implements JobStateInterface
 {
     /**
-     * {@inheritdoc}
+     * String representation of object.
+     *
+     * @return string
      */
-    public function serialize()
+    public function serialize(): string
     {
         return \serialize($this->items);
     }
 
     /**
-     * {@inheritdoc}
+     * Constructs the object.
+     *
+     * @param string $serialized
+     *
+     * @return void
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
-        $this->items = \unserialize($serialized);
+        $this->items = \unserialize($serialized, ['allowed_classes' => true]);
     }
 
     /**
-     * {@inheritdoc}
+     * Put an item in the state by key.
      *
-     * @throws InvalidArgumentException If the type of the value is a Resource or a Closure
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @throws InvalidArgumentException If value type has wrong type
+     *
+     * @return self<string, mixed>
      */
     public function put($key, $value)
     {
@@ -37,6 +48,6 @@ class JobState extends Collection implements JobStateInterface
             throw new InvalidArgumentException('Wrong value passed');
         }
 
-        parent::put($key, $value);
+        return parent::put($key, $value);
     }
 }

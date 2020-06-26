@@ -112,7 +112,11 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
-     * {@inheritdoc}
+     * @param string               $payload
+     * @param string|null          $queue
+     * @param array<string, mixed> $options
+     *
+     * @return void
      */
     public function pushRaw($payload, $queue = null, array $options = []): void
     {

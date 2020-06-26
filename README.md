@@ -5,7 +5,7 @@
 # RabbitMQ-based Laravel queue driver
 
 [![Version][badge_packagist_version]][link_packagist]
-[![Version][badge_php_version]][link_packagist]
+[![PHP Version][badge_php_version]][link_packagist]
 [![Build Status][badge_build_status]][link_build_status]
 [![Coverage][badge_coverage]][link_coverage]
 [![Downloads count][badge_downloads_count]][link_packagist]
@@ -13,11 +13,9 @@
 
 This package allows to use RabbitMQ queues for queued Laravel (prioritized) jobs. Fully configurable.
 
-Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./docker/app/Dockerfile).
+Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./Dockerfile).
 
 For jobs delaying you also should install [`rabbitmq-delayed-message-exchange`][link_rabbitmq_delayed_message_exchange] plugin for RabbitMQ. Delaying is optional feature.
-
-> **Important:** Make sure `opcache` is disabled for CLI in your `php.ini` file (`opcache.enable_cli = "Off"`).
 
 ## Install
 
@@ -31,21 +29,7 @@ $ composer require avto-dev/amqp-rabbit-laravel-queue "^2.0"
 
 > Installed `composer` is required ([how to install composer][getcomposer]). Also you need to fix the major version of package.
 
-Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to manually register the service-provider.
-
-> If you wants to disable package service-provider auto discover, just add into your `composer.json` next lines:
->
-> ```json
-> {
->     "extra": {
->         "laravel": {
->             "dont-discover": [
->                 "avto-dev/amqp-rabbit-laravel-queue"
->             ]
->         }
->     }
-> }
-> ```
+> You need to fix the major version of package.
 
 After that you should modify your configuration files:
 
@@ -64,7 +48,7 @@ return [
     // ...
 
     'queues' => [
-    
+
         'jobs' => [
             'name'         => env('JOBS_QUEUE_NAME', 'jobs'),
             'flags'        => AmqpQueue::FLAG_DURABLE, // Remain queue active when a server restarts
@@ -73,7 +57,7 @@ return [
             ],
             'consumer_tag' => null,
         ],
-        
+
         'failed' => [
             'name'         => env('FAILED_JOBS_QUEUE_NAME', 'failed-jobs'),
             'flags'        => AmqpQueue::FLAG_DURABLE,
@@ -83,13 +67,13 @@ return [
             ],
             'consumer_tag' => null,
         ],
-        
+
     ],
 
     // ...
 
     'exchanges' => [
-        
+
         // RabbitMQ Delayed Message Plugin is required (@link: <https://git.io/fj4SE>)
         'delayed-jobs' => [
             'name'      => env('DELAYED_JOBS_EXCHANGE_NAME', 'jobs.delayed'),
@@ -99,7 +83,7 @@ return [
                 'x-delayed-type' => AmqpTopic::TYPE_DIRECT,
             ],
         ],
-        
+
     ],
 
     // ...
@@ -107,7 +91,7 @@ return [
     'setup' => [
         'rabbit-default' => [
             'queues' => [
-                'jobs', 
+                'jobs',
                 'failed',
             ],
             'exchanges' => [
@@ -120,7 +104,7 @@ return [
 
 ### `./config/queue.php`
 
-Laravel queue settings: 
+Laravel queue settings:
 
 ```php
 <?php
@@ -128,17 +112,17 @@ Laravel queue settings:
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 
 return [
-    
+
     // ...
-    
+
     'default' => env('QUEUE_DRIVER', 'rabbitmq'),
 
     // ...
 
     'connections' => [
-        
+
         // ...
-        
+
         'rabbitmq' => [
             'driver'              => Connector::NAME,
             'connection'          => 'rabbit-default',
@@ -184,7 +168,7 @@ You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->
 - The ability to store the state of `job`
 
 #### State storing
- 
+
 Using this package you can store any valiables (except resources and callable entities) between job restarts (just use trait `WithJobStateTrait` in your job class). But you should remember - state is available only inside job `handle` method.
 
 ### :warning: Warning
@@ -226,7 +210,7 @@ This is open-sourced software licensed under the [MIT License][link_license].
 
 [badge_packagist_version]:https://img.shields.io/packagist/v/avto-dev/amqp-rabbit-laravel-queue.svg?maxAge=180
 [badge_php_version]:https://img.shields.io/packagist/php-v/avto-dev/amqp-rabbit-laravel-queue.svg?longCache=true
-[badge_build_status]:https://travis-ci.org/avto-dev/amqp-rabbit-laravel-queue.svg?branch=master
+[badge_build_status]:https://img.shields.io/github/workflow/status/avto-dev/amqp-rabbit-laravel-queue/tests/master
 [badge_coverage]:https://img.shields.io/codecov/c/github/avto-dev/amqp-rabbit-laravel-queue/master.svg?maxAge=60
 [badge_downloads_count]:https://img.shields.io/packagist/dt/avto-dev/amqp-rabbit-laravel-queue.svg?maxAge=180
 [badge_license]:https://img.shields.io/packagist/l/avto-dev/amqp-rabbit-laravel-queue.svg?longCache=true

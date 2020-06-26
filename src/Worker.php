@@ -14,7 +14,13 @@ use Symfony\Component\Debug\Exception\FatalThrowableError;
 class Worker extends \Illuminate\Queue\Worker
 {
     /**
-     * {@inheritdoc}
+     * Listen to the given queue in a loop.
+     *
+     * @param string        $connectionName
+     * @param string        $queue_names
+     * @param WorkerOptions $options
+     *
+     * @return void
      */
     public function daemon($connectionName, $queue_names, WorkerOptions $options): void
     {

@@ -72,7 +72,14 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     }
 
     /**
-     * {@inheritdoc}
+     * Log a failed job into storage.
+     *
+     * @param string    $connection_name
+     * @param string    $queue_name
+     * @param string    $message_body
+     * @param Exception $exception
+     *
+     * @return int|null
      */
     public function log($connection_name, $queue_name, $message_body, $exception)
     {
@@ -127,13 +134,13 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     }
 
     /**
-     * {@inheritdoc}
+     * Get a list of all of the failed jobs.
      *
      * @throws Throwable
      *
-     * @return array|object[]
+     * @return array<object>
      */
-    public function all()
+    public function all(): array
     {
         $result = [];
 

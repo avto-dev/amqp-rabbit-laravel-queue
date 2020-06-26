@@ -27,11 +27,17 @@ latest: clean ## Install latest php dependencies
 lowest: clean ## Install lowest php dependencies
 	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --ansi --no-suggest --prefer-dist --prefer-lowest
 
-test: ## Execute php tests and linters
+test: up ## Execute php tests and linters
 	$(dc_bin) run $(RUN_APP_ARGS) sh -c "sleep 5 && composer test"
 
-test-cover: ## Execute php tests with coverage
-	$(dc_bin) run --rm --user "0:0" app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer phpunit-cover"'
+test-cover: up ## Execute php tests with coverage
+	$(dc_bin) run --rm --user "0:0" app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer test-cover"'
+
+up: ## Start services
+	$(dc_bin) up -d
+
+down: ## Stop services
+	$(dc_bin) down
 
 shell: ## Start shell into container with php
 	$(dc_bin) run -e "PS1=\[\033[1;32m\]\[\033[1;36m\][\u@docker] \[\033[1;34m\]\w\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]" \

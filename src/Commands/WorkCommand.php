@@ -25,12 +25,12 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
     {
         // Override default timeout value ('60' to '-1')
         $this->signature = (string) \preg_replace(
-            '~(\-\-timeout=)\d+~', '$1-1', $this->signature
+            '~(--timeout=)\d+~', '$1-1', $this->signature
         );
 
         // Mark 'sleep' option as not used
         $this->signature = (string) \preg_replace(
-            '~(\-\-sleep.*)\}~', '$1 <options=bold>(not used)</> }', $this->signature
+            '~(--sleep.*)}~', '$1 <options=bold>(not used)</> }', $this->signature
         );
 
         // Constructor signature in parent class changed since 6.0:
@@ -41,6 +41,8 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
         // - https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Console/WorkCommand.php#L54
         // Since ^6.0 - two arguments:
         // - https://github.com/laravel/framework/blob/v6.0.0/src/Illuminate/Queue/Console/WorkCommand.php#L63
+        // - https://github.com/laravel/framework/blob/v7.0.0/src/Illuminate/Queue/Console/WorkCommand.php#L62
+        //        parent::{'__construct'}(...[$worker, $cache]);
         parent::__construct(...[$worker, $cache]);
     }
 
@@ -75,11 +77,16 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
     }
 
     /**
-     * {@inheritdoc}
+     * Run the worker instance.
+     *
+     * @param string $connection
+     * @param string $queue
+     *
+     * @return array<mixed>
      *
      * @codeCoverageIgnore
      */
-    protected function runWorker($connection, $queue)
+    protected function runWorker($connection, $queue): array
     {
         $this->info('Queue worker started. Press "CTRL+C" to exit');
 
