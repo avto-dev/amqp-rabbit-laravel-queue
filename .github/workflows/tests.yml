@@ -15,7 +15,7 @@ env:
   RABBIT_PORT: 5672
   RABBIT_LOGIN: live111
   RABBIT_PASSWORD: evil222
-  ARTISAN_PROCESS_TIMEOUT: 2
+  ARTISAN_PROCESS_TIMEOUT: 3
 
 jobs: # Docs: <https://git.io/JvxXE>
   php:
