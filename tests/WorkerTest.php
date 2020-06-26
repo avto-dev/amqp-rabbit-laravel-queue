@@ -123,7 +123,7 @@ class WorkerTest extends AbstractTestCase
 
         $this->assertSame(0, $queue->size());
         $queue->push(new SimpleQueueJob);
-        \usleep(1500);
+        \usleep(1800);
         $this->assertSame(1, $queue->size());
 
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, -1));
