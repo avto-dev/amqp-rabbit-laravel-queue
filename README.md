@@ -13,11 +13,9 @@
 
 This package allows to use RabbitMQ queues for queued Laravel (prioritized) jobs. Fully configurable.
 
-Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./docker/app/Dockerfile).
+Installed php extension `ext-amqp` is required. Installation steps can be found in [Dockerfile](./Dockerfile).
 
 For jobs delaying you also should install [`rabbitmq-delayed-message-exchange`][link_rabbitmq_delayed_message_exchange] plugin for RabbitMQ. Delaying is optional feature.
-
-> **Important:** Make sure `opcache` is disabled for CLI in your `php.ini` file (`opcache.enable_cli = "Off"`).
 
 ## Install
 
@@ -31,21 +29,7 @@ $ composer require avto-dev/amqp-rabbit-laravel-queue "^2.0"
 
 > Installed `composer` is required ([how to install composer][getcomposer]). Also you need to fix the major version of package.
 
-Laravel 5.5 and above uses Package Auto-Discovery, so doesn't require you to manually register the service-provider.
-
-> If you wants to disable package service-provider auto discover, just add into your `composer.json` next lines:
->
-> ```json
-> {
->     "extra": {
->         "laravel": {
->             "dont-discover": [
->                 "avto-dev/amqp-rabbit-laravel-queue"
->             ]
->         }
->     }
-> }
-> ```
+> You need to fix the major version of package.
 
 After that you should modify your configuration files:
 
