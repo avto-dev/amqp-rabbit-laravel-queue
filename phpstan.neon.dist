@@ -1,10 +1,14 @@
 parameters:
   level: 'max'
   ignoreErrors:
-    - # dirty hack
-      message: '~__construct\(\) expects~'
+    -
+      message: '~__construct\(\) invoked with \d parameters, \d required~'
       paths:
         - src/Commands/WorkCommand.php
+    -
+      message: '~constructor invoked with \d parameters, \d required~'
+      paths:
+        - src/ServiceProvider.php
   reportUnmatchedIgnoredErrors: false
   paths:
     - src
