@@ -89,7 +89,7 @@ class ServiceProviderTest extends AbstractTestCase
         $this->config()->offsetUnset('queue.failed.connection');
         $this->config()->offsetUnset('queue.failed.queue_id');
 
-        $this->assertInstanceOf(DatabaseFailedJobProvider::class, $this->app->make('queue.failer'));
+        $this->assertNotInstanceOf(RabbitQueueFailedJobProvider::class, $this->app->make('queue.failer'));
     }
 
     /**

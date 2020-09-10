@@ -72,11 +72,11 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
      * @param string $connection
      * @param string $queue
      *
-     * @return array<mixed>
+     * @return array<mixed>|int|null
      *
      * @codeCoverageIgnore
      */
-    protected function runWorker($connection, $queue): array
+    protected function runWorker($connection, $queue)
     {
         $this->info('Queue worker started. Press "CTRL+C" to exit');
 

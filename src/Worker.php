@@ -9,7 +9,6 @@ use Illuminate\Queue\WorkerOptions;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 class Worker extends \Illuminate\Queue\Worker
 {
@@ -20,9 +19,9 @@ class Worker extends \Illuminate\Queue\Worker
      * @param string        $queue_names
      * @param WorkerOptions $options
      *
-     * @return void
+     * @return void|int
      */
-    public function daemon($connectionName, $queue_names, WorkerOptions $options): void
+    public function daemon($connectionName, $queue_names, WorkerOptions $options)
     {
         $queue = $this->manager->connection($connectionName);
 
@@ -66,7 +65,7 @@ class Worker extends \Illuminate\Queue\Worker
                         } catch (Throwable $e) {
                             $consumer->reject($message); // @todo: move to the failed jobs queue?
 
-                            $this->exceptions->report($e = new FatalThrowableError($e));
+                            $this->exceptions->report($e);
                             $this->stopWorkerIfLostConnection($e);
                             $this->sleep(3);
 
@@ -101,12 +100,12 @@ class Worker extends \Illuminate\Queue\Worker
 
             $this->closeRabbitConnection($rabbit_connection);
 
-            $this->stop();
-        // @codeCoverageIgnoreStart
-        } else {
-            // Backward compatibility is our everything =)
-            parent::daemon($connectionName, $queue_names, $options);
+            return $this->stop();
         }
+
+        // Backward compatibility is our everything =)
+        // @codeCoverageIgnoreStart
+        return parent::daemon($connectionName, $queue_names, $options);
         // @codeCoverageIgnoreEnd
     }
 
