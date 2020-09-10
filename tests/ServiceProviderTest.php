@@ -8,7 +8,6 @@ use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use Illuminate\Queue\Events\JobProcessing;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
