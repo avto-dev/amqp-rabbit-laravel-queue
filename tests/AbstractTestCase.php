@@ -7,7 +7,6 @@ use ReflectionFunction;
 use ReflectionException;
 use PHPUnit\Framework\Exception;
 use Illuminate\Foundation\Application;
-use PHPUnit\Framework\InvalidArgumentException;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
@@ -124,6 +123,8 @@ abstract class AbstractTestCase extends BaseTestCase
 
     /**
      * @deprecated
+     *
+     * @param mixed $object
      */
     protected function getObjectAttributeDeprecated($object, string $attributeName)
     {
@@ -133,7 +134,7 @@ abstract class AbstractTestCase extends BaseTestCase
             try {
                 $attribute = $reflector->getProperty($attributeName);
 
-                if (!$attribute || $attribute->isPublic()) {
+                if (! $attribute || $attribute->isPublic()) {
                     return $object->$attributeName;
                 }
 
