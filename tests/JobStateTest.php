@@ -110,7 +110,7 @@ class JobStateTest extends AbstractTestCase
     public function testPutThrowsAnExceptionWhenPassedCallable(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('~Wrong value passed~i');
+        $this->expectExceptionMessageMatches('~Wrong value passed~i');
 
         $this->instance->put('foo', function (): void {
         });
@@ -124,7 +124,7 @@ class JobStateTest extends AbstractTestCase
     public function testPutThrowsAnExceptionWhenPassedResource(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('~Wrong value passed~i');
+        $this->expectExceptionMessageMatches('~Wrong value passed~i');
 
         $this->instance->put('foo', \tmpfile());
     }

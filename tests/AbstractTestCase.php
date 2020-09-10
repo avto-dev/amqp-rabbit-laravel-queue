@@ -2,9 +2,12 @@
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
+use ReflectionObject;
 use ReflectionFunction;
 use ReflectionException;
+use PHPUnit\Framework\Exception;
 use Illuminate\Foundation\Application;
+use PHPUnit\Framework\InvalidArgumentException;
 use AvtoDev\AmqpRabbitManager\QueuesFactoryInterface;
 use Illuminate\Config\Repository as ConfigRepository;
 use AvtoDev\AmqpRabbitManager\ConnectionsFactoryInterface;
@@ -117,5 +120,37 @@ abstract class AbstractTestCase extends BaseTestCase
         $property->setAccessible(true);
         $property->setValue($object, $value);
         $property->setAccessible(false);
+    }
+
+    /**
+     * @deprecated
+     */
+    protected function getObjectAttributeDeprecated($object, string $attributeName)
+    {
+        $reflector = new ReflectionObject($object);
+
+        do {
+            try {
+                $attribute = $reflector->getProperty($attributeName);
+
+                if (!$attribute || $attribute->isPublic()) {
+                    return $object->$attributeName;
+                }
+
+                $attribute->setAccessible(true);
+                $value = $attribute->getValue($object);
+                $attribute->setAccessible(false);
+
+                return $value;
+            } catch (\ReflectionException $e) {
+            }
+        } while ($reflector = $reflector->getParentClass());
+
+        throw new Exception(
+            \sprintf(
+                'Attribute "%s" not found in object.',
+                $attributeName
+            )
+        );
     }
 }

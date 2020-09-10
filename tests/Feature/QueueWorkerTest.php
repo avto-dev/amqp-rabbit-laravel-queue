@@ -247,7 +247,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(SimpleQueueJob::class . '-when');
 
-        $this->assertEquals($this->now + $delay, $when, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta($this->now + $delay, $when, 1, 'Jobs processed with wrong delay');
     }
 
     /**
@@ -269,7 +269,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(QueueJobWithDelay::class . '-when');
 
-        $this->assertEquals($this->now + $job->delay, $when, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta($this->now + $job->delay, $when, 1, 'Jobs processed with wrong delay');
     }
 
     /**
@@ -294,7 +294,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(SimpleQueueJob::class . '-when');
 
-        $this->assertEquals($this->now, $when, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta($this->now, $when, 1, 'Jobs processed with wrong delay');
     }
 
     /**
@@ -391,7 +391,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(QueueJobWithSavedStateDelay::class . '-when');
 
-        $this->assertEquals((new \DateTime)->getTimestamp(), $when + $delay, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta((new \DateTime)->getTimestamp(), $when + $delay, 1, 'Jobs processed with wrong delay');
     }
 
     /**

@@ -50,7 +50,7 @@ class ServiceProviderTest extends AbstractTestCase
     {
         $this->assertArrayHasKey(
             Connector::NAME,
-            $this->getObjectAttribute($this->app->make(QueueManager::class), 'connectors')
+            $this->getObjectAttributeDeprecated($this->app->make(QueueManager::class), 'connectors')
         );
     }
 
@@ -102,7 +102,7 @@ class ServiceProviderTest extends AbstractTestCase
         /** @var QueueManager $queue */
         $queue = $this->app->make(QueueManager::class);
 
-        $connector = $this->getObjectAttribute($queue, 'connectors')[Connector::NAME];
+        $connector = $this->getObjectAttributeDeprecated($queue, 'connectors')[Connector::NAME];
 
         $this->assertInstanceOf(Connector::class, $connector());
     }

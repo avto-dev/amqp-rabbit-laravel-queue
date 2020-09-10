@@ -26,7 +26,7 @@ class WorkCommandTest extends AbstractTestCase
             $command = $this->app->make($abstract);
 
             /** @var \Illuminate\Queue\Worker $worker */
-            $worker = $this->getObjectAttribute($command, 'worker');
+            $worker = $this->getObjectAttributeDeprecated($command, 'worker');
 
             $this->assertInstanceOf(Worker::class, $worker);
         }

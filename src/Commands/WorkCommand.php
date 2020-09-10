@@ -33,17 +33,7 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
             '~(--sleep.*)}~', '$1 <options=bold>(not used)</> }', $this->signature
         );
 
-        // Constructor signature in parent class changed since 6.0:
-        // For ~5.5 one argument:
-        // - https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Console/WorkCommand.php#L53
-        // - https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Console/WorkCommand.php#L53
-        // - https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Console/WorkCommand.php#L53
-        // - https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Console/WorkCommand.php#L54
-        // Since ^6.0 - two arguments:
-        // - https://github.com/laravel/framework/blob/v6.0.0/src/Illuminate/Queue/Console/WorkCommand.php#L63
-        // - https://github.com/laravel/framework/blob/v7.0.0/src/Illuminate/Queue/Console/WorkCommand.php#L62
-        //        parent::{'__construct'}(...[$worker, $cache]);
-        parent::__construct(...[$worker, $cache]);
+        parent::__construct($worker, $cache);
     }
 
     /**

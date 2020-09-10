@@ -90,23 +90,14 @@ class ServiceProvider extends IlluminateServiceProvider
     protected function registerQueueWorker(): void
     {
         $this->app->singleton(Worker::class, function (Container $container): Worker {
-            // Constructor signature changed since 6.0:
-            // For ~5.5 three arguments:
-            // - https://github.com/illuminate/queue/blob/5.5/Worker.php#L68
-            // - https://github.com/illuminate/queue/blob/5.6/Worker.php#L68
-            // - https://github.com/illuminate/queue/blob/5.7/Worker.php#L68
-            // - https://github.com/illuminate/queue/blob/5.8/Worker.php#L68
-            // Since ^6.0 - four arguments:
-            // - https://github.com/illuminate/queue/blob/6.x/Worker.php#L82
-            // - https://github.com/illuminate/queue/blob/7.x/Worker.php#L80
-            return new Worker(...[
+            return new Worker(
                 $container->make('queue'),
                 $container->make('events'),
                 $container->make(ExceptionHandler::class),
                 function (): bool { // Required since illuminate/queue ^6.0
                     return $this->app->isDownForMaintenance();
-                },
-            ]);
+                }
+            );
         });
     }
 
