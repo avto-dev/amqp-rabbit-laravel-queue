@@ -6,10 +6,6 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ## v2.5.0
 
-### Added
-
-- Support PHP `8.x`
-
 ### Changed
 
 - Composer `2.x` is supported now

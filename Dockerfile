@@ -1,4 +1,4 @@
-FROM php:8.0-alpine
+FROM php:7.4.13-alpine
 
 ENV \
     # <https://github.com/alanxz/rabbitmq-c>

@@ -3,7 +3,7 @@
 # Makefile readme (en): <https://www.gnu.org/software/make/manual/html_node/index.html#SEC_Contents>
 
 SHELL = /bin/sh
-RUN_APP_ARGS = --rm --user "$(shell id -u):$(shell id -g)" app
+RUN_APP_ARGS = --rm --user "$(shell id -u):$(shell id -g)"
 
 .PHONY : help install latest lowest test test-cover shell
 .DEFAULT_GOAL : help
@@ -20,13 +20,13 @@ install: clean ## Install stable php dependencies
 	docker-compose run $(RUN_APP_ARGS) app composer update -n --prefer-dist
 
 latest: clean ## Install latest php dependencies
-	docker-compose run $(RUN_APP_ARGS) app composer update -n --ansi --prefer-dist --prefer-stable
+	docker-compose run $(RUN_APP_ARGS) app composer update -n --prefer-dist --prefer-stable
 
 lowest: clean ## Install lowest php dependencies
-	docker-compose run $(RUN_APP_ARGS) app composer update -n --ansi --prefer-dist --prefer-lowest
+	docker-compose run $(RUN_APP_ARGS) app composer update -n --prefer-dist --prefer-lowest
 
 test: up ## Execute php tests and linters
-	docker-compose run $(RUN_APP_ARGS) sh -c "sleep 5 && composer test"
+	docker-compose run $(RUN_APP_ARGS) app sh -c "sleep 5 && composer test"
 
 test-cover: up ## Execute php tests with coverage
 	docker-compose run --rm --user "0:0" -e 'XDEBUG_MODE=coverage' app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer test-cover"'
@@ -38,7 +38,7 @@ down: ## Stop services
 	docker-compose down
 
 shell: ## Start shell into container with php
-	docker-compose run -e "PS1=\[\033[1;32m\]\[\033[1;36m\][\u@docker] \[\033[1;34m\]\w\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]" $(RUN_APP_ARGS) sh
+	docker-compose run -e "PS1=\[\033[1;32m\]\[\033[1;36m\][\u@docker] \[\033[1;34m\]\w\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]" $(RUN_APP_ARGS) app sh
 
 clean: ## Remove all dependencies and unimportant files
 	-rm -Rf ./composer.lock ./vendor ./coverage

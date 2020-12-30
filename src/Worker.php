@@ -63,10 +63,10 @@ class Worker extends \Illuminate\Queue\Worker
                         // Make job instance, based on incoming message
                         try {
                             $job = $queue->convertMessageToJob($message, $consumer);
-                        } catch (Throwable $e) {
+                        } catch (\Exception $e) {
                             $consumer->reject($message); // @todo: move to the failed jobs queue?
 
-                            $this->exceptions->report($e = new FatalThrowableError($e));
+                            $this->exceptions->report($e);
                             $this->stopWorkerIfLostConnection($e);
                             $this->sleep(3);
 
