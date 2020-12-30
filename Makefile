@@ -2,8 +2,6 @@
 # Makefile readme (ru): <http://linux.yaroslavl.ru/docs/prog/gnu_make_3-79_russian_manual.html>
 # Makefile readme (en): <https://www.gnu.org/software/make/manual/html_node/index.html#SEC_Contents>
 
-dc_bin := $(shell command -v docker-compose 2> /dev/null)
-
 SHELL = /bin/sh
 RUN_APP_ARGS = --rm --user "$(shell id -u):$(shell id -g)" app
 
@@ -16,32 +14,31 @@ help: ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[32m%-14s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 build: ## Build docker images, required for current package environment
-	$(dc_bin) build
+	docker-compose build
 
 install: clean ## Install stable php dependencies
-	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --prefer-dist --no-interaction --no-suggest
+	docker-compose run $(RUN_APP_ARGS) app composer update -n --prefer-dist
 
 latest: clean ## Install latest php dependencies
-	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --ansi --no-suggest --prefer-dist --prefer-stable
+	docker-compose run $(RUN_APP_ARGS) app composer update -n --ansi --prefer-dist --prefer-stable
 
 lowest: clean ## Install lowest php dependencies
-	$(dc_bin) run $(RUN_APP_ARGS) composer update -n --ansi --no-suggest --prefer-dist --prefer-lowest
+	docker-compose run $(RUN_APP_ARGS) app composer update -n --ansi --prefer-dist --prefer-lowest
 
 test: up ## Execute php tests and linters
-	$(dc_bin) run $(RUN_APP_ARGS) sh -c "sleep 5 && composer test"
+	docker-compose run $(RUN_APP_ARGS) sh -c "sleep 5 && composer test"
 
 test-cover: up ## Execute php tests with coverage
-	$(dc_bin) run --rm --user "0:0" app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer test-cover"'
+	docker-compose run --rm --user "0:0" -e 'XDEBUG_MODE=coverage' app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer test-cover"'
 
 up: ## Start services
-	$(dc_bin) up -d
+	docker-compose up -d
 
 down: ## Stop services
-	$(dc_bin) down
+	docker-compose down
 
 shell: ## Start shell into container with php
-	$(dc_bin) run -e "PS1=\[\033[1;32m\]\[\033[1;36m\][\u@docker] \[\033[1;34m\]\w\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]" \
-    $(RUN_APP_ARGS) sh
+	docker-compose run -e "PS1=\[\033[1;32m\]\[\033[1;36m\][\u@docker] \[\033[1;34m\]\w\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]" $(RUN_APP_ARGS) sh
 
 clean: ## Remove all dependencies and unimportant files
 	-rm -Rf ./composer.lock ./vendor ./coverage

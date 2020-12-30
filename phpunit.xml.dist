@@ -15,6 +15,8 @@
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
+
+    <!-- deprecated -->
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./src</directory>
@@ -24,7 +26,7 @@
         </whitelist>
     </filter>
     <logging>
-        <!--log type="coverage-html" target="./coverage/html"/-->
+        <log type="coverage-html" target="./coverage/html"/>
         <log type="coverage-xml" target="./coverage/xml"/>
         <log type="coverage-clover" target="./coverage/clover.xml"/>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
@@ -33,5 +35,28 @@
         <env name="APP_ENV" value="testing"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="APP_DEBUG" value="true"/>
+    </php>
+    <!-- /deprecated -->
+
+    <coverage includeUncoveredFiles="false" processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+        <exclude>
+            <directory>./vendor</directory>
+            <directory>./tests</directory>
+        </exclude>
+        <report>
+            <clover outputFile="./coverage/clover.xml"/>
+            <html outputDirectory="./coverage/html"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false"/>
+            <xml outputDirectory="./coverage/xml"/>
+        </report>
+    </coverage>
+
+    <php>
+        <server name="APP_ENV" value="testing" force="true"/>
+        <server name="QUEUE_DRIVER" value="sync" force="true"/>
+        <server name="APP_DEBUG" value="true" force="true"/>
     </php>
 </phpunit>
