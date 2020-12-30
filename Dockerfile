@@ -27,7 +27,7 @@ RUN set -x \
     && ln -s /usr/lib /usr/local/lib64 \
     # install xdebug (for testing with code coverage), but do not enable it
     && pecl install xdebug-3.0.0 1>/dev/null \
-    # this c-library is required for 'php-amqp'
+    # this c-library is required for 'php-amqp' extension
     && ( git clone --branch v${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq \
         && cd /tmp/rabbitmq \
         && mkdir build && cd build \
