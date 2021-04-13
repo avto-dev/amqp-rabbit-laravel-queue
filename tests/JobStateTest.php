@@ -10,7 +10,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\JobState;
 use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\JobState<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\JobState
  */
 class JobStateTest extends AbstractTestCase
 {
@@ -110,7 +110,7 @@ class JobStateTest extends AbstractTestCase
     public function testPutThrowsAnExceptionWhenPassedCallable(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('~Wrong value passed~i');
+        $this->expectErrorMessageMatches('~Wrong value passed~i');
 
         $this->instance->put('foo', function (): void {
         });
@@ -124,7 +124,7 @@ class JobStateTest extends AbstractTestCase
     public function testPutThrowsAnExceptionWhenPassedResource(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('~Wrong value passed~i');
+        $this->expectExceptionMessageMatches('~Wrong value passed~i');
 
         $this->instance->put('foo', \tmpfile());
     }

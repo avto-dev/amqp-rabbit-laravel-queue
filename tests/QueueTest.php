@@ -17,7 +17,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJob;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\Queue<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\Queue
  *
  * @group  queue
  * @group  usesExternalServices
@@ -598,7 +598,7 @@ class QueueTest extends AbstractTestCase
      */
     protected function assertCommonMessageProperties(Message $message, int $allowed_timestamp_delta = 500): void
     {
-        $this->assertRegExp('~job\-[a-zA-Z0-9]{6,}~', $message->getHeader('message_id'));
+        $this->assertMatchesRegularExpression('~job\-[a-zA-Z0-9]{6,}~', $message->getHeader('message_id'));
 
         $timestamp         = $message->getHeader('timestamp');
         $current_timestamp = (new DateTime)->getTimestamp();

@@ -20,7 +20,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider
  */
 class ServiceProviderTest extends AbstractTestCase
 {
@@ -48,10 +48,13 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testQueueDriverRegistration(): void
     {
-        $this->assertArrayHasKey(
-            Connector::NAME,
-            $this->getObjectAttribute($this->app->make(QueueManager::class), 'connectors')
-        );
+        $queue_manager = $this->app->make(QueueManager::class);
+
+        $reflection = new \ReflectionObject($queue_manager);
+        $property   = $reflection->getProperty('connectors');
+        $property->setAccessible(true);
+
+        $this->assertArrayHasKey(Connector::NAME, $property->getValue($queue_manager));
     }
 
     /**
@@ -89,6 +92,9 @@ class ServiceProviderTest extends AbstractTestCase
         $this->config()->offsetUnset('queue.failed.connection');
         $this->config()->offsetUnset('queue.failed.queue_id');
 
+        // Laravel 8 changed default value to new database-uuid driver
+        $this->config()->set('queue.failed.driver', 'database');
+
         $this->assertInstanceOf(DatabaseFailedJobProvider::class, $this->app->make('queue.failer'));
     }
 
@@ -102,7 +108,11 @@ class ServiceProviderTest extends AbstractTestCase
         /** @var QueueManager $queue */
         $queue = $this->app->make(QueueManager::class);
 
-        $connector = $this->getObjectAttribute($queue, 'connectors')[Connector::NAME];
+        $reflection = new \ReflectionObject($queue);
+        $property   = $reflection->getProperty('connectors');
+        $property->setAccessible(true);
+
+        $connector = $property->getValue($queue)[Connector::NAME];
 
         $this->assertInstanceOf(Connector::class, $connector());
     }

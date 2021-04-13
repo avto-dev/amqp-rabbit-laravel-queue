@@ -15,6 +15,8 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTra
 
 /**
  * @group  usesExternalServices
+ *
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\WithJobStateTrait
  */
 class WithJobStateTraitTest extends AbstractTestCase
 {
@@ -70,7 +72,7 @@ class WithJobStateTraitTest extends AbstractTestCase
      *
      * @return void
      */
-    public function testGetStateWithoutNeededInstanceProperty()
+    public function testGetStateWithoutNeededInstanceProperty(): void
     {
         $this->expectException(RuntimeException::class);
         $object = new class {

@@ -9,7 +9,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand
  */
 class JobMakeCommandTest extends AbstractTestCase
 {
@@ -56,12 +56,12 @@ class JobMakeCommandTest extends AbstractTestCase
 
         require $file_path;
 
-        $this->assertInternalType('object', new \App\Jobs\Foo);
+        $this->assertIsObject(new \App\Jobs\Foo);
 
         $content = \file_get_contents($file_path);
 
         foreach (['$tries', '$priority', 'strict_types', 'class ' . $name] as $value) {
-            $this->assertContains($value, $content);
+            $this->assertStringContainsString($value, $content);
         }
 
         $this->fs->delete($file_path);
@@ -83,12 +83,12 @@ class JobMakeCommandTest extends AbstractTestCase
 
         require $file_path;
 
-        $this->assertInternalType('object', new \App\Jobs\Bar);
+        $this->assertIsObject(new \App\Jobs\Bar);
 
         $content = \file_get_contents($file_path);
 
         foreach (['$tries', 'strict_types', 'class ' . $name] as $value) {
-            $this->assertContains($value, $content);
+            $this->assertStringContainsString($value, $content);
         }
 
         $this->fs->delete($file_path);

@@ -11,7 +11,7 @@ use Illuminate\Queue\Connectors\ConnectorInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\Connector<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\Connector
  *
  * @group  queue
  */

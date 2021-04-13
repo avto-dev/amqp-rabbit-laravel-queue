@@ -7,7 +7,7 @@ namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 use AvtoDev\AmqpRabbitLaravelQueue\HasPriorityTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\HasPriorityTrait<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\HasPriorityTrait
  */
 class HasPriorityTraitTest extends AbstractTestCase
 {
