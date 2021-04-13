@@ -6,11 +6,33 @@ namespace AvtoDev\AmqpRabbitLaravelQueue;
 
 use Illuminate\Queue\WorkerOptions;
 use Interop\Amqp\AmqpMessage as Message;
+use Illuminate\Contracts\Events\Dispatcher;
 use Enqueue\AmqpExt\AmqpContext as Context;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Queue\Factory as QueueManager;
 
 class Worker extends \Illuminate\Queue\Worker
 {
+    /** @var string */
+    protected $consumer_tag;
+
+    /**
+     * @param string $consumer_tag
+     *
+     * {@inheritdoc}
+     */
+    public function __construct(QueueManager $manager,
+                                Dispatcher $events,
+                                ExceptionHandler $exceptions,
+                                callable $isDownForMaintenance,
+                                string $consumer_tag = '')
+    {
+        parent::__construct($manager, $events, $exceptions, $isDownForMaintenance);
+
+        $this->consumer_tag = $consumer_tag;
+    }
+
     /**
      * Listen to the given queue in a loop.
      *
@@ -32,6 +54,10 @@ class Worker extends \Illuminate\Queue\Worker
 
             $consumer   = $rabbit_connection->createConsumer($rabbit_queue);
             $subscriber = $rabbit_connection->createSubscriptionConsumer();
+
+            if ($this->consumer_tag) {
+                $consumer->setConsumerTag(\uniqid($this->consumer_tag . '-', true));
+            }
 
             do {
                 $subscriber->subscribe(
@@ -96,11 +122,10 @@ class Worker extends \Illuminate\Queue\Worker
             $this->closeRabbitConnection($rabbit_connection);
 
             return $this->stop();
-        // @codeCoverageIgnoreStart
-        } else {
-            // Backward compatibility is our everything =)
-            return parent::daemon($connectionName, $queue, $options);
         }
+
+        // @codeCoverageIgnoreStart
+        return parent::daemon($connectionName, $queue, $options);
         // @codeCoverageIgnoreEnd
     }
 
