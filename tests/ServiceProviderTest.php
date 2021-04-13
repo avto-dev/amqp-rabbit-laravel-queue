@@ -8,8 +8,8 @@ use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use Illuminate\Queue\Events\JobProcessing;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
+use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
@@ -92,10 +92,7 @@ class ServiceProviderTest extends AbstractTestCase
         $this->config()->offsetUnset('queue.failed.connection');
         $this->config()->offsetUnset('queue.failed.queue_id');
 
-        // Laravel 8 changed default value to new database-uuid driver
-        $this->config()->set('queue.failed.driver', 'database');
-
-        $this->assertInstanceOf(DatabaseFailedJobProvider::class, $this->app->make('queue.failer'));
+        $this->assertInstanceOf(DatabaseUuidFailedJobProvider::class, $this->app->make('queue.failer'));
     }
 
     /**
