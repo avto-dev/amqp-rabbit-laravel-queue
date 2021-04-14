@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ## UNRELEASED
 
+### Added
+
+- Ability to define a custom queue consumer tag prefix
+
 ### Changed
 
 - Minimal required PHP version now is `7.3`
