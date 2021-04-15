@@ -173,7 +173,9 @@ Using this package you can store any variables (except resources and callable en
 
 #### Consumer custom tag prefix
 
-The prefix of the consumer queue tag can be specified with an additional argument in the `AvtoDev\AmqpRabbitLaravelQueue\Worker::__construct` method.
+Every consumer has an identifier that is used by client libraries to determine what handler to invoke for a given delivery. Their names vary from protocol to protocol. Consumer tags and subscription IDs are two most commonly used terms.
+
+If you want to add custom prefix to the consumer tag, you can specify it with an additional argument in the `AvtoDev\AmqpRabbitLaravelQueue\Worker::__construct` method.
 
 ### :warning: Warning
 

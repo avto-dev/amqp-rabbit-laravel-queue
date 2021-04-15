@@ -14,7 +14,7 @@ use Illuminate\Contracts\Queue\Factory as QueueManager;
 
 class Worker extends \Illuminate\Queue\Worker
 {
-    /** @var string */
+    /** @var string|null */
     protected $consumer_tag;
 
     /**
@@ -26,7 +26,7 @@ class Worker extends \Illuminate\Queue\Worker
                                 Dispatcher $events,
                                 ExceptionHandler $exceptions,
                                 callable $isDownForMaintenance,
-                                string $consumer_tag = '')
+                                ?string $consumer_tag = null)
     {
         parent::__construct($manager, $events, $exceptions, $isDownForMaintenance);
 
@@ -34,8 +34,6 @@ class Worker extends \Illuminate\Queue\Worker
     }
 
     /**
-     * Listen to the given queue in a loop.
-     *
      * @inheritdoc
      */
     public function daemon($connectionName, $queue, WorkerOptions $options)
@@ -55,7 +53,7 @@ class Worker extends \Illuminate\Queue\Worker
             $consumer   = $rabbit_connection->createConsumer($rabbit_queue);
             $subscriber = $rabbit_connection->createSubscriptionConsumer();
 
-            if ($this->consumer_tag) {
+            if ($this->consumer_tag !== null) {
                 $consumer->setConsumerTag(\uniqid($this->consumer_tag . '-', true));
             }
 

@@ -5,7 +5,6 @@ ENV \
     RABBITMQ_VERSION="0.10.0" \
     # ext-amqp <https://github.com/pdezwart/php-amqp>
     PHP_AMQP_VERSION="1.10.2" \
-    COMPOSER_ALLOW_SUPERUSER="1" \
     COMPOSER_HOME="/tmp/composer"
 
 COPY --from=composer:2.0.12 /usr/bin/composer /usr/bin/composer
