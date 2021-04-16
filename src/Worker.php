@@ -14,11 +14,13 @@ use Illuminate\Contracts\Queue\Factory as QueueManager;
 
 class Worker extends \Illuminate\Queue\Worker
 {
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     protected $consumer_tag;
 
     /**
-     * @param string $consumer_tag
+     * @param string|null $consumer_tag
      *
      * {@inheritdoc}
      */
