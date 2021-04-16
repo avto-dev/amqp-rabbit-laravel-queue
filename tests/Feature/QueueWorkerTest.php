@@ -16,6 +16,8 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJobWithState;
 /**
  * @group feature
  * @group usesExternalServices
+ *
+ * @coversNothing
  */
 class QueueWorkerTest extends AbstractFeatureTest
 {
@@ -38,9 +40,9 @@ class QueueWorkerTest extends AbstractFeatureTest
         $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
 
         $this->assertEmpty($process_info['stderr']);
-        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
-        $this->assertRegExp("~^.+processing.+{$job_class_safe}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
-        $this->assertRegExp("~^.+processed.+{$job_class_safe}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression("~^.+processing.+{$job_class_safe}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression("~^.+processed.+{$job_class_safe}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
         $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
     }
 
@@ -90,7 +92,7 @@ class QueueWorkerTest extends AbstractFeatureTest
         $output = $process_info['stdout'];
 
         // Should be processed FIRST
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             '~' . \preg_quote(PrioritizedQueueJob::class, '/') . '$~i',
             $output[1] ?? '',
             $output->getAsPlaintText()
@@ -154,7 +156,7 @@ class QueueWorkerTest extends AbstractFeatureTest
         /** @var CommandOutput $output */
         $output = $process_info['stdout'];
 
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             "~^.+failed.+{$failed_job_id}.+pushed\sback.+$~im",
             $output[0] ?? '',
             $output->getAsPlaintText()
@@ -247,7 +249,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(SimpleQueueJob::class . '-when');
 
-        $this->assertEquals($this->now + $delay, $when, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta($this->now + $delay, $when, 1, 'Jobs processed with wrong delay');
     }
 
     /**
@@ -269,7 +271,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(QueueJobWithDelay::class . '-when');
 
-        $this->assertEquals($this->now + $job->delay, $when, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta($this->now + $job->delay, $when, 1, 'Jobs processed with wrong delay');
     }
 
     /**
@@ -294,7 +296,7 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(SimpleQueueJob::class . '-when');
 
-        $this->assertEquals($this->now, $when, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta($this->now, $when, 1, 'Jobs processed with wrong delay');
     }
 
     /**
@@ -391,7 +393,12 @@ class QueueWorkerTest extends AbstractFeatureTest
 
         $when = Sharer::get(QueueJobWithSavedStateDelay::class . '-when');
 
-        $this->assertEquals((new \DateTime)->getTimestamp(), $when + $delay, 'Jobs processed with wrong delay', 1);
+        $this->assertEqualsWithDelta(
+            (new \DateTime)->getTimestamp(),
+            $when + $delay,
+            1,
+            'Jobs processed with wrong delay'
+        );
     }
 
     /**
@@ -420,9 +427,9 @@ class QueueWorkerTest extends AbstractFeatureTest
         $output            = $process_info['stdout'];
         $priority_job_name = \preg_quote(PrioritizedQueueJobWithState::class, '/');
 
-        $this->assertRegExp('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
-        $this->assertRegExp("~^.+processing.+{$priority_job_name}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
-        $this->assertRegExp("~^.+processed.+{$priority_job_name}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression("~^.+processing.+{$priority_job_name}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression("~^.+processed.+{$priority_job_name}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
 
         $this->assertEquals(1, Sharer::get(PrioritizedQueueJobWithState::class . '-handled'));
         $this->assertEquals(

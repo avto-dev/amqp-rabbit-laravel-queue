@@ -4,55 +4,75 @@ declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue;
 
-use Throwable;
 use Illuminate\Queue\WorkerOptions;
 use Interop\Amqp\AmqpMessage as Message;
+use Illuminate\Contracts\Events\Dispatcher;
 use Enqueue\AmqpExt\AmqpContext as Context;
 use Enqueue\AmqpExt\AmqpConsumer as Consumer;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Queue\Factory as QueueManager;
 
 class Worker extends \Illuminate\Queue\Worker
 {
     /**
-     * Listen to the given queue in a loop.
-     *
-     * @param string        $connectionName
-     * @param string        $queue_names
-     * @param WorkerOptions $options
-     *
-     * @return void
+     * @var string|null
      */
-    public function daemon($connectionName, $queue_names, WorkerOptions $options): void
+    protected $consumer_tag;
+
+    /**
+     * @param string|null $consumer_tag
+     *
+     * {@inheritdoc}
+     */
+    public function __construct(QueueManager $manager,
+                                Dispatcher $events,
+                                ExceptionHandler $exceptions,
+                                callable $isDownForMaintenance,
+                                ?string $consumer_tag = null)
     {
-        $queue = $this->manager->connection($connectionName);
+        parent::__construct($manager, $events, $exceptions, $isDownForMaintenance);
+
+        $this->consumer_tag = $consumer_tag;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function daemon($connectionName, $queue, WorkerOptions $options)
+    {
+        $queue_connection = $this->manager->connection($connectionName);
 
         // This worker should work with RabbitMQ queue, or not?
-        if ($queue instanceof Queue) {
+        if ($queue_connection instanceof Queue) {
             if ($this->supportsAsyncSignals()) {
                 $this->listenForSignals();
             }
 
             $last_restart      = (int) $this->getTimestampOfLastQueueRestart();
-            $rabbit_connection = $queue->getRabbitConnection();
-            $rabbit_queue      = $queue->getRabbitQueue();
+            $rabbit_connection = $queue_connection->getRabbitConnection();
+            $rabbit_queue      = $queue_connection->getRabbitQueue();
 
             $consumer   = $rabbit_connection->createConsumer($rabbit_queue);
             $subscriber = $rabbit_connection->createSubscriptionConsumer();
+
+            if ($this->consumer_tag !== null) {
+                $consumer->setConsumerTag(\uniqid($this->consumer_tag . '-', true));
+            }
 
             do {
                 $subscriber->subscribe(
                     $consumer,
                     function (Message $message, Consumer $consumer) use (
-                        $queue,
+                        $queue_connection,
                         $connectionName,
-                        $queue_names,
+                        $queue,
                         $options,
                         $last_restart
                     ): bool {
                         // Before reserving any jobs, we will make sure this queue is not paused and
                         // if it is we will just pause this worker for a given amount of time and
                         // make sure we do not need to kill this worker process off completely.
-                        if (! $this->daemonShouldRun($options, $connectionName, $queue_names)) {
+                        if (! $this->daemonShouldRun($options, $connectionName, $queue)) {
                             $consumer->reject($message);
 
                             $this->pauseWorker($options, $last_restart);
@@ -62,11 +82,11 @@ class Worker extends \Illuminate\Queue\Worker
 
                         // Make job instance, based on incoming message
                         try {
-                            $job = $queue->convertMessageToJob($message, $consumer);
-                        } catch (Throwable $e) {
+                            $job = $queue_connection->convertMessageToJob($message, $consumer);
+                        } catch (\Throwable $e) {
                             $consumer->reject($message); // @todo: move to the failed jobs queue?
 
-                            $this->exceptions->report($e = new FatalThrowableError($e));
+                            $this->exceptions->report($e);
                             $this->stopWorkerIfLostConnection($e);
                             $this->sleep(3);
 
@@ -92,21 +112,20 @@ class Worker extends \Illuminate\Queue\Worker
                     }
                 );
 
-                $subscriber->consume($this->getTimeoutForWork($options, $queue)); // Start `subscribe` method loop
+                $subscriber->consume($this->getTimeoutForWork($options, $queue_connection)); // Start `subscribe` method loop
 
                 //$subscriber->unsubscribe($consumer); // Disabled since v2.2.1
             } while (
-                $queue->shouldResume() === true && $this->needToStop($options, $last_restart) === false
+                $queue_connection->shouldResume() === true && $this->needToStop($options, $last_restart) === false
             );
 
             $this->closeRabbitConnection($rabbit_connection);
 
-            $this->stop();
-        // @codeCoverageIgnoreStart
-        } else {
-            // Backward compatibility is our everything =)
-            parent::daemon($connectionName, $queue_names, $options);
+            return $this->stop();
         }
+
+        // @codeCoverageIgnoreStart
+        return parent::daemon($connectionName, $queue, $options);
         // @codeCoverageIgnoreEnd
     }
 

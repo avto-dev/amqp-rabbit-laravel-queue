@@ -18,7 +18,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\JobStateInterface;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\Job<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\Job
  *
  * @group  queue
  * @group  usesExternalServices

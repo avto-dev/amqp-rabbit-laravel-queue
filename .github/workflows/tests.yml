@@ -28,20 +28,7 @@ jobs: # Docs: <https://git.io/JvxXE>
         setup: [basic, lowest]
         laravel: [default]
         coverage: [yes]
-        php: ['7.2', '7.3', '7.4']
-        include:
-          - php: '7.3'
-            setup: basic
-            coverage: no
-            laravel: '~5.7.0'
-          - php: '7.3'
-            setup: basic
-            coverage: no
-            laravel: '~5.8.0'
-          - php: '7.3'
-            setup: basic
-            coverage: no
-            laravel: '^6.0'
+        php: ['7.3', '7.4']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -51,7 +38,7 @@ jobs: # Docs: <https://git.io/JvxXE>
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, amqp
-          tools: composer:v1 # TODO update composer up to v2
+          tools: composer:v2
 
       - name: Start RabbitMQ server
         run: |
@@ -73,20 +60,17 @@ jobs: # Docs: <https://git.io/JvxXE>
           key: ${{ runner.os }}-composer-${{ matrix.setup }}-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install Composer 'hirak/prestissimo' package
-        run: composer global require hirak/prestissimo --update-no-dev --no-progress --ansi
-
       - name: Install lowest Composer dependencies
         if: matrix.setup == 'lowest'
-        run: composer update --prefer-dist --no-suggest --prefer-lowest --ansi
+        run: composer update --prefer-dist --prefer-lowest --ansi
 
       - name: Install basic Composer dependencies
         if: matrix.setup == 'basic'
-        run: composer update --prefer-dist --no-suggest --ansi
+        run: composer update --prefer-dist --ansi
 
       - name: Install specific laravel version
         if: matrix.laravel != 'default'
-        run: composer require --dev --update-with-all-dependencies --prefer-dist --no-suggest --ansi laravel/laravel "${{ matrix.laravel }}"
+        run: composer require --dev --update-with-all-dependencies --prefer-dist --ansi laravel/laravel "${{ matrix.laravel }}"
 
       - name: Show most important packages versions
         run: composer info | grep -e laravel -e phpunit -e phpstan

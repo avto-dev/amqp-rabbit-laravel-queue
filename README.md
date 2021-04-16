@@ -169,7 +169,13 @@ You can dispatch your jobs as usual (`dispatch(new Job)` or `dispatch(new Job)->
 
 #### State storing
 
-Using this package you can store any valiables (except resources and callable entities) between job restarts (just use trait `WithJobStateTrait` in your job class). But you should remember - state is available only inside job `handle` method.
+Using this package you can store any variables (except resources and callable entities) between job restarts (just use trait `WithJobStateTrait` in your job class). But you should remember - state is available only inside job `handle` method.
+
+#### Consumer custom tag prefix
+
+Every consumer has an identifier that is used by client libraries to determine what handler to invoke for a given delivery. Their names vary from protocol to protocol. Consumer tags and subscription IDs are two most commonly used terms.
+
+If you want to add custom prefix to the consumer tag, you can specify it with an additional argument in the `AvtoDev\AmqpRabbitLaravelQueue\Worker::__construct` method.
 
 ### :warning: Warning
 

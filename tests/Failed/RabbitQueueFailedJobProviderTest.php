@@ -13,7 +13,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider
  *
  * @group usesExternalServices
  */
@@ -61,7 +61,7 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $message = $this->getLastMessage();
 
         $this->assertSame($connection_name, $message->getProperty('job-connection-name'));
-        $this->assertInternalType('numeric', $message->getProperty('job-failed-at'));
+        $this->assertIsNumeric($message->getProperty('job-failed-at'));
         $this->assertSame($queue_name, $message->getProperty('job-queue-name'));
         $this->assertSame((string) $exception, $message->getProperty('job-exception'));
         $this->assertSame($message_body, $message->getBody());
@@ -78,10 +78,10 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
      */
     public function testGenerateMessageId(): void
     {
-        $this->assertInternalType('numeric', $this->provider::generateMessageId('foo'));
-        $this->assertInternalType('numeric', $this->provider::generateMessageId(['foo']));
-        $this->assertInternalType('numeric', $this->provider::generateMessageId(['foo', false]));
-        $this->assertInternalType('numeric', $this->provider::generateMessageId(['foo', false], 123));
+        $this->assertIsNumeric($this->provider::generateMessageId('foo'));
+        $this->assertIsNumeric($this->provider::generateMessageId(['foo']));
+        $this->assertIsNumeric($this->provider::generateMessageId(['foo', false]));
+        $this->assertIsNumeric($this->provider::generateMessageId(['foo', false], 123));
     }
 
     /**

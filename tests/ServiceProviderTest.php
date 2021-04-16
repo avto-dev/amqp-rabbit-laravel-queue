@@ -8,8 +8,8 @@ use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use Illuminate\Queue\Events\JobProcessing;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
+use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
@@ -20,7 +20,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider
  */
 class ServiceProviderTest extends AbstractTestCase
 {
@@ -48,10 +48,13 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testQueueDriverRegistration(): void
     {
-        $this->assertArrayHasKey(
-            Connector::NAME,
-            $this->getObjectAttribute($this->app->make(QueueManager::class), 'connectors')
-        );
+        $queue_manager = $this->app->make(QueueManager::class);
+
+        $reflection = new \ReflectionObject($queue_manager);
+        $property   = $reflection->getProperty('connectors');
+        $property->setAccessible(true);
+
+        $this->assertArrayHasKey(Connector::NAME, $property->getValue($queue_manager));
     }
 
     /**
@@ -89,7 +92,7 @@ class ServiceProviderTest extends AbstractTestCase
         $this->config()->offsetUnset('queue.failed.connection');
         $this->config()->offsetUnset('queue.failed.queue_id');
 
-        $this->assertInstanceOf(DatabaseFailedJobProvider::class, $this->app->make('queue.failer'));
+        $this->assertInstanceOf(DatabaseUuidFailedJobProvider::class, $this->app->make('queue.failer'));
     }
 
     /**
@@ -102,7 +105,11 @@ class ServiceProviderTest extends AbstractTestCase
         /** @var QueueManager $queue */
         $queue = $this->app->make(QueueManager::class);
 
-        $connector = $this->getObjectAttribute($queue, 'connectors')[Connector::NAME];
+        $reflection = new \ReflectionObject($queue);
+        $property   = $reflection->getProperty('connectors');
+        $property->setAccessible(true);
+
+        $connector = $property->getValue($queue)[Connector::NAME];
 
         $this->assertInstanceOf(Connector::class, $connector());
     }

@@ -10,7 +10,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 
 /**
- * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand<extended>
+ * @covers \AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand
  */
 class WorkCommandTest extends AbstractTestCase
 {
@@ -25,8 +25,12 @@ class WorkCommandTest extends AbstractTestCase
             /** @var \Illuminate\Queue\Console\WorkCommand $command */
             $command = $this->app->make($abstract);
 
+            $reflection = new \ReflectionObject($command);
+            $property = $reflection->getProperty('worker');
+            $property->setAccessible(true);
+
             /** @var \Illuminate\Queue\Worker $worker */
-            $worker = $this->getObjectAttribute($command, 'worker');
+            $worker = $property->getValue($command);
 
             $this->assertInstanceOf(Worker::class, $worker);
         }
@@ -45,7 +49,7 @@ class WorkCommandTest extends AbstractTestCase
         /** @var InputOption[] $options */
         $options = $command->getDefinition()->getOptions();
 
-        $this->assertRegExp('~not used~i', $options['sleep']->getDescription());
+        $this->assertMatchesRegularExpression('~not used~i', $options['sleep']->getDescription());
         $this->assertEquals(-1, $options['timeout']->getDefault());
     }
 }

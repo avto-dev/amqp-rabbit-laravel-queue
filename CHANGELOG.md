@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## UNRELEASED
+
+### Added
+
+- Ability to define a custom queue consumer tag prefix
+
+### Changed
+
+- Minimal required PHP version now is `7.3`
+- Minimal `symfony/*` version now is `5.1`
+- Minimal `illuminate/*` package versions now is `8.0`
+- Minimal `laravel/laravel` package versions now is `8.0`
+- Minimal `phpunit/phpunit` package versions now is `9.3`
+- Minimal `avto-dev/amqp-rabbit-manager` package versions now is `2.3`
+- Version of `php` in docker container updated up to `7.3`
+- Version of `composer` in docker container updated up to `2.0.12`
+
 ## v2.4.0
 
 ### Changed
