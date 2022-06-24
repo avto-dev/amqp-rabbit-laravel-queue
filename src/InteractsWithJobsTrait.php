@@ -62,7 +62,7 @@ trait InteractsWithJobsTrait
      *
      * @return string
      */
-    protected function generateMessageId(string $prefix = '', ...$arguments): string
+    protected function generateMessageId(string $prefix, ...$arguments): string
     {
         return $prefix . Str::substr(\sha1(\serialize($arguments)), 0, 8);
     }

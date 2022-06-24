@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## UNRELEASED
+
+### Added
+
+- Support PHP `8.x`
+- Support Laravel `9.x`
+
+### Changed
+
+- XDebug version up to `3.1.5`
+- Package `alanxz/rabbitmq-c` up to `0.11`
+- Package `pdezwart/php-amqp` up to `1.11`
+
 ## v2.5.0
 
 ### Added
