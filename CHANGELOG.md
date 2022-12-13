@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 ## Changed
 
 - Maximal `symfony/console` package versions now is `6.*`
-- 
+
 ## v2.6.0
 
 ### Added
