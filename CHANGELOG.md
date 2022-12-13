@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+## Changed
+
+- Maximal `symfony/console` package versions now is `6.*`
+- 
 ## v2.6.0
 
 ### Added
