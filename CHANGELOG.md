@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ### Added
 
-- Tests under PHP `8.1` and `8.2` on CI
+- Tests for PHP `8.1` and `8.2` on CI
 
 ## v2.6.0
 
