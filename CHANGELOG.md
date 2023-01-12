@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## Unrelease
+
+### Added
+
+- Tests under PHP `8.1` and `8.2` on CI
+
 ## v2.6.0
 
 ### Added
