@@ -10,5 +10,6 @@ parameters:
       paths:
         - src/ServiceProvider.php
   reportUnmatchedIgnoredErrors: false
+  checkGenericClassInNonGenericObjectType: false
   paths:
     - src

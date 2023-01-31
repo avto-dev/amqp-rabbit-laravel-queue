@@ -63,20 +63,6 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
-     */
-    protected function writeStatus(Job $job, $status, $type): void
-    {
-        $this->line(sprintf(
-            "<{$type}>[%s] %s</{$type}> %s",
-            $job->getJobId(),
-            \str_pad("{$status}:", 11), $job->resolveName()
-        ));
-    }
-
-    /**
      * Run the worker instance.
      *
      * @inheritdoc
