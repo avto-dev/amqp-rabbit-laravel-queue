@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+### Changed
+
+- Minimal composer php version is set to `8.x`
+- Package `symfony/console` up to `^5.1 || ^6.0`
+- Package `symphony/process` up to `^5.1 || ^6.0`
+
 ## v2.6.0
 
 ### Added
