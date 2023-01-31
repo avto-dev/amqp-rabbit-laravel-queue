@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ### Changed
 
-- Minimal composer php version is set to `8.x`
+- Minimal composer PHP version is set to `8.x`
 - Package `symfony/console` up to `^5.1 || ^6.0`
 - Package `symphony/process` up to `^5.1 || ^6.0`
 
