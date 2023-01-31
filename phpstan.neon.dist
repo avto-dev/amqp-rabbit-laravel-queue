@@ -1,14 +1,5 @@
 parameters:
   level: 'max'
-  ignoreErrors:
-    -
-      message: '~__construct\(\) invoked with \d parameters, \d required~'
-      paths:
-        - src/Commands/WorkCommand.php
-    -
-      message: '~constructor invoked with \d parameters, \d required~'
-      paths:
-        - src/ServiceProvider.php
   reportUnmatchedIgnoredErrors: false
   checkGenericClassInNonGenericObjectType: false
   paths:

@@ -5,11 +5,13 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
 use Illuminate\Queue\QueueManager;
-use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use Illuminate\Foundation\Console\JobMakeCommand as IllluminateJobMakeCommand;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Console\WorkCommand as IlluminateWorkCommand;
+use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Worker;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
-use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
 use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
@@ -38,7 +40,7 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testOverrideQueueWorkerCommand(): void
     {
-        $this->assertInstanceOf(WorkCommand::class, $this->app->make('command.queue.work'));
+        $this->assertInstanceOf(WorkCommand::class, $this->app->make(IlluminateWorkCommand::class));
     }
 
     /**
@@ -131,6 +133,6 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testOverrideMakeJobCommand(): void
     {
-        $this->assertInstanceOf(JobMakeCommand::class, $this->app->make('command.job.make'));
+        $this->assertInstanceOf(JobMakeCommand::class, $this->app->make(IllluminateJobMakeCommand::class));
     }
 }

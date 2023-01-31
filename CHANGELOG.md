@@ -9,8 +9,19 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 ### Changed
 
 - Minimal composer PHP version is set to `8.x`
-- Package `symfony/console` up to `^5.1 || ^6.0`
-- Package `symphony/process` up to `^5.1 || ^6.0`
+- Package `laravel/laravel` up to `^9.0`
+- Package `illuminate/support` up to `^9.0`
+- Package `illuminate/queue` up to `^9.0`
+- Package `illuminate/container` up to `^9.0`
+- Package `illuminate/contracts` up to `^9.0`
+- Package `symfony/console` up to `^6.0`
+- Package `symphony/process` up to `^6.0`
+- Package `mockery/mockery` up to `^1.5.1`
+- Package `phpstan/phpstan` up to `^0.12.100`
+
+### Removed
+
+- PHP test workflows for versions `7.3` and `7.4`
 
 ## v2.6.0
 
