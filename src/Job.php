@@ -78,8 +78,12 @@ class Job extends \Illuminate\Queue\Jobs\Job implements JobContract
 
         $current_state = $message->getProperty(static::STATE_PROPERTY);
 
-        $this->state = $current_state !== null
-            ? \unserialize($current_state)
+        $unserialized = $current_state !== null
+            ? \unserialize($current_state, ['allowed_classes' => true])
+            : null;
+
+        $this->state = $unserialized instanceof JobStateInterface
+            ? $unserialized
             : new JobState;
     }
 

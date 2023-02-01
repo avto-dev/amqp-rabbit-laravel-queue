@@ -71,8 +71,11 @@ abstract class AbstractExchangeBindListener
     {
         $map = [];
 
+        /** @var array{string, array{driver: string|null, queue_id: string|null, delayed_exchange_id: string|null,}} $connections */
+        $connections = (array) $this->config->get($key);
+
         // Fill bindings map
-        foreach ((array) $this->config->get($key) as $name => $settings) {
+        foreach ($connections as $name => $settings) {
             // Walk thought 'queue.connections.*' sections
             if (($settings['driver'] ?? null) === Connector::NAME) {
                 $queue_id            = $settings['queue_id'] ?? null;
