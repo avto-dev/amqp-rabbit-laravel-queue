@@ -105,7 +105,6 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
         ));
     }
 
-
     /**
      * Run the worker instance.
      *
