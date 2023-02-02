@@ -4,11 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
-## Unrelease
+## Unreleased
 
 ### Added
 
 - Tests for PHP `8.1` and `8.2` on CI
+
+### Changed
+
+- Minimal `phpstan/phpstan` version now is `1.8`
+- Version of `composer` in docker container updated up to `2.5.1`
 
 ## v2.6.0
 
