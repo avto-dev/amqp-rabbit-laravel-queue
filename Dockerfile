@@ -7,7 +7,7 @@ ENV \
     PHP_AMQP_VERSION="1.11.0" \
     COMPOSER_HOME="/tmp/composer"
 
-COPY --from=composer:2.0.12 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.5.1 /usr/bin/composer /usr/bin/composer
 
 RUN set -x \
     && apk add --no-cache binutils git \

@@ -17,11 +17,8 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 - Package `symfony/console` up to `^6.0`
 - Package `symphony/process` up to `^6.0`
 - Package `mockery/mockery` up to `^1.5.1`
-- Package `phpstan/phpstan` up to `^0.12.100`
-
-### Removed
-
-- PHP test workflows for versions `7.3` and `7.4`
+- Minimal `phpstan/phpstan` version now is `1.8`
+- Version of `composer` in docker container updated up to `2.5.1`
 
 ## v2.6.0
 

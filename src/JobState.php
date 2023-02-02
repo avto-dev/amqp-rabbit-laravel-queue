@@ -29,7 +29,10 @@ class JobState extends Collection implements JobStateInterface
      */
     public function unserialize($serialized): void
     {
-        $this->items = \unserialize($serialized, ['allowed_classes' => true]);
+        $unserialized = \unserialize($serialized, ['allowed_classes' => true]);
+        $this->items  = \is_array($unserialized)
+            ? $unserialized
+            : [];
     }
 
     /**
