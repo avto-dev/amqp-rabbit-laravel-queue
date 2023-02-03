@@ -1,25 +1,25 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests;
 
-use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
-use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
-use AvtoDev\AmqpRabbitLaravelQueue\Connector;
-use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
-use AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener;
-use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
-use AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind;
-use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
+use Illuminate\Queue\QueueManager;
 use AvtoDev\AmqpRabbitLaravelQueue\Worker;
+use Illuminate\Queue\Events\JobProcessing;
+use AvtoDev\AmqpRabbitLaravelQueue\Connector;
+use AvtoDev\AmqpRabbitLaravelQueue\Commands\WorkCommand;
+use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
+use AvtoDev\AmqpRabbitLaravelQueue\Commands\JobMakeCommand;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
-use Illuminate\Foundation\Console\JobMakeCommand as IlluminateJobMakeCommand;
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind;
+use AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener;
 use Illuminate\Queue\Console\WorkCommand as IlluminateWorkCommand;
-use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
-use Illuminate\Queue\QueueManager;
+use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
+use Illuminate\Foundation\Console\JobMakeCommand as IlluminateJobMakeCommand;
+use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
  * @covers \AvtoDev\AmqpRabbitLaravelQueue\ServiceProvider
