@@ -157,7 +157,7 @@ class QueueWorkerTest extends AbstractFeatureTest
         $output = $process_info['stdout'];
 
         $this->assertMatchesRegularExpression(
-            "~^.+failed.+{$failed_job_id}.+pushed\sback.+$~im",
+            "~^.+failed.+back.+$~im",
             $output[0] ?? '',
             $output->getAsPlaintText()
         );

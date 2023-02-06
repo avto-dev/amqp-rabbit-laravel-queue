@@ -154,7 +154,7 @@ class ServiceProvider extends IlluminateServiceProvider
     protected function overrideQueueWorkerCommand(): void
     {
         $this->app->extend(
-            'command.queue.work',
+            IlluminateWorkCommand::class,
             static function (IlluminateWorkCommand $command, Container $container): IlluminateWorkCommand {
                 /** @var IlluminateWorkCommand */
                 return $container->make(WorkCommand::class);
@@ -170,7 +170,7 @@ class ServiceProvider extends IlluminateServiceProvider
     protected function overrideMakeJobCommand(): void
     {
         $this->app->extend(
-            'command.job.make',
+            IlluminateJobMakeCommand::class,
             static function (IlluminateJobMakeCommand $command, Container $container): IlluminateJobMakeCommand {
                 /** @var IlluminateJobMakeCommand */
                 return $container->make(JobMakeCommand::class);

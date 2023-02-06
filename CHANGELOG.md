@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ### Changed
 
+- Minimal composer PHP version is set to `8.x`
+- Package `laravel/laravel` up to `^9.0`
+- Package `illuminate/support` up to `^9.0`
+- Package `illuminate/queue` up to `^9.0`
+- Package `illuminate/container` up to `^9.0`
+- Package `illuminate/contracts` up to `^9.0`
+- Package `symfony/console` up to `^6.0`
+- Package `symphony/process` up to `^6.0`
+- Package `mockery/mockery` up to `^1.5.1`
 - Minimal `phpstan/phpstan` version now is `1.8`
 - Version of `composer` in docker container updated up to `2.5.1`
 

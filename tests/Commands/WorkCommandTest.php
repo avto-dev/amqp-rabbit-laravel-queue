@@ -21,7 +21,7 @@ class WorkCommandTest extends AbstractTestCase
      */
     public function testCorrectWorkerPasses(): void
     {
-        foreach (['command.queue.work', WorkCommand::class] as $abstract) {
+        foreach ([\Illuminate\Queue\Console\WorkCommand::class, WorkCommand::class] as $abstract) {
             /** @var \Illuminate\Queue\Console\WorkCommand $command */
             $command = $this->app->make($abstract);
 
@@ -44,7 +44,7 @@ class WorkCommandTest extends AbstractTestCase
     public function testCustomizedCommandOptions(): void
     {
         /** @var WorkCommand $command */
-        $command = $this->app->make('command.queue.work');
+        $command = $this->app->make(\Illuminate\Queue\Console\WorkCommand::class);
 
         /** @var InputOption[] $options */
         $options = $command->getDefinition()->getOptions();

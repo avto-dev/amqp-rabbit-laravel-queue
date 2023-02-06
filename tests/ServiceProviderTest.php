@@ -16,7 +16,9 @@ use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\BindJobStateListener;
+use Illuminate\Queue\Console\WorkCommand as IlluminateWorkCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
+use Illuminate\Foundation\Console\JobMakeCommand as IlluminateJobMakeCommand;
 use AvtoDev\AmqpRabbitLaravelQueue\Tests\Traits\WithTemporaryRabbitConnectionTrait;
 
 /**
@@ -38,7 +40,7 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testOverrideQueueWorkerCommand(): void
     {
-        $this->assertInstanceOf(WorkCommand::class, $this->app->make('command.queue.work'));
+        $this->assertInstanceOf(WorkCommand::class, $this->app->make(IlluminateWorkCommand::class));
     }
 
     /**
@@ -131,6 +133,6 @@ class ServiceProviderTest extends AbstractTestCase
      */
     public function testOverrideMakeJobCommand(): void
     {
-        $this->assertInstanceOf(JobMakeCommand::class, $this->app->make('command.job.make'));
+        $this->assertInstanceOf(JobMakeCommand::class, $this->app->make(IlluminateJobMakeCommand::class));
     }
 }

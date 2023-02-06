@@ -189,8 +189,11 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
 
     /**
      * {@inheritdoc}
+     *
+     * @param  int|null  $hours
+     * @return void
      */
-    public function flush(): void
+    public function flush($hours = null): void
     {
         $this->connection->purgeQueue($this->queue);
     }

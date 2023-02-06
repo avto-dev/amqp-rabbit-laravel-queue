@@ -63,7 +63,36 @@ class WorkCommand extends \Illuminate\Queue\Console\WorkCommand
     }
 
     /**
-     * {@inheritdoc}
+     * Write the status output for the queue worker.
+     *
+     * @param Job $job
+     * @param  string  $status
+     * @return void
+     *
+     * @codeCoverageIgnore
+     */
+    protected function writeOutput(Job $job, $status): void
+    {
+        switch ($status) {
+            case 'starting':
+                $this->writeStatus($job, 'Processing', 'comment');
+                break;
+            case 'success':
+                $this->writeStatus($job, 'Processed', 'info');
+                break;
+            case 'failed':
+                $this->writeStatus($job, 'Failed', 'error');
+                break;
+        }
+    }
+
+    /**
+     * Format the status output for the queue worker.
+     *
+     * @param Job $job
+     * @param  string  $status
+     * @param  string  $type
+     * @return void
      *
      * @codeCoverageIgnore
      */
