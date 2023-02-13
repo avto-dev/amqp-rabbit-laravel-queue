@@ -12,7 +12,8 @@ COPY --from=composer:2.5.1 /usr/bin/composer /usr/bin/composer
 RUN set -x \
     && apk add --no-cache binutils git \
     && apk add --no-cache --virtual .build-deps \
-        openssl-dev \
+        linux-headers \
+        openssl-dev \        
         autoconf \
         pkgconf \
         cmake \
@@ -26,7 +27,7 @@ RUN set -x \
     # workaround for rabbitmq linking issue
     && ln -s /usr/lib /usr/local/lib64 \
     # install xdebug (for testing with code coverage), but do not enable it
-    && pecl install xdebug-3.1.5 1>/dev/null \
+    && pecl install xdebug-3.2.0 1>/dev/null \
     # this c-library is required for 'php-amqp'
     && ( git clone --branch v${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq \
         && cd /tmp/rabbitmq \

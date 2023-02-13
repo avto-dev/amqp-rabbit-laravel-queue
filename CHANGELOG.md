@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 
 ## Unreleased
 
+### Added
+
+- Tests for PHP `8.1` and `8.2` on CI
+
 ### Changed
 
 - Minimal composer PHP version is set to `8.x`
