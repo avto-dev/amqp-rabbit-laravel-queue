@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Listeners;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Event;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeCreated;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\CreateExchangeBind;
@@ -37,11 +38,13 @@ class CreateExchangeBindTest extends AbstractExchangeListenerTestCase
      */
     public function testHandle(): void
     {
-        $this->doesntExpectEvents('queue.delayed-jobs.exchange.bind');
+        Event::fake();
 
         $event = new ExchangeCreated($this->temp_rabbit_connection, $this->temp_rabbit_exchange, Str::random());
 
         $this->listener->handle($event);
+
+        Event::assertNotDispatched('queue.delayed-jobs.exchange.bind');
     }
 
     /**
@@ -51,7 +54,7 @@ class CreateExchangeBindTest extends AbstractExchangeListenerTestCase
      */
     public function testHandleFired(): void
     {
-        $this->expectsEvents('queue.delayed-jobs.exchange.bind');
+        Event::fake();
 
         $this->config()->set('queue.connections', [
             'foo' => [
@@ -70,5 +73,7 @@ class CreateExchangeBindTest extends AbstractExchangeListenerTestCase
         );
 
         $this->listener->handle($event);
+
+        Event::assertDispatched('queue.delayed-jobs.exchange.bind');
     }
 }

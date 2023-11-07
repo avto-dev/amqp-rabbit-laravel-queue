@@ -12,7 +12,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\AbstractTestCase;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use AvtoDev\AmqpRabbitLaravelQueue\Failed\RabbitQueueFailedJobProvider;
 
-abstract class AbstractFeatureTest extends AbstractTestCase
+abstract class AbstractFeatureTestCase extends AbstractTestCase
 {
     /**
      * @var RabbitQueueFailedJobProvider

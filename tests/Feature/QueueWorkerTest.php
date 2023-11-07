@@ -19,7 +19,7 @@ use AvtoDev\AmqpRabbitLaravelQueue\Tests\Stubs\PrioritizedQueueJobWithState;
  *
  * @coversNothing
  */
-class QueueWorkerTest extends AbstractFeatureTest
+class QueueWorkerTest extends AbstractFeatureTestCase
 {
     /**
      * @medium

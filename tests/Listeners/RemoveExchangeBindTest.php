@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace AvtoDev\AmqpRabbitLaravelQueue\Tests\Listeners;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Event;
 use AvtoDev\AmqpRabbitLaravelQueue\Connector;
 use AvtoDev\AmqpRabbitManager\Commands\Events\ExchangeDeleting;
 use AvtoDev\AmqpRabbitLaravelQueue\Listeners\RemoveExchangeBind;
@@ -37,11 +38,13 @@ class RemoveExchangeBindTest extends AbstractExchangeListenerTestCase
      */
     public function testHandle(): void
     {
-        $this->doesntExpectEvents('queue.delayed-jobs.exchange.unbind');
+        Event::fake();
 
         $event = new ExchangeDeleting($this->temp_rabbit_connection, $this->temp_rabbit_exchange, Str::random());
 
         $this->listener->handle($event);
+
+        Event::assertNotDispatched('queue.delayed-jobs.exchange.unbind');
     }
 
     /**
@@ -51,7 +54,7 @@ class RemoveExchangeBindTest extends AbstractExchangeListenerTestCase
      */
     public function testHandleFired(): void
     {
-        $this->expectsEvents('queue.delayed-jobs.exchange.unbind');
+        Event::fake();
 
         $this->config()->set('queue.connections', [
             'foo' => [
@@ -70,5 +73,7 @@ class RemoveExchangeBindTest extends AbstractExchangeListenerTestCase
         );
 
         $this->listener->handle($event);
+
+        Event::assertDispatched('queue.delayed-jobs.exchange.unbind');
     }
 }

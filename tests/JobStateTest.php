@@ -110,7 +110,7 @@ class JobStateTest extends AbstractTestCase
     public function testPutThrowsAnExceptionWhenPassedCallable(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectErrorMessageMatches('~Wrong value passed~i');
+        $this->expectExceptionMessageMatches('~Wrong value passed~i');
 
         $this->instance->put('foo', function (): void {
         });
