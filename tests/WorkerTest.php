@@ -11,6 +11,7 @@ use Enqueue\AmqpExt\AmqpContext;
 use Enqueue\AmqpExt\AmqpConsumer;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Queue\WorkerOptions;
+use Illuminate\Support\Facades\Event;
 use Interop\Queue\SubscriptionConsumer;
 use AvtoDev\AmqpRabbitLaravelQueue\Queue;
 use Illuminate\Queue\Events\JobProcessed;
@@ -96,13 +97,7 @@ class WorkerTest extends AbstractTestCase
      */
     public function testDaemonBasic(): void
     {
-        $this->expectsEvents([
-            JobProcessing::class, JobProcessed::class, SimpleQueueJob::class . '-handled',
-        ]);
-
-        $this->doesntExpectEvents([
-            SimpleQueueJob::class . '-failed',
-        ]);
+        Event::fake();
 
         $this->worker = m::mock(Worker::class, [
             $this->app->make(QueueManager::class),
@@ -133,6 +128,12 @@ class WorkerTest extends AbstractTestCase
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, -1));
 
         $this->assertSame(0, $queue->size());
+
+        Event::assertDispatched(JobProcessing::class);
+        Event::assertDispatched(JobProcessed::class);
+        Event::assertDispatched(SimpleQueueJob::class . '-handled');
+
+        Event::assertNotDispatched(SimpleQueueJob::class . '-failed');
     }
 
     /**
@@ -142,13 +143,7 @@ class WorkerTest extends AbstractTestCase
      */
     public function testDaemonJobFails(): void
     {
-        $this->expectsEvents([
-            JobProcessing::class,
-        ]);
-
-        $this->doesntExpectEvents([
-            QueueJobThatThrowsException::class . '-handled', JobProcessed::class,
-        ]);
+        Event::fake();
 
         $this->worker = m::mock(Worker::class, [
             $this->app->make(QueueManager::class),
@@ -179,6 +174,11 @@ class WorkerTest extends AbstractTestCase
         $this->worker->daemon($this->queue_connection_name, 'default', new WorkerOptions(0, 32, -1, 3, 2));
         \usleep(8500);
         $this->assertSame(0, $queue->size()); // There is no 'jobs.failer', so, failed job should be 'deleted
+
+        Event::assertDispatched(JobProcessing::class);
+
+        Event::assertNotDispatched(QueueJobThatThrowsException::class . '-handled');
+        Event::assertNotDispatched(JobProcessed::class);
     }
 
     /**
