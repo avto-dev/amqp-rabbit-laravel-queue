@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
          colors="true"
-         convertNoticesToExceptions="false"
-         forceCoversAnnotation="true">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">./src</directory>
-    </include>
-    <exclude>
-      <directory>./vendor</directory>
-    </exclude>
+         cacheDirectory=".phpunit.cache"
+         requireCoverageMetadata="true">
+  <coverage>
     <report>
       <clover outputFile="./coverage/clover.xml"/>
       <text outputFile="php://stdout" showUncoveredFiles="false"/>
@@ -26,5 +20,14 @@
     <server name="APP_ENV" value="testing"/>
     <server name="QUEUE_DRIVER" value="sync"/>
     <server name="APP_DEBUG" value="true"/>
+    <server name="CACHE_STORE" value="array"/>
   </php>
+  <source>
+    <include>
+      <directory suffix=".php">./src</directory>
+    </include>
+    <exclude>
+      <directory>./vendor</directory>
+    </exclude>
+  </source>
 </phpunit>

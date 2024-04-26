@@ -1,4 +1,4 @@
-FROM php:8.0-alpine
+FROM php:8.3-alpine
 
 ENV \
     # <https://github.com/alanxz/rabbitmq-c>
@@ -7,7 +7,7 @@ ENV \
     PHP_AMQP_VERSION="1.11.0" \
     COMPOSER_HOME="/tmp/composer"
 
-COPY --from=composer:2.6.5 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.7.4 /usr/bin/composer /usr/bin/composer
 
 RUN set -x \
     && apk add --no-cache binutils git \
@@ -27,7 +27,7 @@ RUN set -x \
     # workaround for rabbitmq linking issue
     && ln -s /usr/lib /usr/local/lib64 \
     # install xdebug (for testing with code coverage), but do not enable it
-    && pecl install xdebug-3.2.0 1>/dev/null \
+    && pecl install xdebug-3.3.0 1>/dev/null \
     # this c-library is required for 'php-amqp'
     && ( git clone --branch v${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq \
         && cd /tmp/rabbitmq \

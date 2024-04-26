@@ -31,7 +31,7 @@ test: up ## Execute php tests and linters
 	$(dc_bin) run $(RUN_APP_ARGS) sh -c "sleep 5 && composer test"
 
 test-cover: up ## Execute php tests with coverage
-	$(dc_bin) run --rm --user "0:0" app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer test-cover"'
+	$(dc_bin) run --rm --user "0:0" -e 'XDEBUG_MODE=coverage' app sh -c 'docker-php-ext-enable xdebug && su $(shell whoami) -s /bin/sh -c "composer test-cover"'
 
 up: ## Start services
 	$(dc_bin) up -d

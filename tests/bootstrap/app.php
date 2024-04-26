@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Cache\CacheManager;
+use Illuminate\Foundation\Application;
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -11,35 +14,47 @@
 |
 */
 
-$app = new Illuminate\Foundation\Application(
-    realpath(__DIR__ . '/../../vendor/laravel/laravel')
-);
+$app_base_path = dirname(__DIR__, 2) . '/vendor/laravel/laravel';
 
-/*
-|--------------------------------------------------------------------------
-| Bind Important Interfaces
-|--------------------------------------------------------------------------
-|
-| Next, we need to bind some important interfaces into the container so
-| we will be able to resolve them when needed. The kernels serve the
-| incoming requests to this application from both the web and CLI.
-|
-*/
+if (Application::VERSION < '11') {
+    $app = new Application($app_base_path);
 
-$app->singleton(
-    Illuminate\Contracts\Http\Kernel::class,
-    App\Http\Kernel::class
-);
+    $app->singleton(
+        Illuminate\Contracts\Http\Kernel::class,
+        App\Http\Kernel::class
+    );
 
-$app->singleton(
-    Illuminate\Contracts\Console\Kernel::class,
-    App\Console\Kernel::class
-);
+    $app->singleton(
+        Illuminate\Contracts\Console\Kernel::class,
+        App\Console\Kernel::class
+    );
 
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    App\Exceptions\Handler::class
-);
+    $app->singleton(
+        Illuminate\Contracts\Debug\ExceptionHandler::class,
+        App\Exceptions\Handler::class
+    );
+} else {
+    $app = Application::configure(basePath: $app_base_path)
+        ->withRouting(
+            web: $app_base_path.'/routes/web.php',
+            commands: $app_base_path.'/routes/console.php',
+            health: '/up',
+        )
+        ->withSingletons([
+            'cache' => function ($app) {
+                return new CacheManager($app);
+            },
+            'cache.store' => function ($app) {
+                return $app['cache']->driver(env('CACHE_STORE'), 'array');
+            }
+        ])
+        ->withMiddleware(function (Illuminate\Foundation\Configuration\Middleware $middleware) {
+            //
+        })
+        ->withExceptions(function (Illuminate\Foundation\Configuration\Exceptions $exceptions) {
+            //
+        })->create();
+}
 
 /*
 |--------------------------------------------------------------------------
