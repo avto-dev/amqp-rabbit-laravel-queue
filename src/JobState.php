@@ -8,6 +8,13 @@ use Closure;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
 
+/**
+ * @template TKey of array-key
+ *
+ * @template TValue
+ *
+ * @extends Collection<TKey, TValue>
+ */
 class JobState extends Collection implements JobStateInterface
 {
     /**
@@ -52,5 +59,23 @@ class JobState extends Collection implements JobStateInterface
         }
 
         return parent::put($key, $value);
+    }
+
+    /**
+     * @return array<TKey, TValue>
+     */
+    public function __serialize(): array
+    {
+        return $this->items;
+    }
+
+    /**
+     * @param array<TKey, TValue> $data
+     *
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->items = $data;
     }
 }

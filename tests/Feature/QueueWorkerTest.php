@@ -40,9 +40,8 @@ class QueueWorkerTest extends AbstractFeatureTestCase
         $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
 
         $this->assertEmpty($process_info['stderr']);
-        $this->assertMatchesRegularExpression('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
-        $this->assertMatchesRegularExpression("~^.+processing.+{$job_class_safe}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
-        $this->assertMatchesRegularExpression("~^.+processed.+{$job_class_safe}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression('~^.+worker started.+$~im', $output[0] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression("~^.+{$job_class_safe}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
         $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
     }
 
@@ -427,9 +426,8 @@ class QueueWorkerTest extends AbstractFeatureTestCase
         $output            = $process_info['stdout'];
         $priority_job_name = \preg_quote(PrioritizedQueueJobWithState::class, '/');
 
-        $this->assertMatchesRegularExpression('~^\d{2}\:\d{2}\:\d{2}\.\d{3}.+start.+$~im', $output[0] ?? '', $output->getAsPlaintText());
-        $this->assertMatchesRegularExpression("~^.+processing.+{$priority_job_name}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
-        $this->assertMatchesRegularExpression("~^.+processed.+{$priority_job_name}.?$~im", $output[2] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression('~^.+worker started.+$~im', $output[0] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression("~^.+{$priority_job_name}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
 
         $this->assertEquals(1, Sharer::get(PrioritizedQueueJobWithState::class . '-handled'));
         $this->assertEquals(
