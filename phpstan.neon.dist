@@ -1,6 +1,5 @@
 parameters:
   level: 'max'
   reportUnmatchedIgnoredErrors: false
-  checkGenericClassInNonGenericObjectType: false
   paths:
     - src

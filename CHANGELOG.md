@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+### Fixed
+
+- Type mismatch after the release of Laravel `v11.26.0`
+
 ## v2.9.0
 
 ### Added
