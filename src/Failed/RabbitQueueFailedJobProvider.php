@@ -10,6 +10,7 @@ use Exception;
 use Throwable;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use Interop\Amqp\AmqpQueue as Queue;
 use Interop\Amqp\AmqpMessage as Message;
 use Enqueue\AmqpExt\AmqpContext as Context;
@@ -115,6 +116,23 @@ class RabbitQueueFailedJobProvider implements FailedJobProviderInterface, \Count
     public static function generateMessageId(...$arguments): int
     {
         return (int) Str::limit((string) \crc32(\serialize($arguments)), 8, '');
+    }
+
+    /**
+     * Get the IDs of all of the failed jobs.
+     *
+     * @param null|string $queue
+     *
+     * @throws \Throwable
+     *
+     * @return array<mixed>
+     */
+    public function ids($queue = null)
+    {
+        return (new Collection($this->all()))
+            ->when($queue !== null, fn ($collect) => $collect->where('queue', $queue))
+            ->pluck('id')
+            ->all();
     }
 
     /**

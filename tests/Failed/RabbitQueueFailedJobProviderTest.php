@@ -293,6 +293,22 @@ class RabbitQueueFailedJobProviderTest extends AbstractTestCase
         $this->assertSame(0, $this->provider->count());
     }
 
+    public function testIds(): void
+    {
+        $ids = [];
+        $queue_name = Str::random(5);
+
+        foreach (\range(1, 10) as $item) {
+            $ids[] = $this->provider->log(
+                Str::random(),
+                $queue_name,
+                Str::random(),
+                new \Exception(Str::random())
+            );
+        }
+        $this->assertEquals($ids, $this->provider->ids($queue_name));
+    }
+
     /**
      * @param int $timeout
      *

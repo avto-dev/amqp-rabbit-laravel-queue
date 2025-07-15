@@ -152,9 +152,10 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     /**
      * Create a payload string from the given job and data.
      *
-     * @param string|mixed $job
-     * @param string|mixed $queue
-     * @param mixed        $data
+     * @param mixed|string                              $job
+     * @param mixed|string                              $queue
+     * @param mixed                                     $data
+     * @param \DateInterval|\DateTimeInterface|int|null $delay
      *
      * @throws RuntimeException
      * @throws \Illuminate\Queue\InvalidPayloadException
@@ -163,7 +164,7 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
      *
      * @see \Illuminate\Queue\Queue::createPayload()
      */
-    public function createPayloadCompatible($job, $queue, $data): string
+    public function createPayloadCompatible($job, $queue, $data, $delay = null): string
     {
         static $parameters_number, $method_name = 'createPayload';
 
@@ -171,19 +172,18 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
             $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
         }
 
-        if ($parameters_number === 2) {
-            // @link: https://github.com/laravel/framework/blob/v5.5.0/src/Illuminate/Queue/Queue.php#L85
-            // @link: https://github.com/laravel/framework/blob/v5.6.0/src/Illuminate/Queue/Queue.php#L85
-            // @link: https://github.com/laravel/framework/blob/v5.7.0/src/Illuminate/Queue/Queue.php#L78
-            return $this->{$method_name}($job, $data);
-        }
-
         if ($parameters_number === 3) {
-            // @link: https://github.com/laravel/framework/blob/v5.8.0/src/Illuminate/Queue/Queue.php#L86
+            // @link: https://github.com/laravel/framework/blob/10.x/src/Illuminate/Queue/Queue.php#L101
+            // @link: https://github.com/laravel/framework/blob/11.x/src/Illuminate/Queue/Queue.php#L101
             return $this->{$method_name}($job, $queue, $data);
         }
 
-        throw new RuntimeException(
+        if ($parameters_number === 4) {
+            // @link: https://github.com/laravel/framework/blob/12.x/src/Illuminate/Queue/Queue.php#L106
+            return $this->{$method_name}($job, $queue, $data, $delay);
+        }
+
+        throw new \RuntimeException(
             "Parent method looks like not compatible with current class (uses {$parameters_number} parameters)"
         );
     }
