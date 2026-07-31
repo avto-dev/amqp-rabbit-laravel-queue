@@ -9,13 +9,13 @@ The format is based on [Keep a Changelog][keepachangelog] and this project adher
 ### Added
 
 - Laravel `13.x` support
+- Implementations for `pendingSize`, `delayedSize`, `reservedSize`, and `creationTimeOfOldestPendingJob` queue contract methods
 
 ### Changed
 
-- Minimal required PHP version now is `8.3`
-- Minimal Laravel version now is `^12.0`
 - Version of `composer` in docker container updated up to `2.10.0`
-- Version of `php` in docker container updated up to `8.4`
+- Version of `php` in docker container updated up to `8.5`
+- Version of `php-amqp` in docker container updated up to `2.2.0`
 - Update dev dependencies
 
 ## v2.10.1

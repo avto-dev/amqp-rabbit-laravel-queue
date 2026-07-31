@@ -86,6 +86,52 @@ class QueueTest extends AbstractTestCase
      *
      * @return void
      */
+    public function testPendingSize(): void
+    {
+        $this->temp_rabbit_connection->purgeQueue($this->temp_rabbit_queue);
+
+        $this->assertSame(0, $this->queue->pendingSize());
+
+        $this->pushMessage();
+
+        $this->assertSame(1, $this->queue->pendingSize());
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testDelayedSize(): void
+    {
+        $this->assertSame(0, $this->queue->delayedSize());
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testReservedSize(): void
+    {
+        $this->assertSame(0, $this->queue->reservedSize());
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
+    public function testCreationTimeOfOldestPendingJob(): void
+    {
+        $this->assertNull($this->queue->creationTimeOfOldestPendingJob());
+    }
+
+    /**
+     * @small
+     *
+     * @return void
+     */
     public function testPush(): void
     {
         // With Basic Job Object

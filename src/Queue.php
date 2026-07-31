@@ -89,6 +89,46 @@ class Queue extends \Illuminate\Queue\Queue implements QueueContract
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @phpstan-ignore missingType.parameter
+     */
+    public function pendingSize($queue = null): int
+    {
+        return $this->size($queue);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @phpstan-ignore missingType.parameter
+     */
+    public function delayedSize($queue = null): int
+    {
+        return 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @phpstan-ignore missingType.parameter
+     */
+    public function reservedSize($queue = null): int
+    {
+        return 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @phpstan-ignore missingType.parameter
+     */
+    public function creationTimeOfOldestPendingJob($queue = null): ?int
+    {
+        return null;
+    }
+
+    /**
      * Push a new job onto the queue.
      *
      * @param object|string $job

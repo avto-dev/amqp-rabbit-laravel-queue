@@ -1,10 +1,10 @@
-FROM php:8.4-alpine
+FROM php:8.5-alpine
 
 ENV \
     # <https://github.com/alanxz/rabbitmq-c>
     RABBITMQ_VERSION="0.13.0" \
-    # ext-amqp <https://github.com/pdezwart/php-amqp>
-    PHP_AMQP_VERSION="1.11.0" \
+    # ext-amqp <https://github.com/php-amqp/php-amqp>
+    PHP_AMQP_VERSION="2.2.0" \
     COMPOSER_HOME="/tmp/composer"
 
 COPY --from=composer:2.10.0 /usr/bin/composer /usr/bin/composer
@@ -35,7 +35,7 @@ RUN set -x \
         && cmake .. \
         && cmake --build . --target install ) \
         && rm -Rf /tmp/rabbitmq \
-    && ( git clone --branch v${PHP_AMQP_VERSION} https://github.com/pdezwart/php-amqp.git /tmp/php-amqp \
+    && ( git clone --branch v${PHP_AMQP_VERSION} https://github.com/php-amqp/php-amqp.git /tmp/php-amqp \
         && cd /tmp/php-amqp \
         && phpize --clean \
         && phpize \
