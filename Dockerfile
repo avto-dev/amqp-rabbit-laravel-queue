@@ -1,13 +1,13 @@
-FROM php:8.3-alpine
+FROM php:8.5-alpine
 
 ENV \
     # <https://github.com/alanxz/rabbitmq-c>
     RABBITMQ_VERSION="0.13.0" \
-    # ext-amqp <https://github.com/pdezwart/php-amqp>
-    PHP_AMQP_VERSION="1.11.0" \
+    # ext-amqp <https://github.com/php-amqp/php-amqp>
+    PHP_AMQP_VERSION="2.2.0" \
     COMPOSER_HOME="/tmp/composer"
 
-COPY --from=composer:2.8.9 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.10.0 /usr/bin/composer /usr/bin/composer
 
 RUN set -x \
     && apk add --no-cache binutils git \
@@ -27,7 +27,7 @@ RUN set -x \
     # workaround for rabbitmq linking issue
     && ln -s /usr/lib /usr/local/lib64 \
     # install xdebug (for testing with code coverage), but do not enable it
-    && pecl install xdebug-3.3.0 1>/dev/null \
+    && pecl install xdebug-3.5.3 1>/dev/null \
     # this c-library is required for 'php-amqp'
     && ( git clone --branch v${RABBITMQ_VERSION} https://github.com/alanxz/rabbitmq-c.git /tmp/rabbitmq \
         && cd /tmp/rabbitmq \
@@ -35,7 +35,7 @@ RUN set -x \
         && cmake .. \
         && cmake --build . --target install ) \
         && rm -Rf /tmp/rabbitmq \
-    && ( git clone --branch v${PHP_AMQP_VERSION} https://github.com/pdezwart/php-amqp.git /tmp/php-amqp \
+    && ( git clone --branch v${PHP_AMQP_VERSION} https://github.com/php-amqp/php-amqp.git /tmp/php-amqp \
         && cd /tmp/php-amqp \
         && phpize --clean \
         && phpize \

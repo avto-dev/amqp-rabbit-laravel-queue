@@ -36,12 +36,12 @@ class QueueWorkerTest extends AbstractFeatureTestCase
 
         $this->assertTrue($process_info['timed_out']);
         /** @var CommandOutput $output */
-        $output         = $process_info['stdout'];
-        $job_class_safe = \preg_quote(SimpleQueueJob::class, '/');
+        $output = $process_info['stdout'];
+        $plain  = $output->getAsPlaintText();
 
         $this->assertEmpty($process_info['stderr']);
-        $this->assertMatchesRegularExpression('~^.+worker started.+$~im', $output[0] ?? '', $output->getAsPlaintText());
-        $this->assertMatchesRegularExpression("~^.+{$job_class_safe}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression('~worker started~i', $plain);
+        $this->assertMatchesRegularExpression('~' . \preg_quote(SimpleQueueJob::class, '/') . '~i', $plain);
         $this->assertSame(1, Sharer::get(SimpleQueueJob::class . '-handled'));
     }
 
@@ -92,8 +92,8 @@ class QueueWorkerTest extends AbstractFeatureTestCase
 
         // Should be processed FIRST
         $this->assertMatchesRegularExpression(
-            '~' . \preg_quote(PrioritizedQueueJob::class, '/') . '$~i',
-            $output[1] ?? '',
+            '~' . \preg_quote(PrioritizedQueueJob::class, '/')
+            . '.+' . \preg_quote(SimpleQueueJob::class, '/') . '~is',
             $output->getAsPlaintText()
         );
 
@@ -155,11 +155,7 @@ class QueueWorkerTest extends AbstractFeatureTestCase
         /** @var CommandOutput $output */
         $output = $process_info['stdout'];
 
-        $this->assertMatchesRegularExpression(
-            "~^.+failed.+back.+$~im",
-            $output[0] ?? '',
-            $output->getAsPlaintText()
-        );
+        $this->assertMatchesRegularExpression('~failed.+back~is', $output->getAsPlaintText());
 
         $process_info = $this->startArtisan('queue:work');
 
@@ -423,11 +419,15 @@ class QueueWorkerTest extends AbstractFeatureTestCase
 
         $this->assertTrue($process_info['timed_out']);
         /** @var CommandOutput $output */
-        $output            = $process_info['stdout'];
-        $priority_job_name = \preg_quote(PrioritizedQueueJobWithState::class, '/');
+        $output = $process_info['stdout'];
+        $plain  = $output->getAsPlaintText();
 
-        $this->assertMatchesRegularExpression('~^.+worker started.+$~im', $output[0] ?? '', $output->getAsPlaintText());
-        $this->assertMatchesRegularExpression("~^.+{$priority_job_name}.?$~im", $output[1] ?? '', $output->getAsPlaintText());
+        $this->assertMatchesRegularExpression('~worker started~i', $plain);
+        $this->assertMatchesRegularExpression(
+            '~' . \preg_quote(PrioritizedQueueJobWithState::class, '/')
+            . '.+' . \preg_quote(SimpleQueueJob::class, '/') . '~is',
+            $plain
+        );
 
         $this->assertEquals(1, Sharer::get(PrioritizedQueueJobWithState::class . '-handled'));
         $this->assertEquals(

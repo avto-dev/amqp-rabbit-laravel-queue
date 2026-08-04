@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+### Added
+
+- Laravel `13.x` support
+- Implementations for `pendingSize`, `delayedSize`, `reservedSize`, and `creationTimeOfOldestPendingJob` queue contract methods
+
+### Changed
+
+- Version of `composer` in docker container updated up to `2.10.0`
+- Version of `php` in docker container updated up to `8.5`
+- Version of `php-amqp` in docker container updated up to `2.2.0`
+- Update dev dependencies
+
 ## v2.10.1
 
 ### Fixed
