@@ -24,11 +24,13 @@ class Worker extends \Illuminate\Queue\Worker
      *
      * {@inheritdoc}
      */
-    public function __construct(QueueManager $manager,
-                                Dispatcher $events,
-                                ExceptionHandler $exceptions,
-                                callable $isDownForMaintenance,
-                                ?string $consumer_tag = null)
+    public function __construct(
+        QueueManager     $manager,
+        Dispatcher       $events,
+        ExceptionHandler $exceptions,
+        callable         $isDownForMaintenance,
+        ?string          $consumer_tag = null
+    )
     {
         parent::__construct($manager, $events, $exceptions, $isDownForMaintenance);
 
@@ -94,7 +96,12 @@ class Worker extends \Illuminate\Queue\Worker
                         }
 
                         if ($this->supportsAsyncSignals()) {
-                            $this->registerTimeoutHandler($job, $options);
+                            $this->registerTimeoutHandlerCompatible(
+                                $connectionName,
+                                $queue,
+                                $job,
+                                $options
+                            );
                         }
 
                         declare(ticks = 100) {
@@ -127,6 +134,48 @@ class Worker extends \Illuminate\Queue\Worker
         // @codeCoverageIgnoreStart
         return parent::daemon($connectionName, $queue, $options);
         // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Call parent timeout handler with a signature compatible with Laravel 11–13.30 and 13.31+.
+     *
+     * Laravel <=13.30 (and 11.x / 12.x): `($job, $options)`.
+     * Laravel >=13.31: `($connectionName, $queue, $job, $options)`.
+     *
+     * @param string|null $connectionName
+     * @param string|null $queue
+     * @param \Illuminate\Contracts\Queue\Job|null $job
+     * @param WorkerOptions $options
+     *
+     * @return void
+     */
+    protected function registerTimeoutHandlerCompatible(?string $connectionName, ?string $queue, ?\Illuminate\Contracts\Queue\Job $job, WorkerOptions $options): void
+    {
+        static $parameters_number, $method_name = 'registerTimeoutHandler';
+
+        if (! \is_int($parameters_number)) {
+            $parameters_number = (new \ReflectionMethod(static::class, $method_name))->getNumberOfParameters();
+        }
+
+        if ($parameters_number === 2) {
+            // @link: https://github.com/laravel/framework/blob/11.x/src/Illuminate/Queue/Worker.php#L238
+            // @link: https://github.com/laravel/framework/blob/12.x/src/Illuminate/Queue/Worker.php#L261
+            // @link: https://github.com/laravel/framework/blob/v13.30.1/src/Illuminate/Queue/Worker.php#L302
+            $this->{$method_name}($job, $options);
+
+            return;
+        }
+
+        if ($parameters_number >= 4) {
+            // @link: https://github.com/laravel/framework/blob/v13.31.0/src/Illuminate/Queue/Worker.php#L305
+            $this->{$method_name}($connectionName, $queue, $job, $options);
+
+            return;
+        }
+
+        throw new \RuntimeException(
+            "Parent method looks like not compatible with current class (uses {$parameters_number} parameters)"
+        );
     }
 
     /**
