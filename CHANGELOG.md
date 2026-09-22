@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog][keepachangelog] and this project adheres to [Semantic Versioning][semver].
 
+## Unreleased
+
+### Fixed
+
+- Compatibility of `Worker::registerTimeoutHandler` call with Laravel `>=13.31`
+
 ## v2.11.0
 
 ### Added
